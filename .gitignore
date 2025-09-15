@@ -24,6 +24,7 @@ logs/
 # ---------------------------------
 # Compiled binaries and executables
 /backend/bin/
+/backend/tmp/
 /backend/*.exe
 /backend/*.out
 /backend/*.test
