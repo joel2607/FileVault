@@ -10,6 +10,11 @@
 *.swp
 *~
 
+# Gemini files
+GEMINI.md
+.gemini/
+docs/
+
 # Log files
 *.log
 logs/
