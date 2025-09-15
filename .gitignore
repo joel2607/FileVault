@@ -1,0 +1,51 @@
+# General
+# ---------------------------------
+# IDE and editor directories
+.idea/
+.vscode/
+
+# OS-generated files
+.DS_Store
+*.swo
+*.swp
+*~
+
+# Log files
+*.log
+logs/
+
+
+# Backend - Go
+# ---------------------------------
+# Compiled binaries and executables
+/backend/bin/
+/backend/*.exe
+/backend/*.out
+/backend/*.test
+
+# Vendor directory (if you use go mod vendor)
+/backend/vendor/
+
+
+# Frontend - React / Node.js
+# ---------------------------------
+# Node modules - this is the most important one
+/frontend/node_modules/
+
+# Build directory
+/frontend/build/
+
+# Debug logs
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# Environment variables - NEVER commit these
+# This will ignore .env, .env.local, .env.development, etc.
+.env*
+
+
+# Docker
+# ---------------------------------
+# Ignore local override files
+docker-compose.override.yml
