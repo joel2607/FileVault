@@ -1,31 +1,26 @@
-# Stage 1: Build the Go application
-FROM golang:1.21-alpine AS builder
+# Use the official Golang image for development
+FROM golang:1.22-alpine
 
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy go.mod and go.sum to download dependencies first
+# Install git, which is required for `go install` to fetch modules
+RUN apk add --no-cache git
+
+# Download and install Air for live-reloading
+RUN go install github.com/cosmtrek/air@v1.51.0
+
+# Copy go module and sum files
 COPY go.mod go.sum ./
 
-# Download dependencies
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the rest of the source code
+# Copy the source code into the container
 COPY . .
 
-# Build the application for a Linux environment
-# CGO_ENABLED=0 is important for creating a static binary
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main .
-
-# Stage 2: Create the final, minimal image
-FROM alpine:latest
-
-WORKDIR /app
-
-# Copy the built binary from the builder stage
-COPY --from=builder /app/main .
-
-# Expose the port the app runs on
+# Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Set the command to run the application
-CMD ["./main"]
+# Command to run the application using Air
+CMD ["air"]
