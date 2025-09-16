@@ -1,0 +1,84 @@
+"""
+Defines the UserRole enum for user authorization.
+"""
+enum UserRole {
+  USER
+  ADMIN
+}
+
+"""
+Represents a user in the system, storing authentication details,
+storage quotas, and API rate limits.
+"""
+type User {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  email: String!
+  storageQuotaMB: Int!
+  usedStorageMB: Int!
+  apiRateLimit: Int!
+  role: UserRole!
+}
+
+"""
+Represents a file uploaded by a user, storing metadata but not the content itself.
+It links to the user and the deduplicated content.
+"""
+type File {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  userId: ID!
+  user: User!
+  fileName: String!
+  mimeType: String!
+  size: Int!
+  deduplicationId: ID!
+  deduplicatedContent: DeduplicatedContent!
+  isPublic: Boolean!
+  downloadCount: Int!
+  tags: String
+  parentFolderId: ID
+  folder: Folder
+}
+
+"""
+Represents a folder for organizing files, supporting nesting and public sharing.
+"""
+type Folder {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  userId: ID!
+  user: User!
+  folderName: String!
+  parentFolderId: ID
+  isPublic: Boolean!
+}
+
+"""
+Stores a single instance of file content for deduplication purposes,
+tracking the content's hash and reference count.
+"""
+type DeduplicatedContent {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  sha256Hash: String!
+  referenceCount: Int!
+}
+
+"""
+Manages file sharing with specific users, defining permission levels.
+"""
+type FileSharing {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  fileId: ID!
+  file: File!
+  sharedWithUserId: ID!
+  sharedWithUser: User!
+  permissionLevel: String!
+}

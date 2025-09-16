@@ -1,0 +1,23 @@
+# Config file for Air - https://github.com/cosmtrek/air
+
+# Working directory
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Command to build the binary
+cmd = "CGO_ENABLED=0 GOOS=linux go build -o ./tmp/main ./cmd/server"
+# The binary to run
+bin = "./tmp/main"
+# Watch these files for changes
+include_ext = ["go", "tpl", "tmpl", "html"]
+# Ignore these files
+exclude_dir = ["assets", "tmp", "vendor"]
+
+[log]
+# Show log time
+time = true
+
+[misc]
+# Delete tmp directory on exit
+clean_on_exit = true
