@@ -1,20 +1,15 @@
+// Package models defines the data structures used in the application.
 package models
 
 import "gorm.io/gorm"
 
-// Folder corresponds to the "folders" table in the database
+// Folder represents a folder for organizing files.
+// This table supports nested folders and public sharing of folders.
 type Folder struct {
-	gorm.Model // Includes ID, CreatedAt, UpdatedAt, DeletedAt
-
-	Name     string `gorm:"not null"`
-	IsPublic bool   `gorm:"default:false;not null"`
-
-	OwnerID uint // Foreign key for the User who owns the folder
-	Owner   User `gorm:"references:ID"`
-
-	ParentID *uint    // Foreign key for the parent folder (nullable for root folders)
-	Parent   *Folder  `gorm:"references:ID"`
-	Subfolders []Folder `gorm:"foreignKey:ParentID"` // A Folder has many subfolders
-
-	Files []File `gorm:"foreignKey:FolderID"` // A Folder has many Files
+	gorm.Model
+	UserID         uint   `gorm:"not null"`
+	User           User   `gorm:"foreignkey:UserID"`
+	FolderName     string `gorm:"type:varchar(255);not null"`
+	ParentFolderID *uint  `gorm:"default:null"`
+	IsPublic       bool   `gorm:"default:false"`
 }
