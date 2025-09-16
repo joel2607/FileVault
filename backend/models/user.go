@@ -1,17 +1,28 @@
+// Package models defines the data structures used in the application.
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
-// User corresponds to the "users" table in the database
+// UserRole defines the roles a user can have.
+type UserRole string
+
+const (
+	// RoleUser is the default role for a regular user.
+	RoleUser UserRole = "user"
+	// RoleAdmin is the role for an administrator.
+	RoleAdmin UserRole = "admin"
+)
+
+// User represents a user in the system.
+// This table stores user information, including authentication details,
+// storage quotas, and API rate limits.
 type User struct {
-	gorm.Model // Includes ID, CreatedAt, UpdatedAt, DeletedAt
-
-	Username     string `gorm:"unique;not null"`
-	IsAdmin      bool   `gorm:"default:false;not null"`
-	PasswordHash string `gorm:"not null"`
-	StorageUsed  int64  `gorm:"default:0;not null"`
-	StorageQuota int64  `gorm:"default:10485760;not null"` // 10 MB default
-
-	Files   []File   `gorm:"foreignKey:OwnerID"` // A User has many Files
-	Folders []Folder `gorm:"foreignKey:OwnerID"` // A User has many Folders
+	gorm.Model
+	Email          string    `gorm:"type:varchar(255);unique;not null"`
+	StorageQuotaMB int       `gorm:"default:10"`
+	UsedStorageMB  int       `gorm:"default:0"`
+	APIRateLimit   int       `gorm:"default:2"`
+	Role           UserRole  `gorm:"type:varchar(50);default:'user'"`
 }
