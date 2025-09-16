@@ -38,7 +38,7 @@ func Init() {
 	}
 
 	// AutoMigrate the schema
-	err = DB.AutoMigrate(&models.User{}, &models.Folder{}, &models.File{}, &models.DeduplicatedContent{}, &models.FileSharing{})
+	err = DB.AutoMigrate(&models.User{}, &models.DeduplicatedContent{}, &models.Folder{}, &models.File{}, &models.FileSharing{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
