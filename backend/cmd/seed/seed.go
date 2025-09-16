@@ -9,6 +9,7 @@ import (
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 )
 
+// Seeding Module to fill database with test data for local development.
 func main() {
 	log.Println("Starting database seeding...")
 
@@ -23,12 +24,16 @@ func main() {
 
 	// 2. Create Users
 	adminUser := models.User{
+		Username:       "admin",
 		Email:          "admin@example.com",
+		PasswordHash:   "placeholder_hash",
 		Role:           models.RoleAdmin,
 		StorageQuotaMB: 1024, // 1 GB
 	}
 	regularUser := models.User{
+		Username:       "user",
 		Email:          "user@example.com",
+		PasswordHash:   "placeholder_hash",
 		Role:           models.RoleUser,
 		StorageQuotaMB: 100, // 100 MB
 	}
@@ -60,7 +65,7 @@ func main() {
 	// 4. Create a File record for the admin user in their new folder
 	// First, create the deduplicated content record
 	deduplicatedContent := models.DeduplicatedContent{
-		SHA256Hash:     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", // SHA256 of an empty string
+		SHA256Hash:     "e3b0c44298fc1c149afbf4-c8996fb92427ae41e4649b934ca495991b7852b855", // SHA256 of an empty string
 		ReferenceCount: 1,
 	}
 	if err := tx.Create(&deduplicatedContent).Error; err != nil {
