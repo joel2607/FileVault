@@ -80,7 +80,7 @@ func main() {
 		MIMEType:        "text/plain",
 		Size:            0,
 		DeduplicationID: deduplicatedContent.ID,
-		ParentFolderID:  &rootFolder.ID,
+		FolderID:  &rootFolder.ID,
 	}
 	if err := tx.Create(&sampleFile).Error; err != nil {
 		tx.Rollback()

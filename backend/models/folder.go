@@ -10,6 +10,7 @@ type Folder struct {
 	UserID         uint   `gorm:"not null"`
 	User           User   `gorm:"foreignkey:UserID"`
 	FolderName     string `gorm:"type:varchar(255);not null"`
-	ParentFolderID *uint  `gorm:"default:null"`
+	ParentFolderID *uint    `gorm:"default:null"`
+	ParentFolder   *Folder  `gorm:"foreignkey:ParentFolderID;references:ID"`
 	IsPublic       bool   `gorm:"default:false"`
 }
