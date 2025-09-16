@@ -20,6 +20,6 @@ type File struct {
 	IsPublic            bool      `gorm:"default:false"`
 	DownloadCount       int       `gorm:"default:0"`
 	Tags                string    `gorm:"type:jsonb"`
-	ParentFolderID      *uint     `gorm:"default:null"`
-	Folder              *Folder   `gorm:"foreignkey:ParentFolderID"`
+	FolderID            *uint     `gorm:"default:null"`
+	Folder              *Folder   `gorm:"foreignkey:FolderID"`
 }

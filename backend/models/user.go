@@ -20,7 +20,9 @@ const (
 // storage quotas, and API rate limits.
 type User struct {
 	gorm.Model
+	Username       string    `gorm:"type:varchar(255);unique;not null"`
 	Email          string    `gorm:"type:varchar(255);unique;not null"`
+	PasswordHash   string    `gorm:"type:varchar(255);not null"`
 	StorageQuotaMB int       `gorm:"default:10"`
 	UsedStorageMB  int       `gorm:"default:0"`
 	APIRateLimit   int       `gorm:"default:2"`
