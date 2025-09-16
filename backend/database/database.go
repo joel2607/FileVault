@@ -13,16 +13,12 @@ import (
 var DB *gorm.DB
 
 func Init() {
-	// Set up Viper to read .env file
-	viper.SetConfigFile("../.env")
+
+	// Set up automatic environment variable reading
 	viper.AutomaticEnv()
 
-	viper.SetDefault("POSTGRES_HOST", "localhost")
+	viper.SetDefault("POSTGRES_HOST", "db")
 	viper.SetDefault("POSTGRES_PORT", "5432")
-
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file, %s", err)
-	}
 
 	// Get database credentials from Viper
 	dbHost := viper.GetString("POSTGRES_HOST")
@@ -38,12 +34,12 @@ func Init() {
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect database")
+		log.Fatalf("failed to connect database: %v", err)
 	}
 
 	// AutoMigrate the schema
 	err = DB.AutoMigrate(&models.User{}, &models.Folder{}, &models.File{})
 	if err != nil {
-		log.Fatal("failed to migrate database")
+		log.Fatalf("failed to migrate database: %v", err)
 	}
 }
