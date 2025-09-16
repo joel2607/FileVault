@@ -6,7 +6,7 @@ tmp_dir = "tmp"
 
 [build]
 # Command to build the binary
-cmd = "CGO_ENABLED=0 GOOS=linux go build -o ./tmp/main ."
+cmd = "CGO_ENABLED=0 GOOS=linux go build -o ./tmp/main ./cmd/server"
 # The binary to run
 bin = "./tmp/main"
 # Watch these files for changes
