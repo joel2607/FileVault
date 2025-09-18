@@ -17,9 +17,6 @@ func Init() {
 	// Set up automatic environment variable reading
 	viper.AutomaticEnv()
 
-	viper.SetDefault("POSTGRES_HOST", "db")
-	viper.SetDefault("POSTGRES_PORT", "5432")
-
 	// Get database credentials from Viper
 	dbHost := viper.GetString("POSTGRES_HOST")
 	dbUser := viper.GetString("POSTGRES_USER")
