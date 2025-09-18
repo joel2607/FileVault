@@ -7,7 +7,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/graph"
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/graphQL"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/spf13/viper"
@@ -28,7 +28,7 @@ func main() {
 	r.Use(middleware.Logger)
 
 	// Create a new GraphQL server
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
+	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{DB: db}}))
 
 	// Add the GraphQL playground and query handlers to the Chi router
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
