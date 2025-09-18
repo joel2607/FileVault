@@ -20,7 +20,7 @@ COPY . .
 RUN go mod tidy
 
 # Build the binary to ensure everything is correct
-RUN cd cmd/server && CGO_ENABLED=0 go build -o ../../tmp/main .
+RUN CGO_ENABLED=0 go build -o ./tmp/server cmd/server.go
 
 # Install Air for live-reloading
 RUN go install github.com/cosmtrek/air@v1.51.0
