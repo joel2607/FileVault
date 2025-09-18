@@ -147,13 +147,23 @@ func (r *folderResolver) ParentFolderID(ctx context.Context, obj *models.Folder)
 // It accepts user registration details (username, email, password) and creates a new user account.
 // Returns the newly created user object upon successful registration.
 func (r *mutationResolver) Register(ctx context.Context, input models.RegisterInput) (*models.User, error) {
-	panic(fmt.Errorf("not implemented: Register - register"))
+	user, err := r.AuthService.Register(input)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // Login handles user authentication.
 // It accepts a user's email and password, and if valid, returns an authentication response containing a token.
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*models.AuthResponse, error) {
-	panic(fmt.Errorf("not implemented: Login - login"))
+	user, err := r.AuthService.Login(email, password)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Generate JWT token and return it
+	return &models.AuthResponse{User: user, Token: ""}, nil
 }
 
 // ID resolves the id field for the User type.
