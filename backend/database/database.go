@@ -12,7 +12,7 @@ import (
 
 var DB *gorm.DB
 
-func Init() {
+func Init() *gorm.DB {
 
 	// Set up automatic environment variable reading
 	viper.AutomaticEnv()
@@ -39,9 +39,6 @@ func Init() {
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
-}
 
-// GetDB returns the database instance.
-func GetDB() *gorm.DB {
 	return DB
 }

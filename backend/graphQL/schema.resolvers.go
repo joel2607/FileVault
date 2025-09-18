@@ -164,6 +164,15 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	return &models.AuthResponse{Token: token, User: user}, nil
 }
 
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
+	user := ctx.Value("user")
+	if user == nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	return user.(*models.User), nil
+}
+
 // ID resolves the id field for the User type.
 // It returns the unique identifier of the user.
 func (r *userResolver) ID(ctx context.Context, obj *models.User) (string, error) {
@@ -217,6 +226,9 @@ func (r *Resolver) Folder() FolderResolver { return &folderResolver{r} }
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
+// Query returns QueryResolver implementation.
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
@@ -225,4 +237,5 @@ type fileResolver struct{ *Resolver }
 type fileSharingResolver struct{ *Resolver }
 type folderResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
