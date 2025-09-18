@@ -9,6 +9,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/spf13/viper v1.21.0
 	github.com/vektah/gqlparser/v2 v2.5.30
+	golang.org/x/crypto v0.42.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.0
 )
@@ -39,7 +40,6 @@ require (
 	github.com/urfave/cli/v2 v2.27.7 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
