@@ -1,0 +1,64 @@
+# Where are all the schema files located? globs are supported eg  src/**/*.graphqls
+schema:
+  - graph/*.graphql
+
+# Where should the generated server code go?
+# 'follow-schema' will create separate generated files (eg. query.generated.go)
+exec:
+  layout: follow-schema
+  dir: graph
+  package: graph
+  filename_template: "{name}.generated.go"
+
+# Where should any generated models go?
+model:
+  filename: models/models_gen.go
+  package: models
+
+# Where should the resolver implementations go?
+# 'follow-schema' is best practice here, creating separate files for organization.
+resolver:
+  layout: follow-schema
+  dir: graph
+  package: graph
+  filename_template: "{name}.resolvers.go"
+
+# This section declares type mapping between the GraphQL and go type systems
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+
+  # My defined models.
+  User:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.User"
+  File:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.File"
+  Folder:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.Folder"
+  DeduplicatedContent:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.DeduplicatedContent"
+  FileSharing:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.FileSharing"
+  UserRole:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.UserRole"
+
