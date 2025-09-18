@@ -1,29 +1,29 @@
-# Where are all the schema files located? globs are supported eg  src/**/*.graphqls
+# Where are all the schema files located? globs are supported.
 schema:
-  - graph/*.graphql
+  - graphQL/*.graphql
 
-# Where should the generated server code go?
-# 'follow-schema' will create separate generated files (eg. query.generated.go)
+# Where the generated server code should go.
+# This file SHOULD NOT be edited.
 exec:
-  layout: follow-schema
-  dir: graph
-  package: graph
-  filename_template: "{name}.generated.go"
+  filename: graphQL/generated.go
+  package:  graphQL
 
 # Where should any generated models go?
+# This file SHOULD NOT be edited.
 model:
-  filename: models/models_gen.go
-  package: models
+  filename: models/models.generated.go
+  package:  models
 
 # Where should the resolver implementations go?
-# 'follow-schema' is best practice here, creating separate files for organization.
+# This file IS where you write your business logic.
 resolver:
-  layout: follow-schema
-  dir: graph
-  package: graph
-  filename_template: "{name}.resolvers.go"
+  layout:      follow-schema
+  dir:         graphQL
+  package:     graphQL
+  # filename_template is not needed for follow-schema, but you can use it if you want
+  # filename_template: "{name}.resolvers.go"
 
-# This section declares type mapping between the GraphQL and go type systems
+# This section declares type mapping between the GraphQL and Go type systems
 models:
   ID:
     model:
@@ -61,4 +61,3 @@ models:
   UserRole:
     model:
       - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.UserRole"
-
