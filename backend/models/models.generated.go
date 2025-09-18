@@ -8,11 +8,10 @@ type AuthResponse struct {
 	User  *User  `json:"user"`
 }
 
-// Defines the mutations available in the API.
+// Defines the queries available in the API.
 type Mutation struct {
 }
 
-// Defines the queries available in the API.
 type Query struct {
 }
 

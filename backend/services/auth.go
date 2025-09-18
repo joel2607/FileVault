@@ -2,7 +2,12 @@ package services
 
 import (
 	"errors"
+	"os"
+	"time"
+
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -22,8 +27,8 @@ func (s *AuthService) Register(input models.RegisterInput) (*models.User, error)
 	}
 
 	user := models.User{
-		Username: input.Username,
-		Email:    input.Email,
+		Username:     input.Username,
+		Email:        input.Email,
 		PasswordHash: string(hashedPassword),
 	}
 
@@ -34,15 +39,49 @@ func (s *AuthService) Register(input models.RegisterInput) (*models.User, error)
 	return &user, nil
 }
 
-func (s *AuthService) Login(email string, password string) (*models.User, error) {
+func (s *AuthService) Login(email string, password string) (string, *models.User, error) {
 	var user models.User
 	if err := s.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		return nil, errors.New("user not found")
+		return "", nil, errors.New("user not found")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return nil, errors.New("invalid password")
+		return "", nil, errors.New("invalid password")
 	}
 
-	return &user, nil
+	expirationHours := viper.GetInt("jwt_expiration_hours")
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Hour * time.Duration(expirationHours)).Unix(),
+	})
+
+	token, err := claims.SignedString([]byte(os.Getenv("JWT_AUTH_SECRET")))
+	if err != nil {
+		return "", nil, err
+	}
+
+	return token, &user, nil
+}
+
+
+
+func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_AUTH_SECRET")), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID := claims["sub"].(string)
+		var user models.User
+		if err := s.DB.First(&user, "id = ?", userID).Error; err != nil {
+			return nil, errors.New("user not found")
+		}
+		return &user, nil
+	}
+
+	return nil, errors.New("invalid token")
 }
