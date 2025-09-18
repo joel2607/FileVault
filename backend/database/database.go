@@ -43,3 +43,8 @@ func Init() {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 }
+
+// GetDB returns the database instance.
+func GetDB() *gorm.DB {
+	return DB
+}
