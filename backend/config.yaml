@@ -1,0 +1,6 @@
+port: "8080"
+postgres_host: "db"
+postgres_port: "5432"
+postgres_user: "user"
+postgres_password: "password"
+postgres_db: "file_storage"
