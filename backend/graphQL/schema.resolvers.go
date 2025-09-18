@@ -156,14 +156,12 @@ func (r *mutationResolver) Register(ctx context.Context, input models.RegisterIn
 
 // Login handles user authentication.
 // It accepts a user's email and password, and if valid, returns an authentication response containing a token.
-func (r *queryResolver) Login(ctx context.Context, email string, password string) (*models.AuthResponse, error) {
-	user, err := r.AuthService.Login(email, password)
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*models.AuthResponse, error) {
+	token, user, err := r.AuthService.Login(email, password)
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: Generate JWT token and return it
-	return &models.AuthResponse{User: user, Token: ""}, nil
+	return &models.AuthResponse{Token: token, User: user}, nil
 }
 
 // ID resolves the id field for the User type.
@@ -219,9 +217,6 @@ func (r *Resolver) Folder() FolderResolver { return &folderResolver{r} }
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
@@ -230,5 +225,4 @@ type fileResolver struct{ *Resolver }
 type fileSharingResolver struct{ *Resolver }
 type folderResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

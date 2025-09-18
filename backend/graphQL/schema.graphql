@@ -105,7 +105,7 @@ type AuthResponse {
 Defines the queries available in the API.
 """
 type Query {
-  login(email: String!, password: String!): AuthResponse!
+  me: User!
 }
 
 """
@@ -113,4 +113,5 @@ Defines the mutations available in the API.
 """
 type Mutation {
   register(input: RegisterInput!): User!
+  login(email: String!, password: String!): AuthResponse!
 }
