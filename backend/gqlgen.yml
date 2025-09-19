@@ -1,0 +1,63 @@
+# Where are all the schema files located? globs are supported.
+schema:
+  - graphQL/*.graphql
+
+# Where the generated server code should go.
+# This file SHOULD NOT be edited.
+exec:
+  filename: graphQL/generated.go
+  package:  graphQL
+
+# Where should any generated models go?
+# This file SHOULD NOT be edited.
+model:
+  filename: models/models.generated.go
+  package:  models
+
+# Where should the resolver implementations go?
+# This file IS where you write your business logic.
+resolver:
+  layout:      follow-schema
+  dir:         graphQL
+  package:     graphQL
+  # filename_template is not needed for follow-schema, but you can use it if you want
+  # filename_template: "{name}.resolvers.go"
+
+# This section declares type mapping between the GraphQL and Go type systems
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+
+  # My defined models.
+  User:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.User"
+  File:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.File"
+  Folder:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.Folder"
+  DeduplicatedContent:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.DeduplicatedContent"
+  FileSharing:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.FileSharing"
+  UserRole:
+    model:
+      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.UserRole"

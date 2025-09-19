@@ -3,19 +3,35 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/spf13/viper"
 )
+
+func init() {
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.SetConfigType("yml")
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("Warning: Could not read config file for seeding: %s. Relying on environment variables.", err)
+	}
+
+	viper.AutomaticEnv()
+	viper.BindEnv("postgres.host", "POSTGRES_HOST")
+	viper.BindEnv("postgres.port", "POSTGRES_PORT")
+	viper.BindEnv("postgres.user", "POSTGRES_USER")
+	viper.BindEnv("postgres.password", "POSTGRES_PASSWORD")
+	viper.BindEnv("postgres.db", "POSTGRES_DB")
+}
 
 // Seeding Module to fill database with test data for local development.
 func main() {
 	log.Println("Starting database seeding...")
 
-	// Hardcode database connection details for local development seeding.
-	os.Setenv("POSTGRES_HOST", "localhost")
-	os.Setenv("POSTGRES_PORT", "5433")
+	// Override config values for local seeding against Docker container
+	viper.Set("postgres.host", "localhost")
+	viper.Set("postgres.port", "5433")
 
 	// 1. Initialize the database connection (this also runs migrations)
 	database.Init()
@@ -65,7 +81,7 @@ func main() {
 	// 4. Create a File record for the admin user in their new folder
 	// First, create the deduplicated content record
 	deduplicatedContent := models.DeduplicatedContent{
-		SHA256Hash:     "e3b0c44298fc1c149afbf4-c8996fb92427ae41e4649b934ca495991b7852b855", // SHA256 of an empty string
+		SHA256Hash:     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", // SHA256 of an empty string
 		ReferenceCount: 1,
 	}
 	if err := tx.Create(&deduplicatedContent).Error; err != nil {
@@ -80,7 +96,8 @@ func main() {
 		MIMEType:        "text/plain",
 		Size:            0,
 		DeduplicationID: deduplicatedContent.ID,
-		FolderID:  &rootFolder.ID,
+		FolderID:        &rootFolder.ID,
+		Tags:            "[]",
 	}
 	if err := tx.Create(&sampleFile).Error; err != nil {
 		tx.Rollback()

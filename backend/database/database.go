@@ -12,20 +12,17 @@ import (
 
 var DB *gorm.DB
 
-func Init() {
+func Init() *gorm.DB {
 
 	// Set up automatic environment variable reading
 	viper.AutomaticEnv()
 
-	viper.SetDefault("POSTGRES_HOST", "db")
-	viper.SetDefault("POSTGRES_PORT", "5432")
-
 	// Get database credentials from Viper
-	dbHost := viper.GetString("POSTGRES_HOST")
-	dbUser := viper.GetString("POSTGRES_USER")
-	dbPassword := viper.GetString("POSTGRES_PASSWORD")
-	dbName := viper.GetString("POSTGRES_DB")
-	dbPort := viper.GetString("POSTGRES_PORT")
+	dbHost := viper.GetString("postgres.host")
+	dbUser := viper.GetString("postgres.user")
+	dbPassword := viper.GetString("postgres.password")
+	dbName := viper.GetString("postgres.db")
+	dbPort := viper.GetString("postgres.port")
 
 	// Database connection
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
@@ -42,4 +39,6 @@ func Init() {
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
+
+	return DB
 }

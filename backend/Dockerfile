@@ -1,26 +1,33 @@
-# Use the official Golang image for development
-FROM golang:1.23-alpine
+# Use the official Golang image
+FROM golang:1.25-alpine
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Install git, which is required for `go install` to fetch modules
+# Install git, which is required for go modules
 RUN apk add --no-cache git
 
-# Download and install Air for live-reloading
-RUN go install github.com/cosmtrek/air@v1.51.0
-
-# Copy go module and sum files
+# Copy go module and sum files to leverage Docker cache
 COPY go.mod go.sum ./
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+# Download all dependencies
 RUN go mod download
 
-# Copy the source code into the container
+# Copy the rest of the source code
 COPY . .
 
-# Expose port 8080 to the outside world
+# Tidy the modules to create a perfect go.sum
+RUN go mod tidy
+
+# Build the binary to ensure everything is correct
+RUN CGO_ENABLED=0 go build -o ./tmp/server cmd/server.go
+
+# Install Air for live-reloading
+RUN go install github.com/cosmtrek/air@v1.51.0
+
+# Expose port 8080
 EXPOSE 8080
 
-# Command to run the application using Air
+# Command to run the application using Air.
+# Air will now use the binary we built during the image creation.
 CMD ["air"]

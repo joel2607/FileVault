@@ -12,11 +12,12 @@ storage quotas, and API rate limits.
 """
 type User {
   id: ID!
+  username: String!
   createdAt: String!
   updatedAt: String!
   email: String!
-  storageQuotaMB: Int!
-  usedStorageMB: Int!
+  storageQuotaMb: Int!
+  usedStorageMb: Int!
   apiRateLimit: Int!
   role: UserRole!
 }
@@ -81,4 +82,36 @@ type FileSharing {
   sharedWithUserId: ID!
   sharedWithUser: User!
   permissionLevel: String!
+}
+
+"""
+Input for the registration mutation.
+"""
+input RegisterInput {
+  username: String!
+  email: String!
+  password: String!
+}
+
+"""
+Response type for a successful login.
+"""
+type AuthResponse {
+  token: String!
+  user: User!
+}
+
+"""
+Defines the queries available in the API.
+"""
+type Query {
+  me: User!
+}
+
+"""
+Defines the mutations available in the API.
+"""
+type Mutation {
+  register(input: RegisterInput!): User!
+  login(email: String!, password: String!): AuthResponse!
 }
