@@ -305,6 +305,11 @@ func (r *userResolver) UsedStorageMb(ctx context.Context, obj *models.User) (int
 	return int32(obj.UsedStorageMB), nil
 }
 
+// SavedStorageMb is the resolver for the savedStorageMb field.
+func (r *userResolver) SavedStorageMb(ctx context.Context, obj *models.User) (int32, error) {
+	return int32(obj.SavedStorageMB), nil
+}
+
 // APIRateLimit resolves the apiRateLimit field for the User type.
 // It returns the user's API request rate limit.
 func (r *userResolver) APIRateLimit(ctx context.Context, obj *models.User) (int32, error) {

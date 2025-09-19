@@ -32,6 +32,7 @@ func NewFileService(db *gorm.DB) *FileService {
 // UploadFile handles the entire file upload process.
 // It performs content hashing for deduplication, saves the file to storage if it's new,
 // validates the MIME type, and creates the necessary metadata in the database.
+// It also updates the user's storage usage statistics.
 //
 // Inputs:
 // - ctx: The context for the request.
@@ -72,6 +73,10 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		}
 		existingContent.ReferenceCount++
 		s.DB.Save(&existingContent)
+
+		// Update user's storage usage. They save space by not uploading duplicate data.
+		user.SavedStorageMB += int(file.Size / (1024 * 1024))
+		s.DB.Save(user)
 		return newFile, nil
 	}
 
@@ -121,6 +126,10 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		return nil, err
 	}
 
+	// Update user's storage usage. They dont save space as this is new data.
+	user.UsedStorageMB += int(file.Size / (1024 * 1024))
+	s.DB.Save(user)
+
 	return newFile, nil
 }
 
@@ -147,6 +156,97 @@ func (s *FileService) CreateFolder(ctx context.Context, input models.NewFolder, 
 	err := s.DB.Create(folder).Error
 	return folder, err
 }
+
+// UpdateFile modifies an existing file's metadata, such as its name or parent folder.
+// It ensures that the user attempting the update is the owner of the file.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - input: The UpdateFile input object containing the file's ID and the new data.
+// - user: The user requesting the update.
+//
+// Outputs:
+// - A pointer to the updated models.File object.
+// - An error if the file is not found or the database operation fails.
+func (s *FileService) UpdateFile(ctx context.Context, input models.UpdateFile, user *models.User) (*models.File, error) {
+	var file models.File
+	if err := s.DB.First(&file, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
+		return nil, err
+	}
+	if input.Name != nil {
+		file.FileName = *input.Name
+	}
+	if input.ParentFolderID != nil {
+		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
+		uid := uint(id)
+		file.FolderID = &uid
+	}
+	err := s.DB.Save(&file).Error
+	return &file, err
+}
+
+// DeleteFile removes a file's metadata from the database and handles the deduplication logic.
+// It decrements the reference count of the associated content. If the count reaches zero,
+// it deletes the actual file from storage, the content record from the database and
+// updates the user's storage usage statistics.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - id: The string ID of the file to be deleted.
+// - user: The user requesting the deletion.
+//
+// Outputs:
+// - A boolean indicating whether the deletion was successful.
+// - An error if the database operation fails.
+func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.User) (bool, error) {
+	uid, _ := strconv.ParseUint(id, 10, 64)
+	var file models.File
+	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return false, err
+	}
+	
+	// Decrement reference count
+	var content models.DeduplicatedContent
+	if err := s.DB.First(&content, file.DeduplicationID).Error; err == nil {
+		content.ReferenceCount--
+		s.DB.Save(&content)
+		if content.ReferenceCount <= 0 {
+			// Delete file from storage
+			filePath := filepath.Join("./uploads", content.SHA256Hash)
+			os.Remove(filePath)
+			s.DB.Delete(&content)
+			// Update user's storage usage
+			user.UsedStorageMB -= int(file.Size / (1024 * 1024))
+			s.DB.Save(user)
+			} else {
+				// Update user's storage usage. They save less space now as one less reference.
+				user.SavedStorageMB -= int(file.Size / (1024 * 1024))
+				s.DB.Save(user)
+		}
+	}
+
+	err := s.DB.Delete(&file).Error
+	return err == nil, err
+}
+
+// GetFolder retrieves a specific folder by its ID for a given user.
+// It ensures that only the owner of the folder can access it.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - id: The string ID of the folder to retrieve.
+// - user: The user requesting the folder.
+//
+// Outputs:
+// - A pointer to the retrieved models.Folder object.
+// - An error if the folder is not found or the user does not have permission.
+func (s *FileService) GetFolder(ctx context.Context, id string, user *models.User) (*models.Folder, error) {
+	var folder models.Folder
+	uid, _ := strconv.ParseUint(id, 10, 64)
+	err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error
+	return &folder, err
+}
+
 
 // UpdateFolder modifies an existing folder's properties, such as its name or parent folder.
 // It ensures that the user attempting the update is the owner of the folder.
@@ -192,88 +292,6 @@ func (s *FileService) DeleteFolder(ctx context.Context, id string, user *models.
 	uid, _ := strconv.ParseUint(id, 10, 64)
 	err := s.DB.Delete(&models.Folder{}, "id = ? AND user_id = ?", uid, user.ID).Error
 	return err == nil, err
-}
-
-// UpdateFile modifies an existing file's metadata, such as its name or parent folder.
-// It ensures that the user attempting the update is the owner of the file.
-//
-// Inputs:
-// - ctx: The context for the request.
-// - input: The UpdateFile input object containing the file's ID and the new data.
-// - user: The user requesting the update.
-//
-// Outputs:
-// - A pointer to the updated models.File object.
-// - An error if the file is not found or the database operation fails.
-func (s *FileService) UpdateFile(ctx context.Context, input models.UpdateFile, user *models.User) (*models.File, error) {
-	var file models.File
-	if err := s.DB.First(&file, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
-		return nil, err
-	}
-	if input.Name != nil {
-		file.FileName = *input.Name
-	}
-	if input.ParentFolderID != nil {
-		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
-		uid := uint(id)
-		file.FolderID = &uid
-	}
-	err := s.DB.Save(&file).Error
-	return &file, err
-}
-
-// DeleteFile removes a file's metadata from the database and handles the deduplication logic.
-// It decrements the reference count of the associated content. If the count reaches zero,
-// it deletes the actual file from storage and the content record from the database.
-//
-// Inputs:
-// - ctx: The context for the request.
-// - id: The string ID of the file to be deleted.
-// - user: The user requesting the deletion.
-//
-// Outputs:
-// - A boolean indicating whether the deletion was successful.
-// - An error if the database operation fails.
-func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.User) (bool, error) {
-	uid, _ := strconv.ParseUint(id, 10, 64)
-	var file models.File
-	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
-		return false, err
-	}
-
-	// Decrement reference count
-	var content models.DeduplicatedContent
-	if err := s.DB.First(&content, file.DeduplicationID).Error; err == nil {
-		content.ReferenceCount--
-		s.DB.Save(&content)
-		if content.ReferenceCount <= 0 {
-			// Delete file from storage
-			filePath := filepath.Join("./uploads", content.SHA256Hash)
-			os.Remove(filePath)
-			s.DB.Delete(&content)
-		}
-	}
-
-	err := s.DB.Delete(&file).Error
-	return err == nil, err
-}
-
-// GetFolder retrieves a specific folder by its ID for a given user.
-// It ensures that only the owner of the folder can access it.
-//
-// Inputs:
-// - ctx: The context for the request.
-// - id: The string ID of the folder to retrieve.
-// - user: The user requesting the folder.
-//
-// Outputs:
-// - A pointer to the retrieved models.Folder object.
-// - An error if the folder is not found or the user does not have permission.
-func (s *FileService) GetFolder(ctx context.Context, id string, user *models.User) (*models.Folder, error) {
-	var folder models.Folder
-	uid, _ := strconv.ParseUint(id, 10, 64)
-	err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error
-	return &folder, err
 }
 
 // GetRoot retrieves the top-level files and folders for a given user.
