@@ -6,23 +6,42 @@ import (
 	"fmt"
 	"io"
 	"mime"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
-	"net/http"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 	"gorm.io/gorm"
 )
 
+// FileService handles business logic related to file and folder management.
+// It interacts with the database to perform CRUD operations on files and folders.
 type FileService struct {
 	DB *gorm.DB
 }
 
+// NewFileService creates and returns a new FileService instance.
+// It takes a GORM database connection as input.
+// Returns a pointer to the newly created FileService.
 func NewFileService(db *gorm.DB) *FileService {
 	return &FileService{DB: db}
 }
 
+// UploadFile handles the entire file upload process.
+// It performs content hashing for deduplication, saves the file to storage if it's new,
+// validates the MIME type, and creates the necessary metadata in the database.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - file: The graphql.Upload object containing the file data and metadata.
+// - user: The user model of the person uploading the file.
+// - parentFolderID: An optional string pointer to the ID of the folder where the file should be placed.
+//
+// Outputs:
+// - A pointer to the created models.File object if successful.
+// - An error if any part of the process fails.
 func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user *models.User, parentFolderID *string) (*models.File, error) {
 	// 1. Hashing
 	hash := sha256.New()
@@ -105,6 +124,16 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 	return newFile, nil
 }
 
+// CreateFolder creates a new folder for a given user.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - input: The NewFolder input object containing the folder's name and optional parent ID.
+// - user: The user who is creating the folder.
+//
+// Outputs:
+// - A pointer to the created models.Folder object.
+// - An error if the database operation fails.
 func (s *FileService) CreateFolder(ctx context.Context, input models.NewFolder, user *models.User) (*models.Folder, error) {
 	folder := &models.Folder{
 		UserID:     user.ID,
@@ -119,6 +148,17 @@ func (s *FileService) CreateFolder(ctx context.Context, input models.NewFolder, 
 	return folder, err
 }
 
+// UpdateFolder modifies an existing folder's properties, such as its name or parent folder.
+// It ensures that the user attempting the update is the owner of the folder.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - input: The UpdateFolder input object containing the folder's ID and the new data.
+// - user: The user requesting the update.
+//
+// Outputs:
+// - A pointer to the updated models.Folder object.
+// - An error if the folder is not found or the database operation fails.
 func (s *FileService) UpdateFolder(ctx context.Context, input models.UpdateFolder, user *models.User) (*models.Folder, error) {
 	var folder models.Folder
 	if err := s.DB.First(&folder, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
@@ -136,12 +176,35 @@ func (s *FileService) UpdateFolder(ctx context.Context, input models.UpdateFolde
 	return &folder, err
 }
 
+// DeleteFolder removes a folder from the database.
+// It ensures that the user attempting the deletion is the owner of the folder.
+// Note: This is a simple implementation. A production system would need to handle orphaned files or subfolders.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - id: The string ID of the folder to be deleted.
+// - user: The user requesting the deletion.
+//
+// Outputs:
+// - A boolean indicating whether the deletion was successful.
+// - An error if the database operation fails.
 func (s *FileService) DeleteFolder(ctx context.Context, id string, user *models.User) (bool, error) {
 	uid, _ := strconv.ParseUint(id, 10, 64)
 	err := s.DB.Delete(&models.Folder{}, "id = ? AND user_id = ?", uid, user.ID).Error
 	return err == nil, err
 }
 
+// UpdateFile modifies an existing file's metadata, such as its name or parent folder.
+// It ensures that the user attempting the update is the owner of the file.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - input: The UpdateFile input object containing the file's ID and the new data.
+// - user: The user requesting the update.
+//
+// Outputs:
+// - A pointer to the updated models.File object.
+// - An error if the file is not found or the database operation fails.
 func (s *FileService) UpdateFile(ctx context.Context, input models.UpdateFile, user *models.User) (*models.File, error) {
 	var file models.File
 	if err := s.DB.First(&file, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
@@ -159,6 +222,18 @@ func (s *FileService) UpdateFile(ctx context.Context, input models.UpdateFile, u
 	return &file, err
 }
 
+// DeleteFile removes a file's metadata from the database and handles the deduplication logic.
+// It decrements the reference count of the associated content. If the count reaches zero,
+// it deletes the actual file from storage and the content record from the database.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - id: The string ID of the file to be deleted.
+// - user: The user requesting the deletion.
+//
+// Outputs:
+// - A boolean indicating whether the deletion was successful.
+// - An error if the database operation fails.
 func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.User) (bool, error) {
 	uid, _ := strconv.ParseUint(id, 10, 64)
 	var file models.File
@@ -183,6 +258,17 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 	return err == nil, err
 }
 
+// GetFolder retrieves a specific folder by its ID for a given user.
+// It ensures that only the owner of the folder can access it.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - id: The string ID of the folder to retrieve.
+// - user: The user requesting the folder.
+//
+// Outputs:
+// - A pointer to the retrieved models.Folder object.
+// - An error if the folder is not found or the user does not have permission.
 func (s *FileService) GetFolder(ctx context.Context, id string, user *models.User) (*models.Folder, error) {
 	var folder models.Folder
 	uid, _ := strconv.ParseUint(id, 10, 64)
@@ -190,6 +276,16 @@ func (s *FileService) GetFolder(ctx context.Context, id string, user *models.Use
 	return &folder, err
 }
 
+// GetRoot retrieves the top-level files and folders for a given user.
+// This represents the user's root directory.
+//
+// Inputs:
+// - ctx: The context for the request.
+// - user: The user whose root directory is being requested.
+//
+// Outputs:
+// - A pointer to a models.Root object, containing slices of top-level files and folders.
+// - An error if the database query fails.
 func (s *FileService) GetRoot(ctx context.Context, user *models.User) (*models.Root, error) {
 	var files []*models.File
 	if err := s.DB.Where("user_id = ? AND folder_id IS NULL", user.ID).Find(&files).Error; err != nil {
@@ -202,6 +298,16 @@ func (s *FileService) GetRoot(ctx context.Context, user *models.User) (*models.R
 	return &models.Root{Files: files, Folders: folders}, nil
 }
 
+// isValidMIME validates the actual content type of a file against its declared MIME type.
+// It reads the first 512 bytes of the file to determine the real MIME type and also checks
+// the file extension as a fallback.
+//
+// Inputs:
+// - filePath: The path to the saved file on the local filesystem.
+// - declaredMIME: The MIME type that was declared by the client upon upload.
+//
+// Outputs:
+// - A boolean that is true if the actual MIME type matches the declared one, and false otherwise.
 func isValidMIME(filePath, declaredMIME string) bool {
 	file, err := os.Open(filePath)
 	if err != nil {
