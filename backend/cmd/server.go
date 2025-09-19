@@ -19,12 +19,19 @@ const defaultPort = "8080"
 func init() {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
 	viper.SetConfigType("yml")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatalf("Error while reading config file %s", err)
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("Warning: Could not read config file: %s. Relying on environment variables.", err)
 	}
+
+	viper.AutomaticEnv()
+	viper.BindEnv("postgres.host", "POSTGRES_HOST")
+	viper.BindEnv("postgres.port", "POSTGRES_PORT")
+	viper.BindEnv("postgres.user", "POSTGRES_USER")
+	viper.BindEnv("postgres.password", "POSTGRES_PASSWORD")
+	viper.BindEnv("postgres.db", "POSTGRES_DB")
+	viper.BindEnv("auth.jwt_expiration_hours", "JWT_EXPIRATION_HOURS")
+	viper.BindEnv("jwt_auth_secret", "JWT_AUTH_SECRET")
 }
 
 func main() {

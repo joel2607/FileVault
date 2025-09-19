@@ -6,7 +6,7 @@ postgres:
   port: "5432"
   user: "user"
   password: "password"
-  db: "file_storage"
+  db: "file_vault"
 
 auth:
   jwt_expiration_hours: 24
