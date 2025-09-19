@@ -13,7 +13,11 @@ type contextKey struct {
 }
 
 var userCtxKey = &contextKey{"user"}
+var roleCtxKey = &contextKey{"role"}
 
+// AuthMiddleware extracts the JWT token from the Authorization header,
+// validates it, and adds the user information to the request context.
+// It also attaches role information for RBAC in context.
 func AuthMiddleware(authService *services.AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -31,8 +35,21 @@ func AuthMiddleware(authService *services.AuthService) func(http.Handler) http.H
 			}
 
 			ctx := context.WithValue(r.Context(), userCtxKey, user)
+			ctx = context.WithValue(ctx, roleCtxKey, user.Role)
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+// REST routes can use this for RBAC. GraphQL resolvers can use the context directly and should not use this function.
+func AdminOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		role := r.Context().Value(roleCtxKey)
+		if role == nil || role.(string) != "ADMIN" {
+			http.Error(w, "Forbidden: Admins only", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
