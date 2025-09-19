@@ -63,21 +63,28 @@ func (s *AuthService) Login(email string, password string) (string, *models.User
 	return token, &user, nil
 }
 
-
-
 func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(viper.GetString("JWT_AUTH_SECRET")), nil
 	})
 
 	if err != nil {
-		return nil, err
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, errors.New("token is expired")
+		}
+		return nil, errors.New("could not parse token")
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userID := claims["sub"].(string)
+		// Extract user ID from claims
+		sub, ok := claims["sub"].(float64)
+		if !ok {
+			return nil, errors.New("invalid token: sub claim is not a number")
+		}
+		userID := uint(sub)
+
 		var user models.User
-		if err := s.DB.First(&user, "id = ?", userID).Error; err != nil {
+		if err := s.DB.First(&user, userID).Error; err != nil {
 			return nil, errors.New("user not found")
 		}
 		return &user, nil
