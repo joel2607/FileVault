@@ -6,9 +6,9 @@ package graphQL
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 )
@@ -153,6 +153,20 @@ func (r *folderResolver) ParentFolderID(ctx context.Context, obj *models.Folder)
 	return &id, nil
 }
 
+// Files is the resolver for the files field.
+func (r *folderResolver) Files(ctx context.Context, obj *models.Folder) ([]*models.File, error) {
+	var files []*models.File
+	err := r.DB.Where("folder_id = ?", obj.ID).Find(&files).Error
+	return files, err
+}
+
+// Folders is the resolver for the folders field.
+func (r *folderResolver) Folders(ctx context.Context, obj *models.Folder) ([]*models.Folder, error) {
+	var folders []*models.Folder
+	err := r.DB.Where("parent_folder_id = ?", obj.ID).Find(&folders).Error
+	return folders, err
+}
+
 // Register handles user registration.
 // It accepts user registration details (username, email, password) and creates a new user account.
 // Returns the newly created user object upon successful registration.
@@ -174,26 +188,81 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	return &models.AuthResponse{Token: token, User: user}, nil
 }
 
-// Me is the resolver for the me field.
-func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
-	// Check for a specific authentication error from the middleware first.
-	if err, ok := ctx.Value(middleware.AuthErrorCtxKey).(error); ok && err != nil {
+// UploadFile is the resolver for the uploadFile field.
+func (r *mutationResolver) UploadFile(ctx context.Context, file graphql.Upload, parentFolderID *string) (*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
 		return nil, err
 	}
+	return r.FileService.UploadFile(ctx, file, user, parentFolderID)
+}
 
-	// Then, check for the user. If no user and no error, it means no token was provided.
-	userVal := ctx.Value(middleware.UserCtxKey)
-	if userVal == nil {
-		return nil, fmt.Errorf("access denied: no token provided")
+// CreateFolder is the resolver for the createFolder field.
+func (r *mutationResolver) CreateFolder(ctx context.Context, input models.NewFolder) (*models.Folder, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
 	}
+	return r.FileService.CreateFolder(ctx, input, user)
+}
 
-	user, ok := userVal.(*models.User)
-	if !ok {
-		// This case should ideally not happen if the middleware is correct.
-		return nil, fmt.Errorf("internal server error: user context value is of the wrong type")
+// UpdateFolder is the resolver for the updateFolder field.
+func (r *mutationResolver) UpdateFolder(ctx context.Context, input models.UpdateFolder) (*models.Folder, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
 	}
+	return r.FileService.UpdateFolder(ctx, input, user)
+}
 
-	return user, nil
+// DeleteFolder is the resolver for the deleteFolder field.
+func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (bool, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return false, err
+	}
+	return r.FileService.DeleteFolder(ctx, id, user)
+}
+
+// UpdateFile is the resolver for the updateFile field.
+func (r *mutationResolver) UpdateFile(ctx context.Context, input models.UpdateFile) (*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.FileService.UpdateFile(ctx, input, user)
+}
+
+// DeleteFile is the resolver for the deleteFile field.
+func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (bool, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return false, err
+	}
+	return r.FileService.DeleteFile(ctx, id, user)
+}
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
+	return middleware.GetCurrentUser(ctx)
+}
+
+// Folder is the resolver for the folder field.
+func (r *queryResolver) Folder(ctx context.Context, id string) (*models.Folder, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.FileService.GetFolder(ctx, id, user)
+}
+
+// Root is the resolver for the root field.
+func (r *queryResolver) Root(ctx context.Context) (*models.Root, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.FileService.GetRoot(ctx, user)
 }
 
 // ID resolves the id field for the User type.

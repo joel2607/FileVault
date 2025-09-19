@@ -43,11 +43,12 @@ func main() {
 	db := database.Init()
 	
 	authService := services.NewAuthService(db)
+	fileService := services.NewFileService(db)
 
 	router := chi.NewRouter()
 	router.Use(middleware.AuthMiddleware(authService))
 
-	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{DB: db, AuthService: authService}}))
+	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{DB: db, AuthService: authService, FileService: fileService}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)

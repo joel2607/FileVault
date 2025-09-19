@@ -12,6 +12,11 @@ type AuthResponse struct {
 type Mutation struct {
 }
 
+type NewFolder struct {
+	Name           string  `json:"name"`
+	ParentFolderID *string `json:"parentFolderID,omitempty"`
+}
+
 // Defines the queries available in the API.
 type Query struct {
 }
@@ -21,4 +26,21 @@ type RegisterInput struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type Root struct {
+	Files   []*File   `json:"files,omitempty"`
+	Folders []*Folder `json:"folders,omitempty"`
+}
+
+type UpdateFile struct {
+	ID             string  `json:"id"`
+	Name           *string `json:"name,omitempty"`
+	ParentFolderID *string `json:"parentFolderID,omitempty"`
+}
+
+type UpdateFolder struct {
+	ID             string  `json:"id"`
+	Name           *string `json:"name,omitempty"`
+	ParentFolderID *string `json:"parentFolderID,omitempty"`
 }
