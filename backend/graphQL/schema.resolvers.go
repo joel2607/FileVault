@@ -14,61 +14,61 @@ import (
 )
 
 // ID resolves the id field for the DeduplicatedContent type.
-// It returns the unique identifier of the deduplicated content.
+// It converts the numeric ID of the content object into a string.
 func (r *deduplicatedContentResolver) ID(ctx context.Context, obj *models.DeduplicatedContent) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the DeduplicatedContent type.
-// It returns the timestamp indicating when the deduplicated content was first created.
+// It returns the creation timestamp as a string.
 func (r *deduplicatedContentResolver) CreatedAt(ctx context.Context, obj *models.DeduplicatedContent) (string, error) {
 	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the DeduplicatedContent type.
-// It returns the timestamp indicating when the deduplicated content was last updated.
+// It returns the last update timestamp as a string.
 func (r *deduplicatedContentResolver) UpdatedAt(ctx context.Context, obj *models.DeduplicatedContent) (string, error) {
 	return obj.UpdatedAt.String(), nil
 }
 
 // ReferenceCount resolves the referenceCount field for the DeduplicatedContent type.
-// It returns the number of files that reference this deduplicated content.
+// It returns the number of files that point to this specific content.
 func (r *deduplicatedContentResolver) ReferenceCount(ctx context.Context, obj *models.DeduplicatedContent) (int32, error) {
 	return int32(obj.ReferenceCount), nil
 }
 
 // ID resolves the id field for the File type.
-// It returns the unique identifier of the file.
+// It converts the numeric ID of the file object into a string.
 func (r *fileResolver) ID(ctx context.Context, obj *models.File) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the File type.
-// It returns the timestamp indicating when the file was created.
+// It returns the creation timestamp as a string.
 func (r *fileResolver) CreatedAt(ctx context.Context, obj *models.File) (string, error) {
 	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the File type.
-// It returns the timestamp indicating when the file was last updated.
+// It returns the last update timestamp as a string.
 func (r *fileResolver) UpdatedAt(ctx context.Context, obj *models.File) (string, error) {
 	return obj.UpdatedAt.String(), nil
 }
 
 // UserID resolves the userId field for the File type.
-// It returns the unique identifier of the user who owns the file.
+// It returns the ID of the user who owns the file as a string.
 func (r *fileResolver) UserID(ctx context.Context, obj *models.File) (string, error) {
 	return strconv.FormatUint(uint64(obj.UserID), 10), nil
 }
 
 // Size resolves the size field for the File type.
-// It returns the size of the file in bytes.
+// It returns the file size in bytes as an integer.
 func (r *fileResolver) Size(ctx context.Context, obj *models.File) (int32, error) {
 	return int32(obj.Size), nil
 }
 
 // DeduplicationID resolves the deduplicationId field for the File type.
-// It returns the identifier of the deduplicated content associated with this file.
+// It returns the ID of the associated deduplicated content as a string.
 func (r *fileResolver) DeduplicationID(ctx context.Context, obj *models.File) (string, error) {
 	return strconv.FormatUint(uint64(obj.DeduplicationID), 10), nil
 }
@@ -80,7 +80,7 @@ func (r *fileResolver) DownloadCount(ctx context.Context, obj *models.File) (int
 }
 
 // ParentFolderID resolves the parentFolderId field for the File type.
-// It returns the identifier of the parent folder, or null if the file is in the root directory.
+// It returns the ID of the folder containing this file, or null if it's in the root.
 func (r *fileResolver) ParentFolderID(ctx context.Context, obj *models.File) (*string, error) {
 	if obj.FolderID == nil {
 		return nil, nil
@@ -90,61 +90,61 @@ func (r *fileResolver) ParentFolderID(ctx context.Context, obj *models.File) (*s
 }
 
 // ID resolves the id field for the FileSharing type.
-// It returns the unique identifier of the file sharing record.
+// It converts the numeric ID of the sharing record into a string.
 func (r *fileSharingResolver) ID(ctx context.Context, obj *models.FileSharing) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the FileSharing type.
-// It returns the timestamp indicating when the file was shared.
+// It returns the creation timestamp as a string.
 func (r *fileSharingResolver) CreatedAt(ctx context.Context, obj *models.FileSharing) (string, error) {
 	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the FileSharing type.
-// It returns the timestamp indicating when the file sharing record was last updated.
+// It returns the last update timestamp as a string.
 func (r *fileSharingResolver) UpdatedAt(ctx context.Context, obj *models.FileSharing) (string, error) {
 	return obj.UpdatedAt.String(), nil
 }
 
 // FileID resolves the fileId field for the FileSharing type.
-// It returns the unique identifier of the shared file.
+// It returns the ID of the file being shared as a string.
 func (r *fileSharingResolver) FileID(ctx context.Context, obj *models.FileSharing) (string, error) {
 	return strconv.FormatUint(uint64(obj.FileID), 10), nil
 }
 
 // SharedWithUserID resolves the sharedWithUserId field for the FileSharing type.
-// It returns the unique identifier of the user with whom the file is shared.
+// It returns the ID of the user with whom the file is shared as a string.
 func (r *fileSharingResolver) SharedWithUserID(ctx context.Context, obj *models.FileSharing) (string, error) {
 	return strconv.FormatUint(uint64(obj.SharedWithUserID), 10), nil
 }
 
 // ID resolves the id field for the Folder type.
-// It returns the unique identifier of the folder.
+// It converts the numeric ID of the folder object into a string.
 func (r *folderResolver) ID(ctx context.Context, obj *models.Folder) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the Folder type.
-// It returns the timestamp indicating when the folder was created.
+// It returns the creation timestamp as a string.
 func (r *folderResolver) CreatedAt(ctx context.Context, obj *models.Folder) (string, error) {
 	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the Folder type.
-// It returns the timestamp indicating when the folder was last updated.
+// It returns the last update timestamp as a string.
 func (r *folderResolver) UpdatedAt(ctx context.Context, obj *models.Folder) (string, error) {
 	return obj.UpdatedAt.String(), nil
 }
 
 // UserID resolves the userId field for the Folder type.
-// It returns the unique identifier of the user who owns the folder.
+// It returns the ID of the user who owns the folder as a string.
 func (r *folderResolver) UserID(ctx context.Context, obj *models.Folder) (string, error) {
 	return strconv.FormatUint(uint64(obj.UserID), 10), nil
 }
 
 // ParentFolderID resolves the parentFolderId field for the Folder type.
-// It returns the identifier of the parent folder, or null if the folder is in the root directory.
+// It returns the ID of the parent folder, or null if it's a root-level folder.
 func (r *folderResolver) ParentFolderID(ctx context.Context, obj *models.Folder) (*string, error) {
 	if obj.ParentFolderID == nil {
 		return nil, nil
@@ -153,23 +153,24 @@ func (r *folderResolver) ParentFolderID(ctx context.Context, obj *models.Folder)
 	return &id, nil
 }
 
-// Files is the resolver for the files field.
+// Files resolves the files field for the Folder type.
+// It retrieves and returns a list of all files located directly within the folder.
 func (r *folderResolver) Files(ctx context.Context, obj *models.Folder) ([]*models.File, error) {
 	var files []*models.File
 	err := r.DB.Where("folder_id = ?", obj.ID).Find(&files).Error
 	return files, err
 }
 
-// Folders is the resolver for the folders field.
+// Folders resolves the folders field for the Folder type.
+// It retrieves and returns a list of all subfolders located directly within the folder.
 func (r *folderResolver) Folders(ctx context.Context, obj *models.Folder) ([]*models.Folder, error) {
 	var folders []*models.Folder
 	err := r.DB.Where("parent_folder_id = ?", obj.ID).Find(&folders).Error
 	return folders, err
 }
 
-// Register handles user registration.
-// It accepts user registration details (username, email, password) and creates a new user account.
-// Returns the newly created user object upon successful registration.
+// Register is the resolver for the register mutation.
+// It handles new user registration by calling the AuthService.
 func (r *mutationResolver) Register(ctx context.Context, input models.RegisterInput) (*models.User, error) {
 	user, err := r.AuthService.Register(input)
 	if err != nil {
@@ -178,8 +179,8 @@ func (r *mutationResolver) Register(ctx context.Context, input models.RegisterIn
 	return user, nil
 }
 
-// Login handles user authentication.
-// It accepts a user's email and password, and if valid, returns an authentication response containing a token.
+// Login is the resolver for the login mutation.
+// It authenticates a user and returns a token by calling the AuthService.
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*models.AuthResponse, error) {
 	token, user, err := r.AuthService.Login(email, password)
 	if err != nil {
@@ -188,7 +189,8 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	return &models.AuthResponse{Token: token, User: user}, nil
 }
 
-// UploadFile is the resolver for the uploadFile field.
+// UploadFile is the resolver for the uploadFile mutation.
+// It handles the file upload process by calling the FileService.
 func (r *mutationResolver) UploadFile(ctx context.Context, file graphql.Upload, parentFolderID *string) (*models.File, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -197,7 +199,8 @@ func (r *mutationResolver) UploadFile(ctx context.Context, file graphql.Upload, 
 	return r.FileService.UploadFile(ctx, file, user, parentFolderID)
 }
 
-// CreateFolder is the resolver for the createFolder field.
+// CreateFolder is the resolver for the createFolder mutation.
+// It creates a new folder by calling the FileService.
 func (r *mutationResolver) CreateFolder(ctx context.Context, input models.NewFolder) (*models.Folder, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -206,7 +209,8 @@ func (r *mutationResolver) CreateFolder(ctx context.Context, input models.NewFol
 	return r.FileService.CreateFolder(ctx, input, user)
 }
 
-// UpdateFolder is the resolver for the updateFolder field.
+// UpdateFolder is the resolver for the updateFolder mutation.
+// It updates an existing folder's details by calling the FileService.
 func (r *mutationResolver) UpdateFolder(ctx context.Context, input models.UpdateFolder) (*models.Folder, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -215,7 +219,8 @@ func (r *mutationResolver) UpdateFolder(ctx context.Context, input models.Update
 	return r.FileService.UpdateFolder(ctx, input, user)
 }
 
-// DeleteFolder is the resolver for the deleteFolder field.
+// DeleteFolder is the resolver for the deleteFolder mutation.
+// It deletes a folder by calling the FileService.
 func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (bool, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -224,7 +229,8 @@ func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (bool, e
 	return r.FileService.DeleteFolder(ctx, id, user)
 }
 
-// UpdateFile is the resolver for the updateFile field.
+// UpdateFile is the resolver for the updateFile mutation.
+// It updates a file's metadata by calling the FileService.
 func (r *mutationResolver) UpdateFile(ctx context.Context, input models.UpdateFile) (*models.File, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -233,7 +239,8 @@ func (r *mutationResolver) UpdateFile(ctx context.Context, input models.UpdateFi
 	return r.FileService.UpdateFile(ctx, input, user)
 }
 
-// DeleteFile is the resolver for the deleteFile field.
+// DeleteFile is the resolver for the deleteFile mutation.
+// It deletes a file by calling the FileService.
 func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (bool, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -242,12 +249,14 @@ func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (bool, err
 	return r.FileService.DeleteFile(ctx, id, user)
 }
 
-// Me is the resolver for the me field.
+// Me is the resolver for the me query.
+// It retrieves the currently authenticated user's information from the context.
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
 	return middleware.GetCurrentUser(ctx)
 }
 
-// Folder is the resolver for the folder field.
+// Folder is the resolver for the folder query.
+// It retrieves a specific folder by its ID for the current user.
 func (r *queryResolver) Folder(ctx context.Context, id string) (*models.Folder, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -256,7 +265,8 @@ func (r *queryResolver) Folder(ctx context.Context, id string) (*models.Folder, 
 	return r.FileService.GetFolder(ctx, id, user)
 }
 
-// Root is the resolver for the root field.
+// Root is the resolver for the root query.
+// It retrieves the top-level files and folders for the currently authenticated user.
 func (r *queryResolver) Root(ctx context.Context) (*models.Root, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
@@ -266,35 +276,37 @@ func (r *queryResolver) Root(ctx context.Context) (*models.Root, error) {
 }
 
 // ID resolves the id field for the User type.
-// It returns the unique identifier of the user.
+// It converts the numeric ID of the user object into a string.
 func (r *userResolver) ID(ctx context.Context, obj *models.User) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the User type.
-// It returns the timestamp indicating when the user account was created.
+// It returns the creation timestamp as a string.
 func (r *userResolver) CreatedAt(ctx context.Context, obj *models.User) (string, error) {
 	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the User type.
-// It returns the timestamp indicating when the user account was last updated.
+// It returns the last update timestamp as a string.
 func (r *userResolver) UpdatedAt(ctx context.Context, obj *models.User) (string, error) {
 	return obj.UpdatedAt.String(), nil
 }
 
-// StorageQuotaMb is the resolver for the storageQuotaMB field.
+// StorageQuotaMb resolves the storageQuotaMb field for the User type.
+// It returns the user's total storage quota in megabytes.
 func (r *userResolver) StorageQuotaMb(ctx context.Context, obj *models.User) (int32, error) {
 	return int32(obj.StorageQuotaMB), nil
 }
 
-// UsedStorageMb is the resolver for the usedStorageMB field.
+// UsedStorageMb resolves the usedStorageMb field for the User type.
+// It returns the amount of storage the user has currently used in megabytes.
 func (r *userResolver) UsedStorageMb(ctx context.Context, obj *models.User) (int32, error) {
 	return int32(obj.UsedStorageMB), nil
 }
 
 // APIRateLimit resolves the apiRateLimit field for the User type.
-// It returns the maximum number of API requests the user can make per minute.
+// It returns the user's API request rate limit.
 func (r *userResolver) APIRateLimit(ctx context.Context, obj *models.User) (int32, error) {
 	return int32(obj.APIRateLimit), nil
 }
