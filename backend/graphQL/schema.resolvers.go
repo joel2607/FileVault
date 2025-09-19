@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 )
 
@@ -175,11 +176,24 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
-	user := ctx.Value("user")
-	if user == nil {
-		return nil, fmt.Errorf("access denied")
+	// Check for a specific authentication error from the middleware first.
+	if err, ok := ctx.Value(middleware.AuthErrorCtxKey).(error); ok && err != nil {
+		return nil, err
 	}
-	return user.(*models.User), nil
+
+	// Then, check for the user. If no user and no error, it means no token was provided.
+	userVal := ctx.Value(middleware.UserCtxKey)
+	if userVal == nil {
+		return nil, fmt.Errorf("access denied: no token provided")
+	}
+
+	user, ok := userVal.(*models.User)
+	if !ok {
+		// This case should ideally not happen if the middleware is correct.
+		return nil, fmt.Errorf("internal server error: user context value is of the wrong type")
+	}
+
+	return user, nil
 }
 
 // ID resolves the id field for the User type.
