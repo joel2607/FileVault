@@ -51,6 +51,7 @@ func (s *AuthService) Login(email string, password string) (string, *models.User
 	expirationHours := viper.GetInt("auth.jwt_expiration_hours")
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
+		"role": user.Role,
 		"exp": time.Now().Add(time.Hour * time.Duration(expirationHours)).Unix(),
 	})
 
