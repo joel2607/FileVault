@@ -7,6 +7,7 @@ package graphQL
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 )
@@ -14,133 +15,141 @@ import (
 // ID resolves the id field for the DeduplicatedContent type.
 // It returns the unique identifier of the deduplicated content.
 func (r *deduplicatedContentResolver) ID(ctx context.Context, obj *models.DeduplicatedContent) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the DeduplicatedContent type.
 // It returns the timestamp indicating when the deduplicated content was first created.
 func (r *deduplicatedContentResolver) CreatedAt(ctx context.Context, obj *models.DeduplicatedContent) (string, error) {
-	panic(fmt.Errorf("not implemented: CreatedAt - createdAt"))
+	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the DeduplicatedContent type.
 // It returns the timestamp indicating when the deduplicated content was last updated.
 func (r *deduplicatedContentResolver) UpdatedAt(ctx context.Context, obj *models.DeduplicatedContent) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdatedAt - updatedAt"))
+	return obj.UpdatedAt.String(), nil
 }
 
 // ReferenceCount resolves the referenceCount field for the DeduplicatedContent type.
 // It returns the number of files that reference this deduplicated content.
 func (r *deduplicatedContentResolver) ReferenceCount(ctx context.Context, obj *models.DeduplicatedContent) (int32, error) {
-	panic(fmt.Errorf("not implemented: ReferenceCount - referenceCount"))
+	return int32(obj.ReferenceCount), nil
 }
 
 // ID resolves the id field for the File type.
 // It returns the unique identifier of the file.
 func (r *fileResolver) ID(ctx context.Context, obj *models.File) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the File type.
 // It returns the timestamp indicating when the file was created.
 func (r *fileResolver) CreatedAt(ctx context.Context, obj *models.File) (string, error) {
-	panic(fmt.Errorf("not implemented: CreatedAt - createdAt"))
+	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the File type.
 // It returns the timestamp indicating when the file was last updated.
 func (r *fileResolver) UpdatedAt(ctx context.Context, obj *models.File) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdatedAt - updatedAt"))
+	return obj.UpdatedAt.String(), nil
 }
 
 // UserID resolves the userId field for the File type.
 // It returns the unique identifier of the user who owns the file.
 func (r *fileResolver) UserID(ctx context.Context, obj *models.File) (string, error) {
-	panic(fmt.Errorf("not implemented: UserID - userId"))
+	return strconv.FormatUint(uint64(obj.UserID), 10), nil
 }
 
 // Size resolves the size field for the File type.
 // It returns the size of the file in bytes.
 func (r *fileResolver) Size(ctx context.Context, obj *models.File) (int32, error) {
-	panic(fmt.Errorf("not implemented: Size - size"))
+	return int32(obj.Size), nil
 }
 
 // DeduplicationID resolves the deduplicationId field for the File type.
 // It returns the identifier of the deduplicated content associated with this file.
 func (r *fileResolver) DeduplicationID(ctx context.Context, obj *models.File) (string, error) {
-	panic(fmt.Errorf("not implemented: DeduplicationID - deduplicationId"))
+	return strconv.FormatUint(uint64(obj.DeduplicationID), 10), nil
 }
 
 // DownloadCount resolves the downloadCount field for the File type.
 // It returns the number of times the file has been downloaded.
 func (r *fileResolver) DownloadCount(ctx context.Context, obj *models.File) (int32, error) {
-	panic(fmt.Errorf("not implemented: DownloadCount - downloadCount"))
+	return int32(obj.DownloadCount), nil
 }
 
 // ParentFolderID resolves the parentFolderId field for the File type.
 // It returns the identifier of the parent folder, or null if the file is in the root directory.
 func (r *fileResolver) ParentFolderID(ctx context.Context, obj *models.File) (*string, error) {
-	panic(fmt.Errorf("not implemented: ParentFolderID - parentFolderId"))
+	if obj.FolderID == nil {
+		return nil, nil
+	}
+	id := strconv.FormatUint(uint64(*obj.FolderID), 10)
+	return &id, nil
 }
 
 // ID resolves the id field for the FileSharing type.
 // It returns the unique identifier of the file sharing record.
 func (r *fileSharingResolver) ID(ctx context.Context, obj *models.FileSharing) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the FileSharing type.
 // It returns the timestamp indicating when the file was shared.
 func (r *fileSharingResolver) CreatedAt(ctx context.Context, obj *models.FileSharing) (string, error) {
-	panic(fmt.Errorf("not implemented: CreatedAt - createdAt"))
+	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the FileSharing type.
 // It returns the timestamp indicating when the file sharing record was last updated.
 func (r *fileSharingResolver) UpdatedAt(ctx context.Context, obj *models.FileSharing) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdatedAt - updatedAt"))
+	return obj.UpdatedAt.String(), nil
 }
 
 // FileID resolves the fileId field for the FileSharing type.
 // It returns the unique identifier of the shared file.
 func (r *fileSharingResolver) FileID(ctx context.Context, obj *models.FileSharing) (string, error) {
-	panic(fmt.Errorf("not implemented: FileID - fileId"))
+	return strconv.FormatUint(uint64(obj.FileID), 10), nil
 }
 
 // SharedWithUserID resolves the sharedWithUserId field for the FileSharing type.
 // It returns the unique identifier of the user with whom the file is shared.
 func (r *fileSharingResolver) SharedWithUserID(ctx context.Context, obj *models.FileSharing) (string, error) {
-	panic(fmt.Errorf("not implemented: SharedWithUserID - sharedWithUserId"))
+	return strconv.FormatUint(uint64(obj.SharedWithUserID), 10), nil
 }
 
 // ID resolves the id field for the Folder type.
 // It returns the unique identifier of the folder.
 func (r *folderResolver) ID(ctx context.Context, obj *models.Folder) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the Folder type.
 // It returns the timestamp indicating when the folder was created.
 func (r *folderResolver) CreatedAt(ctx context.Context, obj *models.Folder) (string, error) {
-	panic(fmt.Errorf("not implemented: CreatedAt - createdAt"))
+	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the Folder type.
 // It returns the timestamp indicating when the folder was last updated.
 func (r *folderResolver) UpdatedAt(ctx context.Context, obj *models.Folder) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdatedAt - updatedAt"))
+	return obj.UpdatedAt.String(), nil
 }
 
 // UserID resolves the userId field for the Folder type.
 // It returns the unique identifier of the user who owns the folder.
 func (r *folderResolver) UserID(ctx context.Context, obj *models.Folder) (string, error) {
-	panic(fmt.Errorf("not implemented: UserID - userId"))
+	return strconv.FormatUint(uint64(obj.UserID), 10), nil
 }
 
 // ParentFolderID resolves the parentFolderId field for the Folder type.
 // It returns the identifier of the parent folder, or null if the folder is in the root directory.
 func (r *folderResolver) ParentFolderID(ctx context.Context, obj *models.Folder) (*string, error) {
-	panic(fmt.Errorf("not implemented: ParentFolderID - parentFolderId"))
+	if obj.ParentFolderID == nil {
+		return nil, nil
+	}
+	id := strconv.FormatUint(uint64(*obj.ParentFolderID), 10)
+	return &id, nil
 }
 
 // Register handles user registration.
@@ -176,37 +185,35 @@ func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
 // ID resolves the id field for the User type.
 // It returns the unique identifier of the user.
 func (r *userResolver) ID(ctx context.Context, obj *models.User) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // CreatedAt resolves the createdAt field for the User type.
 // It returns the timestamp indicating when the user account was created.
 func (r *userResolver) CreatedAt(ctx context.Context, obj *models.User) (string, error) {
-	panic(fmt.Errorf("not implemented: CreatedAt - createdAt"))
+	return obj.CreatedAt.String(), nil
 }
 
 // UpdatedAt resolves the updatedAt field for the User type.
 // It returns the timestamp indicating when the user account was last updated.
 func (r *userResolver) UpdatedAt(ctx context.Context, obj *models.User) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdatedAt - updatedAt"))
+	return obj.UpdatedAt.String(), nil
 }
 
-// StorageQuotaMb resolves the storageQuotaMB field for the User type.
-// It returns the user's total storage quota in megabytes.
+// StorageQuotaMb is the resolver for the storageQuotaMB field.
 func (r *userResolver) StorageQuotaMb(ctx context.Context, obj *models.User) (int32, error) {
-	panic(fmt.Errorf("not implemented: StorageQuotaMb - storageQuotaMB"))
+	return int32(obj.StorageQuotaMB), nil
 }
 
-// UsedStorageMb resolves the usedStorageMB field for the User type.
-// It returns the amount of storage the user has consumed in megabytes.
+// UsedStorageMb is the resolver for the usedStorageMB field.
 func (r *userResolver) UsedStorageMb(ctx context.Context, obj *models.User) (int32, error) {
-	panic(fmt.Errorf("not implemented: UsedStorageMb - usedStorageMB"))
+	return int32(obj.UsedStorageMB), nil
 }
 
 // APIRateLimit resolves the apiRateLimit field for the User type.
 // It returns the maximum number of API requests the user can make per minute.
 func (r *userResolver) APIRateLimit(ctx context.Context, obj *models.User) (int32, error) {
-	panic(fmt.Errorf("not implemented: APIRateLimit - apiRateLimit"))
+	return int32(obj.APIRateLimit), nil
 }
 
 // DeduplicatedContent returns DeduplicatedContentResolver implementation.
