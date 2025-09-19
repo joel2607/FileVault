@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
@@ -49,13 +48,13 @@ func (s *AuthService) Login(email string, password string) (string, *models.User
 		return "", nil, errors.New("invalid password")
 	}
 
-	expirationHours := viper.GetInt("jwt_expiration_hours")
+	expirationHours := viper.GetInt("auth.jwt_expiration_hours")
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * time.Duration(expirationHours)).Unix(),
 	})
 
-	token, err := claims.SignedString([]byte(os.Getenv("JWT_AUTH_SECRET")))
+	token, err := claims.SignedString([]byte(viper.GetString("JWT_AUTH_SECRET")))
 	if err != nil {
 		return "", nil, err
 	}
@@ -67,7 +66,7 @@ func (s *AuthService) Login(email string, password string) (string, *models.User
 
 func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_AUTH_SECRET")), nil
+		return []byte(viper.GetString("JWT_AUTH_SECRET")), nil
 	})
 
 	if err != nil {

@@ -18,11 +18,11 @@ func Init() *gorm.DB {
 	viper.AutomaticEnv()
 
 	// Get database credentials from Viper
-	dbHost := viper.GetString("POSTGRES_HOST")
-	dbUser := viper.GetString("POSTGRES_USER")
-	dbPassword := viper.GetString("POSTGRES_PASSWORD")
-	dbName := viper.GetString("POSTGRES_DB")
-	dbPort := viper.GetString("POSTGRES_PORT")
+	dbHost := viper.GetString("postgres.host")
+	dbUser := viper.GetString("postgres.user")
+	dbPassword := viper.GetString("postgres.password")
+	dbName := viper.GetString("postgres.db")
+	dbPort := viper.GetString("postgres.port")
 
 	// Database connection
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",

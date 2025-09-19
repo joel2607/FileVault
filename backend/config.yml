@@ -1,0 +1,12 @@
+server:
+  port: "8080"
+  
+postgres:
+  host: "db"
+  port: "5432"
+  user: "user"
+  password: "password"
+  db: "file_storage"
+
+auth:
+  jwt_expiration_hours: 24

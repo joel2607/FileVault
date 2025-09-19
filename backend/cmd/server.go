@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -17,11 +16,19 @@ import (
 
 const defaultPort = "8080"
 
-func main() {
-	viper.SetConfigFile(".env")
-	viper.ReadInConfig()
+func init() {
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+	viper.SetConfigType("yml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error while reading config file %s", err)
+	}
+}
 
-	port := os.Getenv("PORT")
+func main() {
+	port := viper.GetString("server.port")
 	if port == "" {
 		port = defaultPort
 	}
