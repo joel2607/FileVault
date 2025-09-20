@@ -135,10 +135,10 @@ type ComplexityRoot struct {
 		Email          func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Role           func(childComplexity int) int
-		SavedStorageMb func(childComplexity int) int
-		StorageQuotaMb func(childComplexity int) int
+		SavedStorageKb func(childComplexity int) int
+		StorageQuotaKb func(childComplexity int) int
 		UpdatedAt      func(childComplexity int) int
-		UsedStorageMb  func(childComplexity int) int
+		UsedStorageKb  func(childComplexity int) int
 		Username       func(childComplexity int) int
 	}
 }
@@ -208,9 +208,9 @@ type UserResolver interface {
 	CreatedAt(ctx context.Context, obj *models.User) (string, error)
 	UpdatedAt(ctx context.Context, obj *models.User) (string, error)
 
-	StorageQuotaMb(ctx context.Context, obj *models.User) (int32, error)
-	UsedStorageMb(ctx context.Context, obj *models.User) (int32, error)
-	SavedStorageMb(ctx context.Context, obj *models.User) (int32, error)
+	StorageQuotaKb(ctx context.Context, obj *models.User) (int32, error)
+	UsedStorageKb(ctx context.Context, obj *models.User) (int32, error)
+	SavedStorageKb(ctx context.Context, obj *models.User) (int32, error)
 	APIRateLimit(ctx context.Context, obj *models.User) (int32, error)
 }
 
@@ -634,30 +634,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.Role(childComplexity), true
-	case "User.savedStorageMb":
-		if e.complexity.User.SavedStorageMb == nil {
+	case "User.savedStorageKb":
+		if e.complexity.User.SavedStorageKb == nil {
 			break
 		}
 
-		return e.complexity.User.SavedStorageMb(childComplexity), true
-	case "User.storageQuotaMb":
-		if e.complexity.User.StorageQuotaMb == nil {
+		return e.complexity.User.SavedStorageKb(childComplexity), true
+	case "User.storageQuotaKb":
+		if e.complexity.User.StorageQuotaKb == nil {
 			break
 		}
 
-		return e.complexity.User.StorageQuotaMb(childComplexity), true
+		return e.complexity.User.StorageQuotaKb(childComplexity), true
 	case "User.updatedAt":
 		if e.complexity.User.UpdatedAt == nil {
 			break
 		}
 
 		return e.complexity.User.UpdatedAt(childComplexity), true
-	case "User.usedStorageMb":
-		if e.complexity.User.UsedStorageMb == nil {
+	case "User.usedStorageKb":
+		if e.complexity.User.UsedStorageKb == nil {
 			break
 		}
 
-		return e.complexity.User.UsedStorageMb(childComplexity), true
+		return e.complexity.User.UsedStorageKb(childComplexity), true
 	case "User.username":
 		if e.complexity.User.Username == nil {
 			break
@@ -1028,12 +1028,12 @@ func (ec *executionContext) fieldContext_AuthResponse_user(_ context.Context, fi
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "storageQuotaMb":
-				return ec.fieldContext_User_storageQuotaMb(ctx, field)
-			case "usedStorageMb":
-				return ec.fieldContext_User_usedStorageMb(ctx, field)
-			case "savedStorageMb":
-				return ec.fieldContext_User_savedStorageMb(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
 			case "apiRateLimit":
 				return ec.fieldContext_User_apiRateLimit(ctx, field)
 			case "role":
@@ -1340,12 +1340,12 @@ func (ec *executionContext) fieldContext_File_user(_ context.Context, field grap
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "storageQuotaMb":
-				return ec.fieldContext_User_storageQuotaMb(ctx, field)
-			case "usedStorageMb":
-				return ec.fieldContext_User_usedStorageMb(ctx, field)
-			case "savedStorageMb":
-				return ec.fieldContext_User_savedStorageMb(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
 			case "apiRateLimit":
 				return ec.fieldContext_User_apiRateLimit(ctx, field)
 			case "role":
@@ -1921,12 +1921,12 @@ func (ec *executionContext) fieldContext_FileSharing_sharedWithUser(_ context.Co
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "storageQuotaMb":
-				return ec.fieldContext_User_storageQuotaMb(ctx, field)
-			case "usedStorageMb":
-				return ec.fieldContext_User_usedStorageMb(ctx, field)
-			case "savedStorageMb":
-				return ec.fieldContext_User_savedStorageMb(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
 			case "apiRateLimit":
 				return ec.fieldContext_User_apiRateLimit(ctx, field)
 			case "role":
@@ -2117,12 +2117,12 @@ func (ec *executionContext) fieldContext_Folder_user(_ context.Context, field gr
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "storageQuotaMb":
-				return ec.fieldContext_User_storageQuotaMb(ctx, field)
-			case "usedStorageMb":
-				return ec.fieldContext_User_usedStorageMb(ctx, field)
-			case "savedStorageMb":
-				return ec.fieldContext_User_savedStorageMb(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
 			case "apiRateLimit":
 				return ec.fieldContext_User_apiRateLimit(ctx, field)
 			case "role":
@@ -2368,12 +2368,12 @@ func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, 
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "storageQuotaMb":
-				return ec.fieldContext_User_storageQuotaMb(ctx, field)
-			case "usedStorageMb":
-				return ec.fieldContext_User_usedStorageMb(ctx, field)
-			case "savedStorageMb":
-				return ec.fieldContext_User_savedStorageMb(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
 			case "apiRateLimit":
 				return ec.fieldContext_User_apiRateLimit(ctx, field)
 			case "role":
@@ -2831,12 +2831,12 @@ func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graph
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "email":
 				return ec.fieldContext_User_email(ctx, field)
-			case "storageQuotaMb":
-				return ec.fieldContext_User_storageQuotaMb(ctx, field)
-			case "usedStorageMb":
-				return ec.fieldContext_User_usedStorageMb(ctx, field)
-			case "savedStorageMb":
-				return ec.fieldContext_User_savedStorageMb(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
 			case "apiRateLimit":
 				return ec.fieldContext_User_apiRateLimit(ctx, field)
 			case "role":
@@ -3311,14 +3311,14 @@ func (ec *executionContext) fieldContext_User_email(_ context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _User_storageQuotaMb(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_storageQuotaKb(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_storageQuotaMb,
+		ec.fieldContext_User_storageQuotaKb,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().StorageQuotaMb(ctx, obj)
+			return ec.resolvers.User().StorageQuotaKb(ctx, obj)
 		},
 		nil,
 		ec.marshalNInt2int32,
@@ -3327,7 +3327,7 @@ func (ec *executionContext) _User_storageQuotaMb(ctx context.Context, field grap
 	)
 }
 
-func (ec *executionContext) fieldContext_User_storageQuotaMb(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_storageQuotaKb(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -3340,14 +3340,14 @@ func (ec *executionContext) fieldContext_User_storageQuotaMb(_ context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _User_usedStorageMb(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_usedStorageKb(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_usedStorageMb,
+		ec.fieldContext_User_usedStorageKb,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().UsedStorageMb(ctx, obj)
+			return ec.resolvers.User().UsedStorageKb(ctx, obj)
 		},
 		nil,
 		ec.marshalNInt2int32,
@@ -3356,7 +3356,7 @@ func (ec *executionContext) _User_usedStorageMb(ctx context.Context, field graph
 	)
 }
 
-func (ec *executionContext) fieldContext_User_usedStorageMb(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_usedStorageKb(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -3369,14 +3369,14 @@ func (ec *executionContext) fieldContext_User_usedStorageMb(_ context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _User_savedStorageMb(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_savedStorageKb(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_savedStorageMb,
+		ec.fieldContext_User_savedStorageKb,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().SavedStorageMb(ctx, obj)
+			return ec.resolvers.User().SavedStorageKb(ctx, obj)
 		},
 		nil,
 		ec.marshalNInt2int32,
@@ -3385,7 +3385,7 @@ func (ec *executionContext) _User_savedStorageMb(ctx context.Context, field grap
 	)
 }
 
-func (ec *executionContext) fieldContext_User_savedStorageMb(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_savedStorageKb(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -6730,7 +6730,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "storageQuotaMb":
+		case "storageQuotaKb":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -6739,7 +6739,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._User_storageQuotaMb(ctx, field, obj)
+				res = ec._User_storageQuotaKb(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -6766,7 +6766,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "usedStorageMb":
+		case "usedStorageKb":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -6775,7 +6775,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._User_usedStorageMb(ctx, field, obj)
+				res = ec._User_usedStorageKb(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -6802,7 +6802,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "savedStorageMb":
+		case "savedStorageKb":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -6811,7 +6811,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._User_savedStorageMb(ctx, field, obj)
+				res = ec._User_savedStorageKb(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

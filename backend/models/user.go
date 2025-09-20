@@ -23,9 +23,9 @@ type User struct {
 	Username       string    `gorm:"type:varchar(255);unique;not null"`
 	Email          string    `gorm:"type:varchar(255);unique;not null"`
 	PasswordHash   string    `gorm:"type:varchar(255);not null"`
-	StorageQuotaMB int       `gorm:"default:10"`
-	UsedStorageMB  int       `gorm:"default:0"`
-	SavedStorageMB int       `gorm:"default:0"`
+	StorageQuotaKB float64   `gorm:"default:10240"`
+	UsedStorageKB  float64   `gorm:"default:0"`
+	SavedStorageKB float64   `gorm:"default:0"`
 	APIRateLimit   int       `gorm:"default:2"`
 	Role           UserRole  `gorm:"type:varchar(50);default:'user'"`
 }

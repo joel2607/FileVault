@@ -5,12 +5,13 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"log"
 	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
-	"math"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 	"gorm.io/gorm"
@@ -44,6 +45,7 @@ func NewFileService(db *gorm.DB) *FileService {
 // - A pointer to the created models.File object if successful.
 // - An error if any part of the process fails.
 func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user *models.User, parentFolderID *string) (*models.File, error) {
+	log.Printf("Uploading file: %s of size %d bytes\n", file.Filename, file.Size)
 	// 1. Hashing
 	hash := sha256.New()
 	if _, err := io.Copy(hash, file.File); err != nil {
@@ -75,9 +77,10 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		s.DB.Save(&existingContent)
 
 		// Update user's storage usage. They save space by not uploading duplicate data.
-		storageChangeMB := int(math.Round(float64(file.Size) / (1024 * 1024)))
-		user.SavedStorageMB += storageChangeMB
-		user.UsedStorageMB += storageChangeMB
+		storageChangeKB := float64(file.Size) / 1024
+		user.SavedStorageKB += storageChangeKB
+		user.UsedStorageKB += storageChangeKB
+		log.Printf("User used storage(saved): %f", user.UsedStorageKB)
 		s.DB.Save(user)
 		return newFile, nil
 	}
@@ -109,7 +112,9 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		SHA256Hash:     sha256Hash,
 		ReferenceCount: 1,
 	}
+	log.Println("Creating new deduplicated content with hash:", sha256Hash)
 	if err := s.DB.Create(newContent).Error; err != nil {
+		log.Printf("Could not create deduplicated content: %v", err)
 		return nil, err
 	}
 	newFile := &models.File{
@@ -129,7 +134,8 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 	}
 
 	// Update user's storage usage. They dont save space as this is new data.
-	user.UsedStorageMB += int(math.Round(float64(file.Size) / (1024 * 1024)))
+	user.UsedStorageKB += float64(file.Size) / 1024
+	log.Printf("User used storage: %f", user.UsedStorageKB)
 	s.DB.Save(user)
 
 	return newFile, nil
@@ -207,7 +213,7 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 		return false, err
 	}
 
-	storageChangeMB := int(math.Round(float64(file.Size) / (1024 * 1024)))
+	storageChangeKB := float64(file.Size) / 1024
 
 	// Decrement reference count
 	var content models.DeduplicatedContent
@@ -220,12 +226,12 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 			os.Remove(filePath)
 			s.DB.Delete(&content)
 			// Update user's storage usage
-			user.UsedStorageMB -= storageChangeMB
+			user.UsedStorageKB -= storageChangeKB
 			s.DB.Save(user)
 		} else {
 			// Update user's storage usage. They save less space now as one less reference.
-			user.SavedStorageMB -= storageChangeMB
-			user.UsedStorageMB -= storageChangeMB
+			user.SavedStorageKB -= storageChangeKB
+			user.UsedStorageKB -= storageChangeKB
 			s.DB.Save(user)
 		}
 	}
