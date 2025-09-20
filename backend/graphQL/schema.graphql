@@ -118,9 +118,9 @@ type Mutation {
   uploadFile(file: Upload!, parentFolderID: ID): File!
   createFolder(input: NewFolder!): Folder!
   updateFolder(input: UpdateFolder!): Folder!
-  deleteFolder(id: ID!): Boolean!
+  deleteFolder(id: ID!): Folder!
   updateFile(input: UpdateFile!): File!
-  deleteFile(id: ID!): Boolean!
+  deleteFile(id: ID!): File!
 }
 
 scalar Upload

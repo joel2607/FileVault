@@ -267,10 +267,10 @@ func (r *mutationResolver) UpdateFolder(ctx context.Context, input models.Update
 
 // DeleteFolder is the resolver for the deleteFolder mutation.
 // It deletes a folder by calling the FileService.
-func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (bool, error) {
+func (r *mutationResolver) DeleteFolder(ctx context.Context, id string) (*models.Folder, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	return r.FileService.DeleteFolder(ctx, id, user)
 }
@@ -287,10 +287,10 @@ func (r *mutationResolver) UpdateFile(ctx context.Context, input models.UpdateFi
 
 // DeleteFile is the resolver for the deleteFile mutation.
 // It deletes a file by calling the FileService.
-func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (bool, error) {
+func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (*models.File, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	return r.FileService.DeleteFile(ctx, id, user)
 }
