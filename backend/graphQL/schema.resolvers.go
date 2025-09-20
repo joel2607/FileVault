@@ -339,21 +339,21 @@ func (r *userResolver) UpdatedAt(ctx context.Context, obj *models.User) (string,
 	return obj.UpdatedAt.String(), nil
 }
 
-// StorageQuotaMb resolves the storageQuotaMb field for the User type.
-// It returns the user's total storage quota in megabytes.
-func (r *userResolver) StorageQuotaMb(ctx context.Context, obj *models.User) (int32, error) {
-	return int32(obj.StorageQuotaMB), nil
+// StorageQuotaKb resolves the storageQuotaKb field for the User type.
+// It returns the user's total storage quota in kilobytes.
+func (r *userResolver) StorageQuotaKb(ctx context.Context, obj *models.User) (int32, error) {
+	return int32(obj.StorageQuotaKB), nil
 }
 
-// UsedStorageMb resolves the usedStorageMb field for the User type.
-// It returns the amount of storage the user has currently used in megabytes.
-func (r *userResolver) UsedStorageMb(ctx context.Context, obj *models.User) (int32, error) {
-	return int32(obj.UsedStorageMB), nil
+// UsedStorageKb resolves the usedStorageKb field for the User type.
+// It returns the amount of storage the user has currently used in kilobytes.
+func (r *userResolver) UsedStorageKb(ctx context.Context, obj *models.User) (int32, error) {
+	return int32(obj.UsedStorageKB), nil
 }
 
-// SavedStorageMb is the resolver for the savedStorageMb field.
-func (r *userResolver) SavedStorageMb(ctx context.Context, obj *models.User) (int32, error) {
-	return int32(obj.SavedStorageMB), nil
+// SavedStorageKb is the resolver for the savedStorageKb field.
+func (r *userResolver) SavedStorageKb(ctx context.Context, obj *models.User) (int32, error) {
+	return int32(obj.SavedStorageKB), nil
 }
 
 // APIRateLimit resolves the apiRateLimit field for the User type.

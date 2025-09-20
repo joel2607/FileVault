@@ -16,9 +16,9 @@ type User {
   createdAt: String!
   updatedAt: String!
   email: String!
-  storageQuotaMb: Int!
-  usedStorageMb: Int!
-  savedStorageMb: Int!
+  storageQuotaKb: Int!
+  usedStorageKb: Int!
+  savedStorageKb: Int!
   apiRateLimit: Int!
   role: UserRole!
 }
