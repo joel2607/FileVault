@@ -113,6 +113,7 @@ type ComplexityRoot struct {
 		DeleteFolder      func(childComplexity int, id string) int
 		Login             func(childComplexity int, email string, password string) int
 		Register          func(childComplexity int, input models.RegisterInput) int
+		RemoveFileAccess  func(childComplexity int, fileID string, userID string) int
 		SetFilePrivate    func(childComplexity int, fileID string) int
 		SetFilePublic     func(childComplexity int, fileID string) int
 		ShareFileWithUser func(childComplexity int, fileID string, userID string) int
@@ -122,11 +123,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		AdminRoot func(childComplexity int, userID *string) int
-		File      func(childComplexity int, id string) int
-		Folder    func(childComplexity int, id string) int
-		Me        func(childComplexity int) int
-		UserRoot  func(childComplexity int) int
+		File               func(childComplexity int, id string) int
+		Folder             func(childComplexity int, id string) int
+		GetUsersWithAccess func(childComplexity int, fileID string) int
+		Me                 func(childComplexity int) int
+		Root               func(childComplexity int) int
+		SearchFiles        func(childComplexity int, filter *models.FileFilterInput) int
 	}
 
 	Root struct {
@@ -204,13 +206,15 @@ type MutationResolver interface {
 	SetFilePublic(ctx context.Context, fileID string) (*models.File, error)
 	SetFilePrivate(ctx context.Context, fileID string) (*models.File, error)
 	ShareFileWithUser(ctx context.Context, fileID string, userID string) (*models.FileSharing, error)
+	RemoveFileAccess(ctx context.Context, fileID string, userID string) (bool, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
 	Folder(ctx context.Context, id string) (*models.Folder, error)
-	UserRoot(ctx context.Context) (*models.Root, error)
-	AdminRoot(ctx context.Context, userID *string) (*models.Root, error)
+	Root(ctx context.Context) (*models.Root, error)
 	File(ctx context.Context, id string) (*models.File, error)
+	GetUsersWithAccess(ctx context.Context, fileID string) ([]*models.User, error)
+	SearchFiles(ctx context.Context, filter *models.FileFilterInput) ([]*models.File, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *models.User) (string, error)
@@ -543,6 +547,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Register(childComplexity, args["input"].(models.RegisterInput)), true
+	case "Mutation.removeFileAccess":
+		if e.complexity.Mutation.RemoveFileAccess == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeFileAccess_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveFileAccess(childComplexity, args["fileID"].(string), args["userID"].(string)), true
 	case "Mutation.setFilePrivate":
 		if e.complexity.Mutation.SetFilePrivate == nil {
 			break
@@ -610,17 +625,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.UploadFiles(childComplexity, args["files"].([]*graphql.Upload), args["parentFolderID"].(*string)), true
 
-	case "Query.adminRoot":
-		if e.complexity.Query.AdminRoot == nil {
-			break
-		}
-
-		args, err := ec.field_Query_adminRoot_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.AdminRoot(childComplexity, args["userID"].(*string)), true
 	case "Query.file":
 		if e.complexity.Query.File == nil {
 			break
@@ -643,18 +647,40 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Folder(childComplexity, args["id"].(string)), true
+	case "Query.getUsersWithAccess":
+		if e.complexity.Query.GetUsersWithAccess == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUsersWithAccess_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUsersWithAccess(childComplexity, args["fileID"].(string)), true
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
 			break
 		}
 
 		return e.complexity.Query.Me(childComplexity), true
-	case "Query.userRoot":
-		if e.complexity.Query.UserRoot == nil {
+	case "Query.root":
+		if e.complexity.Query.Root == nil {
 			break
 		}
 
-		return e.complexity.Query.UserRoot(childComplexity), true
+		return e.complexity.Query.Root(childComplexity), true
+	case "Query.searchFiles":
+		if e.complexity.Query.SearchFiles == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchFiles_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchFiles(childComplexity, args["filter"].(*models.FileFilterInput)), true
 
 	case "Root.files":
 		if e.complexity.Root.Files == nil {
@@ -738,6 +764,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputFileFilterInput,
 		ec.unmarshalInputNewFolder,
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputUpdateFile,
@@ -918,6 +945,22 @@ func (ec *executionContext) field_Mutation_register_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_removeFileAccess_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "fileID", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["fileID"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "userID", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["userID"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_setFilePrivate_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1005,17 +1048,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_adminRoot_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userID", ec.unmarshalOID2ᚖstring)
-	if err != nil {
-		return nil, err
-	}
-	args["userID"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_file_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1035,6 +1067,28 @@ func (ec *executionContext) field_Query_folder_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getUsersWithAccess_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "fileID", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["fileID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_searchFiles_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
 	return args, nil
 }
 
@@ -3181,6 +3235,47 @@ func (ec *executionContext) fieldContext_Mutation_shareFileWithUser(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_removeFileAccess(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_removeFileAccess,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RemoveFileAccess(ctx, fc.Args["fileID"].(string), fc.Args["userID"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeFileAccess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeFileAccess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -3295,14 +3390,14 @@ func (ec *executionContext) fieldContext_Query_folder(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_userRoot(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_root(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_userRoot,
+		ec.fieldContext_Query_root,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().UserRoot(ctx)
+			return ec.resolvers.Query().Root(ctx)
 		},
 		nil,
 		ec.marshalORoot2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRoot,
@@ -3311,7 +3406,7 @@ func (ec *executionContext) _Query_userRoot(ctx context.Context, field graphql.C
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_userRoot(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_root(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -3326,53 +3421,6 @@ func (ec *executionContext) fieldContext_Query_userRoot(_ context.Context, field
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Root", field.Name)
 		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_adminRoot(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_adminRoot,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().AdminRoot(ctx, fc.Args["userID"].(*string))
-		},
-		nil,
-		ec.marshalORoot2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRoot,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_adminRoot(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "files":
-				return ec.fieldContext_Root_files(ctx, field)
-			case "folders":
-				return ec.fieldContext_Root_folders(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Root", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_adminRoot_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
 	}
 	return fc, nil
 }
@@ -3444,6 +3492,142 @@ func (ec *executionContext) fieldContext_Query_file(ctx context.Context, field g
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_file_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getUsersWithAccess(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getUsersWithAccess,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetUsersWithAccess(ctx, fc.Args["fileID"].(string))
+		},
+		nil,
+		ec.marshalOUser2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getUsersWithAccess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
+			case "apiRateLimit":
+				return ec.fieldContext_User_apiRateLimit(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getUsersWithAccess_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_searchFiles(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_searchFiles,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().SearchFiles(ctx, fc.Args["filter"].(*models.FileFilterInput))
+		},
+		nil,
+		ec.marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_searchFiles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_File_updatedAt(ctx, field)
+			case "userId":
+				return ec.fieldContext_File_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_File_user(ctx, field)
+			case "fileName":
+				return ec.fieldContext_File_fileName(ctx, field)
+			case "mimeType":
+				return ec.fieldContext_File_mimeType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "deduplicationId":
+				return ec.fieldContext_File_deduplicationId(ctx, field)
+			case "deduplicatedContent":
+				return ec.fieldContext_File_deduplicatedContent(ctx, field)
+			case "isPublic":
+				return ec.fieldContext_File_isPublic(ctx, field)
+			case "downloadCount":
+				return ec.fieldContext_File_downloadCount(ctx, field)
+			case "tags":
+				return ec.fieldContext_File_tags(ctx, field)
+			case "parentFolderId":
+				return ec.fieldContext_File_parentFolderId(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_searchFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5406,6 +5590,75 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputFileFilterInput(ctx context.Context, obj any) (models.FileFilterInput, error) {
+	var it models.FileFilterInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"mimeTypes", "minSize", "maxSize", "startDate", "endDate", "tags", "uploaderID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "mimeTypes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mimeTypes"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MimeTypes = data
+		case "minSize":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minSize"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinSize = data
+		case "maxSize":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxSize"))
+			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaxSize = data
+		case "startDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.StartDate = data
+		case "endDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EndDate = data
+		case "tags":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Tags = data
+		case "uploaderID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uploaderID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UploaderID = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewFolder(ctx context.Context, obj any) (models.NewFolder, error) {
 	var it models.NewFolder
 	asMap := map[string]any{}
@@ -6949,6 +7202,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "removeFileAccess":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeFileAccess(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7032,7 +7292,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "userRoot":
+		case "root":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -7041,26 +7301,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_userRoot(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "adminRoot":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_adminRoot(ctx, field)
+				res = ec._Query_root(ctx, field)
 				return res
 			}
 
@@ -7080,6 +7321,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_file(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getUsersWithAccess":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUsersWithAccess(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "searchFiles":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_searchFiles(ctx, field)
 				return res
 			}
 
@@ -8412,6 +8691,14 @@ func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversity
 	return ec._File(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput(ctx context.Context, v any) (*models.FileFilterInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputFileFilterInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOFolder2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolderᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Folder) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -8484,6 +8771,24 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalOInt2ᚖint32(ctx context.Context, v any) (*int32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt32(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.SelectionSet, v *int32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt32(*v)
+	return res
+}
+
 func (ec *executionContext) marshalORoot2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRoot(ctx context.Context, sel ast.SelectionSet, v *models.Root) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -8503,6 +8808,42 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {
 	if v == nil {
 		return nil, nil
@@ -8519,6 +8860,53 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

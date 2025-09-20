@@ -8,6 +8,16 @@ type AuthResponse struct {
 	User  *User  `json:"user"`
 }
 
+type FileFilterInput struct {
+	MimeTypes  []string `json:"mimeTypes,omitempty"`
+	MinSize    *int32   `json:"minSize,omitempty"`
+	MaxSize    *int32   `json:"maxSize,omitempty"`
+	StartDate  *string  `json:"startDate,omitempty"`
+	EndDate    *string  `json:"endDate,omitempty"`
+	Tags       []string `json:"tags,omitempty"`
+	UploaderID *string  `json:"uploaderID,omitempty"`
+}
+
 // Defines the mutations available in the API.
 type Mutation struct {
 }
