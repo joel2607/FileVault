@@ -70,43 +70,43 @@ func main() {
 	}
 	log.Println("Successfully created users.")
 
-	// 3. Create a Folder for the admin user
-	rootFolder := models.Folder{
-		UserID:     adminUser.ID,
-		FolderName: "My Documents",
-	}
-	if err := tx.Create(&rootFolder).Error; err != nil {
-		tx.Rollback()
-		log.Fatalf("Could not create root folder: %v", err)
-	}
-	log.Println("Successfully created a folder.")
+	// // 3. Create a Folder for the admin user
+	// rootFolder := models.Folder{
+	// 	UserID:     adminUser.ID,
+	// 	FolderName: "My Documents",
+	// }
+	// if err := tx.Create(&rootFolder).Error; err != nil {
+	// 	tx.Rollback()
+	// 	log.Fatalf("Could not create root folder: %v", err)
+	// }
+	// log.Println("Successfully created a folder.")
 
-	// 4. Create a File record for the admin user in their new folder
-	// First, create the deduplicated content record
-	deduplicatedContent := models.DeduplicatedContent{
-		SHA256Hash:     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", // SHA256 of an empty string
-		ReferenceCount: 1,
-	}
-	if err := tx.Create(&deduplicatedContent).Error; err != nil {
-		tx.Rollback()
-		log.Fatalf("Could not create deduplicated content: %v", err)
-	}
+	// // 4. Create a File record for the admin user in their new folder
+	// // First, create the deduplicated content record
+	// deduplicatedContent := models.DeduplicatedContent{
+	// 	SHA256Hash:     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", // SHA256 of an empty string
+	// 	ReferenceCount: 1,
+	// }
+	// if err := tx.Create(&deduplicatedContent).Error; err != nil {
+	// 	tx.Rollback()
+	// 	log.Fatalf("Could not create deduplicated content: %v", err)
+	// }
 
-	// Now, create the file metadata that points to the content
-	sampleFile := models.File{
-		UserID:          adminUser.ID,
-		FileName:        "empty_file.txt",
-		MIMEType:        "text/plain",
-		Size:            0,
-		DeduplicationID: deduplicatedContent.ID,
-		FolderID:        &rootFolder.ID,
-		Tags:            "[]",
-	}
-	if err := tx.Create(&sampleFile).Error; err != nil {
-		tx.Rollback()
-		log.Fatalf("Could not create sample file: %v", err)
-	}
-	log.Println("Successfully created a file record.")
+	// // Now, create the file metadata that points to the content
+	// sampleFile := models.File{
+	// 	UserID:          adminUser.ID,
+	// 	FileName:        "empty_file.txt",
+	// 	MIMEType:        "text/plain",
+	// 	Size:            0,
+	// 	DeduplicationID: deduplicatedContent.ID,
+	// 	FolderID:        &rootFolder.ID,
+	// 	Tags:            "[]",
+	// }
+	// if err := tx.Create(&sampleFile).Error; err != nil {
+	// 	tx.Rollback()
+	// 	log.Fatalf("Could not create sample file: %v", err)
+	// }
+	// log.Println("Successfully created a file record.")
 
 	// Commit the transaction
 	if err := tx.Commit().Error; err != nil {
