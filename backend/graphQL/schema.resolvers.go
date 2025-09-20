@@ -2,14 +2,12 @@ package graphQL
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
-	"gorm.io/gorm"
 )
 
 // ID resolves the id field for the DeduplicatedContent type.
@@ -396,6 +394,18 @@ func (r *queryResolver) AdminRoot(ctx context.Context, userID *string) (*models.
 	}
 
 	return r.ShareService.GetAdminRoot(ctx, userID)
+}
+
+// GetUsersWithAccess is the resolver for the getUsersWithAccess query.
+// It returns a list of users who have access to a file.
+// This includes the file owner and any users the file has been shared with.
+// Only the file owner can perform this action.
+func (r *queryResolver) GetUsersWithAccess(ctx context.Context, fileID string) ([]*models.User, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.GetUsersWithAccess(ctx, fileID, user)
 }
 
 // ID resolves the id field for the User type.
