@@ -45,14 +45,14 @@ func main() {
 	adminUser := models.User{
 		Username:       "admin",
 		Email:          "admin@example.com",
-		PasswordHash:   "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // sha 256 for "admin"
+		PasswordHash:   "$2a$10$dqgg48GLMDj7AjLHTZ7n7uUO3Ksl9cQTiCWE9.KQWqGsMpUMNBNoG", // sha 256 for "admin" with server salt
 		Role:           models.RoleAdmin,
 		StorageQuotaKB: 1048576, // 1 GB
 	}
 	regularUser := models.User{
 		Username:       "user",
 		Email:          "user@example.com",
-		PasswordHash:   "$2a$10$OuvU0Yy9wDLwFBDrdlkvMe0p6wtAWFS7IuuQ7c5q2b1NmFmvwykyW", // sha 256 for "user"
+		PasswordHash:   "$2a$10$OuvU0Yy9wDLwFBDrdlkvMe0p6wtAWFS7IuuQ7c5q2b1NmFmvwykyW", // sha 256 for "user" with server salt
 		Role:           models.RoleUser,
 		StorageQuotaKB: 102400, // 100 MB
 	}
