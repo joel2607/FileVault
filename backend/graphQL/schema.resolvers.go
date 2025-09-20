@@ -235,14 +235,24 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	return &models.AuthResponse{Token: token, User: user}, nil
 }
 
-// UploadFile is the resolver for the uploadFile mutation.
-// It handles the file upload process by calling the FileService.
-func (r *mutationResolver) UploadFile(ctx context.Context, file graphql.Upload, parentFolderID *string) (*models.File, error) {
+// UploadFiles is the resolver for the uploadFiles field.
+func (r *mutationResolver) UploadFiles(ctx context.Context, files []*graphql.Upload, parentFolderID *string) ([]*models.File, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return r.FileService.UploadFile(ctx, file, user, parentFolderID)
+
+	var uploadedFiles []*models.File
+	for _, file := range files {
+		uploadedFile, err := r.FileService.UploadFile(ctx, *file, user, parentFolderID)
+		if err != nil {
+			// For now, we'll just return the first error we encounter.
+			return nil, err
+		}
+		uploadedFiles = append(uploadedFiles, uploadedFile)
+	}
+
+	return uploadedFiles, nil
 }
 
 // CreateFolder is the resolver for the createFolder mutation.

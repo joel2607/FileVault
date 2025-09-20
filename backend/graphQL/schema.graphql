@@ -115,7 +115,7 @@ Defines the mutations available in the API.
 type Mutation {
   register(input: RegisterInput!): User!
   login(email: String!, password: String!): AuthResponse!
-  uploadFile(file: Upload!, parentFolderID: ID): File!
+  uploadFiles(files: [Upload!]!, parentFolderID: ID): [File!]!
   createFolder(input: NewFolder!): Folder!
   updateFolder(input: UpdateFolder!): Folder!
   deleteFolder(id: ID!): Folder!
