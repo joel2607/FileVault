@@ -214,7 +214,12 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 	}
 
 	fileSizeKB := float64(file.Size) / 1024
-
+	
+	// First delete file record to prevent deduplicated content delete fail. 
+	err := s.DB.Delete(&file).Error
+	if err != nil {
+		return nil, err
+	}
 	// Decrement reference count
 	var content models.DeduplicatedContent
 	if err := s.DB.First(&content, file.DeduplicationID).Error; err == nil {
@@ -225,9 +230,12 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 		s.DB.Save(user)
 		if content.ReferenceCount <= 0 {
 			// Delete file from storage
+			if err := s.DB.Delete(&content).Error; err != nil {
+				log.Println(err)
+				log.Println("Failed to delete deduplicated content with hash:", content.SHA256Hash)
+			}
 			filePath := filepath.Join("./uploads", content.SHA256Hash)
 			os.Remove(filePath)
-			s.DB.Delete(&content)
 		} else {
 			// Update user's storage usage. They save less space now as one less reference.
 			user.SavedStorageKB -= fileSizeKB
@@ -235,10 +243,6 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 		}
 	}
 
-	err := s.DB.Delete(&file).Error
-	if err != nil {
-		return nil, err
-	}
 	return &file, nil
 
 }
