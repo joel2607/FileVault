@@ -158,3 +158,82 @@ func (s *ShareService) SetFilePublic(ctx context.Context, fileID string, user *m
 	return &file, nil
 }
 
+// SetFilePrivate makes a file private. Only the file owner can perform this action.
+func (s *ShareService) SetFilePrivate(ctx context.Context, fileID string, user *models.User) (*models.File, error) {
+	var file models.File
+	uid, err := strconv.ParseUint(fileID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file ID")
+	}
+
+	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return nil, fmt.Errorf("file not found or access denied")
+	}
+
+	file.IsPublic = false
+	if err := s.DB.Save(&file).Error; err != nil {
+		return nil, err
+	}
+
+	return &file, nil
+}
+
+// ShareFileWithUser grants a user access to a private file.
+// It returns an error if the file is public.
+func (s *ShareService) ShareFileWithUser(ctx context.Context, fileID string, shareWithUserID string, user *models.User) (*models.FileSharing, error) {
+	var file models.File
+	uid, err := strconv.ParseUint(fileID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file ID")
+	}
+
+	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return nil, fmt.Errorf("file not found or access denied")
+	}
+
+	if file.IsPublic {
+		return nil, fmt.Errorf("cannot share a public file")
+	}
+
+	shareWithUID, err := strconv.ParseUint(shareWithUserID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID to share with")
+	}
+
+	share := &models.FileSharing{
+		FileID:           uint(uid),
+		SharedWithUserID: uint(shareWithUID),
+		PermissionLevel:  "read", // Or any other permission level you want to implement
+	}
+
+	if err := s.DB.Create(share).Error; err != nil {
+		return nil, err
+	}
+
+	return share, nil
+}
+
+// RemoveFileAccess removes a user's access to a shared file.
+// Only the file owner can perform this action.
+func (s *ShareService) RemoveFileAccess(ctx context.Context, fileID string, userIDToRemove string, user *models.User) (bool, error) {
+	var file models.File
+	uid, err := strconv.ParseUint(fileID, 10, 64)
+	if err != nil {
+		return false, fmt.Errorf("invalid file ID")
+	}
+
+	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return false, fmt.Errorf("file not found or access denied")
+	}
+
+	userIDToRemove_uid, err := strconv.ParseUint(userIDToRemove, 10, 64)
+	if err != nil {
+		return false, fmt.Errorf("invalid user ID to remove access from")
+	}
+
+	if err := s.DB.Where("file_id = ? AND shared_with_user_id = ?", uid, userIDToRemove_uid).Delete(&models.FileSharing{}).Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
