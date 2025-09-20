@@ -38,20 +38,23 @@ func main() {
 	db := database.DB // Use the global DB variable from the database package
 	log.Println("Database connection and migration successful.")
 
+	db.Exec("TRUNCATE TABLE users, files, folders, deduplicated_contents, file_sharings RESTART IDENTITY CASCADE")
+	log.Println("Deleted existing records.")
+
 	// 2. Create Users
 	adminUser := models.User{
 		Username:       "admin",
 		Email:          "admin@example.com",
-		PasswordHash:   "placeholder_hash",
+		PasswordHash:   "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // sha 256 for "admin"
 		Role:           models.RoleAdmin,
-		StorageQuotaMB: 1024, // 1 GB
+		StorageQuotaKB: 1048576, // 1 GB
 	}
 	regularUser := models.User{
 		Username:       "user",
 		Email:          "user@example.com",
-		PasswordHash:   "placeholder_hash",
+		PasswordHash:   "$2a$10$OuvU0Yy9wDLwFBDrdlkvMe0p6wtAWFS7IuuQ7c5q2b1NmFmvwykyW", // sha 256 for "user"
 		Role:           models.RoleUser,
-		StorageQuotaMB: 100, // 100 MB
+		StorageQuotaKB: 102400, // 100 MB
 	}
 
 	// Use a transaction to ensure all or nothing
