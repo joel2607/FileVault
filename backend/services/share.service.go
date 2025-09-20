@@ -237,3 +237,36 @@ func (s *ShareService) RemoveFileAccess(ctx context.Context, fileID string, user
 
 	return true, nil
 }
+
+// GetUsersWithAccess returns a list of users who have access to a file.
+// This includes the file owner and any users the file has been shared with.
+// Only the file owner can perform this action.
+func (s *ShareService) GetUsersWithAccess(ctx context.Context, fileID string, user *models.User) ([]*models.User, error) {
+	var file models.File
+	uid, err := strconv.ParseUint(fileID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file ID")
+	}
+
+	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return nil, fmt.Errorf("file not found or access denied")
+	}
+
+	var users []*models.User
+	// Add the owner to the list
+	users = append(users, user)
+
+	var shares []models.FileSharing
+	if err := s.DB.Where("file_id = ?", uid).Find(&shares).Error; err != nil {
+		return nil, err
+	}
+
+	for _, share := range shares {
+		var sharedUser models.User
+		if err := s.DB.First(&sharedUser, share.SharedWithUserID).Error; err == nil {
+			users = append(users, &sharedUser)
+		}
+	}
+
+	return users, nil
+}
