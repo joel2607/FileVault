@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services"
 )
 
@@ -15,8 +17,10 @@ type ContextKey struct {
 
 // UserCtxKey is the key for storing user information in the context.
 var UserCtxKey = &ContextKey{"user"}
+
 // RoleCtxKey is the key for storing user role in the context.
 var RoleCtxKey = &ContextKey{"role"}
+
 // AuthErrorCtxKey is the key for storing authentication errors in the context.
 var AuthErrorCtxKey = &ContextKey{"auth-error"}
 
@@ -70,4 +74,22 @@ func AdminOnly(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func GetCurrentUser(ctx context.Context) (*models.User, error) {
+	if err, ok := ctx.Value(AuthErrorCtxKey).(error); ok && err != nil {
+		return nil, err
+	}
+
+	userVal := ctx.Value(UserCtxKey)
+	if userVal == nil {
+		return nil, fmt.Errorf("access denied: no token provided")
+	}
+
+	user, ok := userVal.(*models.User)
+	if !ok {
+		return nil, fmt.Errorf("internal server error: user context value is of the wrong type")
+	}
+
+	return user, nil
 }

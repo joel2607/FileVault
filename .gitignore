@@ -32,6 +32,9 @@ logs/
 # Vendor directory (if you use go mod vendor)
 /backend/vendor/
 
+# User Uploads
+/backend/uploads
+
 
 # Frontend - React / Node.js
 # ---------------------------------
