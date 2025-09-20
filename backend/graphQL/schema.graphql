@@ -151,12 +151,22 @@ input UpdateFile {
     parentFolderID: ID
 }
 
+input FileFilterInput {
+  mimeTypes: [String!]
+  minSize: Int
+  maxSize: Int
+  startDate: String
+  endDate: String
+  tags: [String!]
+  uploaderID: ID
+}
+
 extend type Query {
   folder(id: ID!): Folder
-  userRoot: Root
-  adminRoot(userID: ID): Root
+  root: Root
   file(id: ID!): File
   getUsersWithAccess(fileID: ID!): [User!]
+  searchFiles(filter: FileFilterInput): [File!]
 }
 
 extend type Folder {

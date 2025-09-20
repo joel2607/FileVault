@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 	"gorm.io/gorm"
@@ -20,42 +21,15 @@ func NewShareService(db *gorm.DB) *ShareService {
 	return &ShareService{DB: db}
 }
 
-// GetUserRoot retrieves the top-level files and folders for a regular user.
-// It returns the user's own root-level items plus any public root-level items.
-func (s *ShareService) GetUserRoot(ctx context.Context, user *models.User) (*models.Root, error) {
+// GetRoot retrieves the top-level files and folders for a user.
+func (s *ShareService) GetRoot(ctx context.Context, user *models.User) (*models.Root, error) {
 	var files []*models.File
 	var folders []*models.Folder
 
-	if err := s.DB.Where("(user_id = ? AND folder_id IS NULL)", user.ID, true).Find(&files).Error; err != nil {
+	if err := s.DB.Where("user_id = ? AND folder_id IS NULL", user.ID).Find(&files).Error; err != nil {
 		return nil, err
 	}
-	if err := s.DB.Where("(user_id = ? AND parent_folder_id IS NULL)", user.ID, true).Find(&folders).Error; err != nil {
-		return nil, err
-	}
-
-	return &models.Root{Files: files, Folders: folders}, nil
-}
-
-// GetAdminRoot retrieves root-level files and folders for an admin user.
-// If a userID is provided, it fetches the root for that specific user.
-// Otherwise, it returns all root-level items in the system.
-func (s *ShareService) GetAdminRoot(ctx context.Context, userID *string) (*models.Root, error) {
-	var files []*models.File
-	var folders []*models.Folder
-
-	db := s.DB
-	if userID != nil {
-		uid, err := strconv.ParseUint(*userID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("invalid user ID")
-		}
-		db = s.DB.Where("user_id = ?", uid)
-	}
-
-	if err := db.Where("folder_id IS NULL").Find(&files).Error; err != nil {
-		return nil, err
-	}
-	if err := db.Where("parent_folder_id IS NULL").Find(&folders).Error; err != nil {
+	if err := s.DB.Where("user_id = ? AND parent_folder_id IS NULL", user.ID).Find(&folders).Error; err != nil {
 		return nil, err
 	}
 
@@ -269,4 +243,58 @@ func (s *ShareService) GetUsersWithAccess(ctx context.Context, fileID string, us
 	}
 
 	return users, nil
+}
+
+// SearchFiles searches for files based on a set of filters.
+// Admins can search all files, while regular users can only search their own files and files shared with them.
+func (s *ShareService) SearchFiles(ctx context.Context, filter *models.FileFilterInput, user *models.User) ([]*models.File, error) {
+	var files []*models.File
+	db := s.DB
+
+	if user.Role != models.RoleAdmin {
+		// Regular user: can search own files and files shared with them
+		sharedFileIDs := s.DB.Model(&models.FileSharing{}).Select("file_id").Where("shared_with_user_id = ?", user.ID)
+		db = db.Where("user_id = ? OR id IN (?)", user.ID, sharedFileIDs)
+	}
+
+	if filter != nil {
+		if len(filter.MimeTypes) > 0 {
+			db = db.Where("mime_type IN (?)", filter.MimeTypes)
+		}
+		if filter.MinSize != nil {
+			db = db.Where("size >= ?", *filter.MinSize)
+		}
+		if filter.MaxSize != nil {
+			db = db.Where("size <= ?", *filter.MaxSize)
+		}
+		if filter.StartDate != nil {
+			st, err := time.Parse(time.RFC3339, *filter.StartDate)
+			if err == nil {
+				db = db.Where("created_at >= ?", st)
+			}
+		}
+		if filter.EndDate != nil {
+			et, err := time.Parse(time.RFC3339, *filter.EndDate)
+			if err == nil {
+				db = db.Where("created_at <= ?", et)
+			}
+		}
+		if len(filter.Tags) > 0 {
+			for _, tag := range filter.Tags {
+				db = db.Where("tags::jsonb @> ?", fmt.Sprintf("\"%s\"", tag))
+			}
+		}
+		if filter.UploaderID != nil {
+			uid, err := strconv.ParseUint(*filter.UploaderID, 10, 64)
+			if err == nil {
+				db = db.Where("user_id = ?", uid)
+			}
+		}
+	}
+
+	if err := db.Find(&files).Error; err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
