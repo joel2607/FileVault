@@ -121,6 +121,10 @@ type Mutation {
   deleteFolder(id: ID!): Folder!
   updateFile(input: UpdateFile!): File!
   deleteFile(id: ID!): File!
+  setFilePublic(fileID: ID!): File!
+  setFilePrivate(fileID: ID!): File!
+  shareFileWithUser(fileID: ID!, userID: ID!): FileSharing!
+  removeFileAccess(fileID: ID!, userID: ID!): Boolean!
 }
 
 scalar Upload

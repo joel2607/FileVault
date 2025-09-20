@@ -304,6 +304,47 @@ func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (*models.F
 	return r.FileService.DeleteFile(ctx, id, user)
 }
 
+// SetFilePublic is the resolver for the setFilePublic mutation.
+// It makes a file public and can only be performed by the file owner.
+func (r *mutationResolver) SetFilePublic(ctx context.Context, fileID string) (*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.SetFilePublic(ctx, fileID, user)
+}
+
+// SetFilePrivate is the resolver for the setFilePrivate mutation.
+// It makes a file private and can only be performed by the file owner.
+func (r *mutationResolver) SetFilePrivate(ctx context.Context, fileID string) (*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.SetFilePrivate(ctx, fileID, user)
+}
+
+// ShareFileWithUser is the resolver for the shareFileWithUser mutation.
+// It grants another user access to a private file.
+// This action can only be performed by the file owner and fails if the file is public.
+func (r *mutationResolver) ShareFileWithUser(ctx context.Context, fileID string, userID string) (*models.FileSharing, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.ShareFileWithUser(ctx, fileID, userID, user)
+}
+
+// RemoveFileAccess is the resolver for the removeFileAccess mutation.
+// It removes a user's access to a shared file.
+// This action can only be performed by the file owner.
+func (r *mutationResolver) RemoveFileAccess(ctx context.Context, fileID string, userID string) (bool, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return false, err
+	}
+	return r.ShareService.RemoveFileAccess(ctx, fileID, userID, user)
+}
 
 // Me is the resolver for the me query.
 // It retrieves the currently authenticated user's information from the context.
