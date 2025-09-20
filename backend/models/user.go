@@ -1,10 +1,6 @@
 // Package models defines the data structures used in the application.
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 // UserRole defines the roles a user can have.
 type UserRole string
 
@@ -19,7 +15,7 @@ const (
 // This table stores user information, including authentication details,
 // storage quotas, and API rate limits.
 type User struct {
-	gorm.Model
+	BaseModel
 	Username       string    `gorm:"type:varchar(255);unique;not null"`
 	Email          string    `gorm:"type:varchar(255);unique;not null"`
 	PasswordHash   string    `gorm:"type:varchar(255);not null"`

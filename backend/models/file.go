@@ -1,15 +1,11 @@
 // Package models defines the data structures used in the application.
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 // File represents a file uploaded by a user.
 // This table stores metadata for each file, but not the file content itself.
 // It links to the user who uploaded it and the deduplicated content.
 type File struct {
-	gorm.Model
+	BaseModel
 	UserID              uint      `gorm:"not null"`
 	User                User      `gorm:"foreignkey:UserID"`
 	FileName            string    `gorm:"type:varchar(255);not null"`
@@ -23,4 +19,3 @@ type File struct {
 	FolderID            *uint     `gorm:"default:null"`
 	Folder              *Folder   `gorm:"foreignkey:FolderID"`
 }
-
