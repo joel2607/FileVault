@@ -193,9 +193,9 @@ type MutationResolver interface {
 	UploadFile(ctx context.Context, file graphql.Upload, parentFolderID *string) (*models.File, error)
 	CreateFolder(ctx context.Context, input models.NewFolder) (*models.Folder, error)
 	UpdateFolder(ctx context.Context, input models.UpdateFolder) (*models.Folder, error)
-	DeleteFolder(ctx context.Context, id string) (bool, error)
+	DeleteFolder(ctx context.Context, id string) (*models.Folder, error)
 	UpdateFile(ctx context.Context, input models.UpdateFile) (*models.File, error)
-	DeleteFile(ctx context.Context, id string) (bool, error)
+	DeleteFile(ctx context.Context, id string) (*models.File, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
@@ -2653,7 +2653,7 @@ func (ec *executionContext) _Mutation_deleteFolder(ctx context.Context, field gr
 			return ec.resolvers.Mutation().DeleteFolder(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNBoolean2bool,
+		ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
 		true,
 		true,
 	)
@@ -2666,7 +2666,29 @@ func (ec *executionContext) fieldContext_Mutation_deleteFolder(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Folder_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Folder_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Folder_updatedAt(ctx, field)
+			case "userId":
+				return ec.fieldContext_Folder_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Folder_user(ctx, field)
+			case "folderName":
+				return ec.fieldContext_Folder_folderName(ctx, field)
+			case "parentFolderId":
+				return ec.fieldContext_Folder_parentFolderId(ctx, field)
+			case "isPublic":
+				return ec.fieldContext_Folder_isPublic(ctx, field)
+			case "files":
+				return ec.fieldContext_Folder_files(ctx, field)
+			case "folders":
+				return ec.fieldContext_Folder_folders(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Folder", field.Name)
 		},
 	}
 	defer func() {
@@ -2767,7 +2789,7 @@ func (ec *executionContext) _Mutation_deleteFile(ctx context.Context, field grap
 			return ec.resolvers.Mutation().DeleteFile(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNBoolean2bool,
+		ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
 		true,
 		true,
 	)
@@ -2780,7 +2802,39 @@ func (ec *executionContext) fieldContext_Mutation_deleteFile(ctx context.Context
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_File_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_File_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_File_updatedAt(ctx, field)
+			case "userId":
+				return ec.fieldContext_File_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_File_user(ctx, field)
+			case "fileName":
+				return ec.fieldContext_File_fileName(ctx, field)
+			case "mimeType":
+				return ec.fieldContext_File_mimeType(ctx, field)
+			case "size":
+				return ec.fieldContext_File_size(ctx, field)
+			case "deduplicationId":
+				return ec.fieldContext_File_deduplicationId(ctx, field)
+			case "deduplicatedContent":
+				return ec.fieldContext_File_deduplicatedContent(ctx, field)
+			case "isPublic":
+				return ec.fieldContext_File_isPublic(ctx, field)
+			case "downloadCount":
+				return ec.fieldContext_File_downloadCount(ctx, field)
+			case "tags":
+				return ec.fieldContext_File_tags(ctx, field)
+			case "parentFolderId":
+				return ec.fieldContext_File_parentFolderId(ctx, field)
+			case "folder":
+				return ec.fieldContext_File_folder(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	defer func() {

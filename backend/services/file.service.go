@@ -206,38 +206,41 @@ func (s *FileService) UpdateFile(ctx context.Context, input models.UpdateFile, u
 // Outputs:
 // - A boolean indicating whether the deletion was successful.
 // - An error if the database operation fails.
-func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.User) (bool, error) {
+func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.User) (*models.File, error) {
 	uid, _ := strconv.ParseUint(id, 10, 64)
 	var file models.File
 	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
-		return false, err
+		return nil, err
 	}
 
-	storageChangeKB := float64(file.Size) / 1024
+	fileSizeKB := float64(file.Size) / 1024
 
 	// Decrement reference count
 	var content models.DeduplicatedContent
 	if err := s.DB.First(&content, file.DeduplicationID).Error; err == nil {
 		content.ReferenceCount--
 		s.DB.Save(&content)
+		// Update user's storage usage
+		user.UsedStorageKB -= fileSizeKB
+		s.DB.Save(user)
 		if content.ReferenceCount <= 0 {
 			// Delete file from storage
 			filePath := filepath.Join("./uploads", content.SHA256Hash)
 			os.Remove(filePath)
 			s.DB.Delete(&content)
-			// Update user's storage usage
-			user.UsedStorageKB -= storageChangeKB
-			s.DB.Save(user)
 		} else {
 			// Update user's storage usage. They save less space now as one less reference.
-			user.SavedStorageKB -= storageChangeKB
-			user.UsedStorageKB -= storageChangeKB
+			user.SavedStorageKB -= fileSizeKB
 			s.DB.Save(user)
 		}
 	}
 
 	err := s.DB.Delete(&file).Error
-	return err == nil, err
+	if err != nil {
+		return nil, err
+	}
+	return &file, nil
+
 }
 
 // GetFolder retrieves a specific folder by its ID for a given user.
@@ -299,10 +302,17 @@ func (s *FileService) UpdateFolder(ctx context.Context, input models.UpdateFolde
 // Outputs:
 // - A boolean indicating whether the deletion was successful.
 // - An error if the database operation fails.
-func (s *FileService) DeleteFolder(ctx context.Context, id string, user *models.User) (bool, error) {
+func (s *FileService) DeleteFolder(ctx context.Context, id string, user *models.User) (*models.Folder, error) {
 	uid, _ := strconv.ParseUint(id, 10, 64)
-	err := s.DB.Delete(&models.Folder{}, "id = ? AND user_id = ?", uid, user.ID).Error
-	return err == nil, err
+	var folder models.Folder
+	if err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return nil, err
+	}
+	err := s.DB.Delete(&folder).Error
+	if err != nil {
+		return nil, err
+	}
+	return &folder, nil
 }
 
 // GetRoot retrieves the top-level files and folders for a given user.
