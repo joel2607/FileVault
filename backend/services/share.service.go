@@ -298,3 +298,103 @@ func (s *ShareService) SearchFiles(ctx context.Context, filter *models.FileFilte
 
 	return files, nil
 }
+
+// SetFolderPublic makes a folder public. Only the folder owner can perform this action.
+func (s *ShareService) SetFolderPublic(ctx context.Context, folderID string, user *models.User) (*models.Folder, error) {
+	var folder models.Folder
+	uid, err := strconv.ParseUint(folderID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid folder ID")
+	}
+
+	if err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return nil, fmt.Errorf("folder not found or access denied")
+	}
+
+	folder.IsPublic = true
+	if err := s.DB.Save(&folder).Error; err != nil {
+		return nil, err
+	}
+
+	return &folder, nil
+}
+
+// SetFolderPrivate makes a folder private. Only the folder owner can perform this action.
+func (s *ShareService) SetFolderPrivate(ctx context.Context, folderID string, user *models.User) (*models.Folder, error) {
+	var folder models.Folder
+	uid, err := strconv.ParseUint(folderID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid folder ID")
+	}
+
+	if err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return nil, fmt.Errorf("folder not found or access denied")
+	}
+
+	folder.IsPublic = false
+	if err := s.DB.Save(&folder).Error; err != nil {
+		return nil, err
+	}
+
+	return &folder, nil
+}
+
+// ShareFolderWithUser grants a user access to a private folder.
+// It returns an error if the folder is public.
+func (s *ShareService) ShareFolderWithUser(ctx context.Context, folderID string, shareWithUserID string, user *models.User) (*models.FolderSharing, error) {
+	var folder models.Folder
+	uid, err := strconv.ParseUint(folderID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid folder ID")
+	}
+
+	if err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return nil, fmt.Errorf("folder not found or access denied")
+	}
+
+	if folder.IsPublic {
+		return nil, fmt.Errorf("cannot share a public folder")
+	}
+
+	shareWithUID, err := strconv.ParseUint(shareWithUserID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID to share with")
+	}
+
+	share := &models.FolderSharing{
+		FolderID:         uint(uid),
+		SharedWithUserID: uint(shareWithUID),
+		PermissionLevel:  "read", // Or any other permission level you want to implement
+	}
+
+	if err := s.DB.Create(share).Error; err != nil {
+		return nil, err
+	}
+
+	return share, nil
+}
+
+// RemoveFolderAccess removes a user's access to a shared folder.
+// Only the folder owner can perform this action.
+func (s *ShareService) RemoveFolderAccess(ctx context.Context, folderID string, userIDToRemove string, user *models.User) (bool, error) {
+	var folder models.Folder
+	uid, err := strconv.ParseUint(folderID, 10, 64)
+	if err != nil {
+		return false, fmt.Errorf("invalid folder ID")
+	}
+
+	if err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
+		return false, fmt.Errorf("folder not found or access denied")
+	}
+
+	userIDToRemove_uid, err := strconv.ParseUint(userIDToRemove, 10, 64)
+	if err != nil {
+		return false, fmt.Errorf("invalid user ID to remove access from")
+	}
+
+	if err := s.DB.Where("folder_id = ? AND shared_with_user_id = ?", uid, userIDToRemove_uid).Delete(&models.FolderSharing{}).Error; err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

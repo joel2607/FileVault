@@ -35,7 +35,7 @@ func Init() *gorm.DB {
 	}
 
 	// AutoMigrate the schema
-	err = DB.AutoMigrate(&models.User{}, &models.DeduplicatedContent{}, &models.Folder{}, &models.File{}, &models.FileSharing{})
+	err = DB.AutoMigrate(&models.User{}, &models.DeduplicatedContent{}, &models.Folder{}, &models.File{}, &models.FileSharing{}, &models.FolderSharing{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
