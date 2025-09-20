@@ -19,7 +19,8 @@ type File struct {
 	DeduplicatedContent DeduplicatedContent `gorm:"foreignkey:DeduplicationID"`
 	IsPublic            bool      `gorm:"default:false"`
 	DownloadCount       int       `gorm:"default:0"`
-	Tags                string    `gorm:"type:jsonb"`
+	Tags                string    `gorm:"type:jsonb;default:'[]'"`
 	FolderID            *uint     `gorm:"default:null"`
 	Folder              *Folder   `gorm:"foreignkey:FolderID"`
 }
+

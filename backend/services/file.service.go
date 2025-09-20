@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-
+	"math"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 	"gorm.io/gorm"
@@ -75,7 +75,9 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		s.DB.Save(&existingContent)
 
 		// Update user's storage usage. They save space by not uploading duplicate data.
-		user.SavedStorageMB += int(file.Size / (1024 * 1024))
+		storageChangeMB := int(math.Round(float64(file.Size) / (1024 * 1024)))
+		user.SavedStorageMB += storageChangeMB
+		user.UsedStorageMB += storageChangeMB
 		s.DB.Save(user)
 		return newFile, nil
 	}
@@ -127,7 +129,7 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 	}
 
 	// Update user's storage usage. They dont save space as this is new data.
-	user.UsedStorageMB += int(file.Size / (1024 * 1024))
+	user.UsedStorageMB += int(math.Round(float64(file.Size) / (1024 * 1024)))
 	s.DB.Save(user)
 
 	return newFile, nil
@@ -204,7 +206,9 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
 		return false, err
 	}
-	
+
+	storageChangeMB := int(math.Round(float64(file.Size) / (1024 * 1024)))
+
 	// Decrement reference count
 	var content models.DeduplicatedContent
 	if err := s.DB.First(&content, file.DeduplicationID).Error; err == nil {
@@ -216,12 +220,13 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 			os.Remove(filePath)
 			s.DB.Delete(&content)
 			// Update user's storage usage
-			user.UsedStorageMB -= int(file.Size / (1024 * 1024))
+			user.UsedStorageMB -= storageChangeMB
 			s.DB.Save(user)
-			} else {
-				// Update user's storage usage. They save less space now as one less reference.
-				user.SavedStorageMB -= int(file.Size / (1024 * 1024))
-				s.DB.Save(user)
+		} else {
+			// Update user's storage usage. They save less space now as one less reference.
+			user.SavedStorageMB -= storageChangeMB
+			user.UsedStorageMB -= storageChangeMB
+			s.DB.Save(user)
 		}
 	}
 
