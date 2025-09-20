@@ -61,6 +61,14 @@ func (r *fileResolver) UserID(ctx context.Context, obj *models.File) (string, er
 	return strconv.FormatUint(uint64(obj.UserID), 10), nil
 }
 
+// User resolves the user field for the File type.
+// It retrieves and returns the user who owns the file.
+func (r *fileResolver) User(ctx context.Context, obj *models.File) (*models.User, error) {
+	var user models.User
+	err := r.DB.First(&user, obj.UserID).Error
+	return &user, err
+}
+
 // Size resolves the size field for the File type.
 // It returns the file size in bytes as an integer.
 func (r *fileResolver) Size(ctx context.Context, obj *models.File) (int32, error) {
@@ -71,6 +79,13 @@ func (r *fileResolver) Size(ctx context.Context, obj *models.File) (int32, error
 // It returns the ID of the associated deduplicated content as a string.
 func (r *fileResolver) DeduplicationID(ctx context.Context, obj *models.File) (string, error) {
 	return strconv.FormatUint(uint64(obj.DeduplicationID), 10), nil
+}
+
+// DeduplicatedContent resolves the deduplicatedContent field for the File type.
+func (r *fileResolver) DeduplicatedContent(ctx context.Context, obj *models.File) (*models.DeduplicatedContent, error) {
+	var content models.DeduplicatedContent
+	err := r.DB.First(&content, obj.DeduplicationID).Error
+	return &content, err
 }
 
 // DownloadCount resolves the downloadCount field for the File type.
@@ -87,6 +102,16 @@ func (r *fileResolver) ParentFolderID(ctx context.Context, obj *models.File) (*s
 	}
 	id := strconv.FormatUint(uint64(*obj.FolderID), 10)
 	return &id, nil
+}
+
+// Folder resolves the folder field for the File type.
+func (r *fileResolver) Folder(ctx context.Context, obj *models.File) (*models.Folder, error) {
+	if obj.FolderID == nil {
+		return nil, nil
+	}
+	var folder models.Folder
+	err := r.DB.First(&folder, *obj.FolderID).Error
+	return &folder, err
 }
 
 // ID resolves the id field for the FileSharing type.
@@ -113,10 +138,24 @@ func (r *fileSharingResolver) FileID(ctx context.Context, obj *models.FileSharin
 	return strconv.FormatUint(uint64(obj.FileID), 10), nil
 }
 
+// File resolves the file field for the FileSharing type.
+func (r *fileSharingResolver) File(ctx context.Context, obj *models.FileSharing) (*models.File, error) {
+	var file models.File
+	err := r.DB.First(&file, obj.FileID).Error
+	return &file, err
+}
+
 // SharedWithUserID resolves the sharedWithUserId field for the FileSharing type.
 // It returns the ID of the user with whom the file is shared as a string.
 func (r *fileSharingResolver) SharedWithUserID(ctx context.Context, obj *models.FileSharing) (string, error) {
 	return strconv.FormatUint(uint64(obj.SharedWithUserID), 10), nil
+}
+
+// SharedWithUser resolves the sharedWithUser field for the FileSharing type.
+func (r *fileSharingResolver) SharedWithUser(ctx context.Context, obj *models.FileSharing) (*models.User, error) {
+	var user models.User
+	err := r.DB.First(&user, obj.SharedWithUserID).Error
+	return &user, err
 }
 
 // ID resolves the id field for the Folder type.
@@ -141,6 +180,13 @@ func (r *folderResolver) UpdatedAt(ctx context.Context, obj *models.Folder) (str
 // It returns the ID of the user who owns the folder as a string.
 func (r *folderResolver) UserID(ctx context.Context, obj *models.Folder) (string, error) {
 	return strconv.FormatUint(uint64(obj.UserID), 10), nil
+}
+
+// User resolves the user field for the Folder type.
+func (r *folderResolver) User(ctx context.Context, obj *models.Folder) (*models.User, error) {
+	var user models.User
+	err := r.DB.First(&user, obj.UserID).Error
+	return &user, err
 }
 
 // ParentFolderID resolves the parentFolderId field for the Folder type.
