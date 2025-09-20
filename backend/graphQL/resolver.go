@@ -15,4 +15,5 @@ type Resolver struct {
 	DB          *gorm.DB
 	AuthService *services.AuthService
 	FileService *services.FileService
+	ShareService *services.ShareService
 }
