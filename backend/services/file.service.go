@@ -312,6 +312,35 @@ func (s *FileService) DeleteFolder(ctx context.Context, id string, user *models.
 	if err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
 		return nil, err
 	}
+
+	// Find all files in the folder
+	var files []*models.File
+	if err := s.DB.Where("folder_id = ?", uid).Find(&files).Error; err != nil {
+		return nil, err
+	}
+
+	// Delete all files in the folder
+	for _, file := range files {
+		fileID := strconv.FormatUint(uint64(file.ID), 10)
+		if _, err := s.DeleteFile(ctx, fileID, user); err != nil {
+			return nil, err
+		}
+	}
+
+	// Find all subfolders in the folder
+	var subfolders []*models.Folder
+	if err := s.DB.Where("parent_folder_id = ?", uid).Find(&subfolders).Error; err != nil {
+		return nil, err
+	}
+
+	// Recursively delete all subfolders
+	for _, subfolder := range subfolders {
+		subfolderID := strconv.FormatUint(uint64(subfolder.ID), 10)
+		if _, err := s.DeleteFolder(ctx, subfolderID, user); err != nil {
+			return nil, err
+		}
+	}
+
 	err := s.DB.Delete(&folder).Error
 	if err != nil {
 		return nil, err
