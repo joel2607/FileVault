@@ -47,17 +47,29 @@ models:
     model:
       - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.User"
   File:
-    model:
-      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.File"
+    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.File"
+    fields:
+      user:
+        resolver: true
+      deduplicatedContent:
+        resolver: true
+      folder:
+        resolver: true
   Folder:
-    model:
-      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.Folder"
+    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.Folder"
+    fields:
+      user:
+        resolver: true
   DeduplicatedContent:
     model:
       - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.DeduplicatedContent"
   FileSharing:
-    model:
-      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.FileSharing"
+    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.FileSharing"
+    fields:
+      file:
+        resolver: true
+      sharedWithUser:
+        resolver: true
   UserRole:
     model:
       - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.UserRole"

@@ -155,27 +155,32 @@ type FileResolver interface {
 	CreatedAt(ctx context.Context, obj *models.File) (string, error)
 	UpdatedAt(ctx context.Context, obj *models.File) (string, error)
 	UserID(ctx context.Context, obj *models.File) (string, error)
+	User(ctx context.Context, obj *models.File) (*models.User, error)
 
 	Size(ctx context.Context, obj *models.File) (int32, error)
 	DeduplicationID(ctx context.Context, obj *models.File) (string, error)
+	DeduplicatedContent(ctx context.Context, obj *models.File) (*models.DeduplicatedContent, error)
 
 	DownloadCount(ctx context.Context, obj *models.File) (int32, error)
 
 	ParentFolderID(ctx context.Context, obj *models.File) (*string, error)
+	Folder(ctx context.Context, obj *models.File) (*models.Folder, error)
 }
 type FileSharingResolver interface {
 	ID(ctx context.Context, obj *models.FileSharing) (string, error)
 	CreatedAt(ctx context.Context, obj *models.FileSharing) (string, error)
 	UpdatedAt(ctx context.Context, obj *models.FileSharing) (string, error)
 	FileID(ctx context.Context, obj *models.FileSharing) (string, error)
-
+	File(ctx context.Context, obj *models.FileSharing) (*models.File, error)
 	SharedWithUserID(ctx context.Context, obj *models.FileSharing) (string, error)
+	SharedWithUser(ctx context.Context, obj *models.FileSharing) (*models.User, error)
 }
 type FolderResolver interface {
 	ID(ctx context.Context, obj *models.Folder) (string, error)
 	CreatedAt(ctx context.Context, obj *models.Folder) (string, error)
 	UpdatedAt(ctx context.Context, obj *models.Folder) (string, error)
 	UserID(ctx context.Context, obj *models.Folder) (string, error)
+	User(ctx context.Context, obj *models.Folder) (*models.User, error)
 
 	ParentFolderID(ctx context.Context, obj *models.Folder) (*string, error)
 
@@ -1308,10 +1313,10 @@ func (ec *executionContext) _File_user(ctx context.Context, field graphql.Collec
 		field,
 		ec.fieldContext_File_user,
 		func(ctx context.Context) (any, error) {
-			return obj.User, nil
+			return ec.resolvers.File().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -1321,8 +1326,8 @@ func (ec *executionContext) fieldContext_File_user(_ context.Context, field grap
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -1475,10 +1480,10 @@ func (ec *executionContext) _File_deduplicatedContent(ctx context.Context, field
 		field,
 		ec.fieldContext_File_deduplicatedContent,
 		func(ctx context.Context) (any, error) {
-			return obj.DeduplicatedContent, nil
+			return ec.resolvers.File().DeduplicatedContent(ctx, obj)
 		},
 		nil,
-		ec.marshalNDeduplicatedContent2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDeduplicatedContent,
+		ec.marshalNDeduplicatedContent2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDeduplicatedContent,
 		true,
 		true,
 	)
@@ -1488,8 +1493,8 @@ func (ec *executionContext) fieldContext_File_deduplicatedContent(_ context.Cont
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -1632,7 +1637,7 @@ func (ec *executionContext) _File_folder(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_File_folder,
 		func(ctx context.Context) (any, error) {
-			return obj.Folder, nil
+			return ec.resolvers.File().Folder(ctx, obj)
 		},
 		nil,
 		ec.marshalOFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
@@ -1645,8 +1650,8 @@ func (ec *executionContext) fieldContext_File_folder(_ context.Context, field gr
 	fc = &graphql.FieldContext{
 		Object:     "File",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -1799,10 +1804,10 @@ func (ec *executionContext) _FileSharing_file(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_FileSharing_file,
 		func(ctx context.Context) (any, error) {
-			return obj.File, nil
+			return ec.resolvers.FileSharing().File(ctx, obj)
 		},
 		nil,
-		ec.marshalNFile2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
+		ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
 		true,
 		true,
 	)
@@ -1812,8 +1817,8 @@ func (ec *executionContext) fieldContext_FileSharing_file(_ context.Context, fie
 	fc = &graphql.FieldContext{
 		Object:     "FileSharing",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -1889,10 +1894,10 @@ func (ec *executionContext) _FileSharing_sharedWithUser(ctx context.Context, fie
 		field,
 		ec.fieldContext_FileSharing_sharedWithUser,
 		func(ctx context.Context) (any, error) {
-			return obj.SharedWithUser, nil
+			return ec.resolvers.FileSharing().SharedWithUser(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -1902,8 +1907,8 @@ func (ec *executionContext) fieldContext_FileSharing_sharedWithUser(_ context.Co
 	fc = &graphql.FieldContext{
 		Object:     "FileSharing",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -2085,10 +2090,10 @@ func (ec *executionContext) _Folder_user(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Folder_user,
 		func(ctx context.Context) (any, error) {
-			return obj.User, nil
+			return ec.resolvers.Folder().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -2098,8 +2103,8 @@ func (ec *executionContext) fieldContext_Folder_user(_ context.Context, field gr
 	fc = &graphql.FieldContext{
 		Object:     "Folder",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -5445,10 +5450,41 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "user":
-			out.Values[i] = ec._File_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "fileName":
 			out.Values[i] = ec._File_fileName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5532,10 +5568,41 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "deduplicatedContent":
-			out.Values[i] = ec._File_deduplicatedContent(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_deduplicatedContent(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "isPublic":
 			out.Values[i] = ec._File_isPublic(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5613,7 +5680,38 @@ func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "folder":
-			out.Values[i] = ec._File_folder(ctx, field, obj)
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._File_folder(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5793,10 +5891,41 @@ func (ec *executionContext) _FileSharing(ctx context.Context, sel ast.SelectionS
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "file":
-			out.Values[i] = ec._FileSharing_file(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._FileSharing_file(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "sharedWithUserId":
 			field := field
 
@@ -5834,10 +5963,41 @@ func (ec *executionContext) _FileSharing(ctx context.Context, sel ast.SelectionS
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "sharedWithUser":
-			out.Values[i] = ec._FileSharing_sharedWithUser(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._FileSharing_sharedWithUser(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "permissionLevel":
 			out.Values[i] = ec._FileSharing_permissionLevel(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6022,10 +6182,41 @@ func (ec *executionContext) _Folder(ctx context.Context, sel ast.SelectionSet, o
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "user":
-			out.Values[i] = ec._Folder_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Folder_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "folderName":
 			out.Values[i] = ec._Folder_folderName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -7078,6 +7269,16 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 
 func (ec *executionContext) marshalNDeduplicatedContent2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDeduplicatedContent(ctx context.Context, sel ast.SelectionSet, v models.DeduplicatedContent) graphql.Marshaler {
 	return ec._DeduplicatedContent(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDeduplicatedContent2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDeduplicatedContent(ctx context.Context, sel ast.SelectionSet, v *models.DeduplicatedContent) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DeduplicatedContent(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNFile2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v models.File) graphql.Marshaler {
