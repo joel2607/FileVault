@@ -57,6 +57,8 @@ type Folder {
   folderName: String!
   parentFolderId: ID
   isPublic: Boolean!
+  files: [File!]
+  folders: [Folder!]
 }
 
 """
@@ -86,6 +88,20 @@ type FileSharing {
 }
 
 """
+Manages folder sharing with specific users, defining permission levels.
+"""
+type FolderSharing {
+  id: ID!
+  createdAt: String!
+  updatedAt: String!
+  folderId: ID!
+  folder: Folder!
+  sharedWithUserId: ID!
+  sharedWithUser: User!
+  permissionLevel: String!
+}
+
+"""
 Input for the registration mutation.
 """
 input RegisterInput {
@@ -107,6 +123,11 @@ Defines the queries available in the API.
 """
 type Query {
   me: User!
+  folder(id: ID!): Folder
+  root: Root
+  file(id: ID!): File
+  getUsersWithAccess(fileID: ID!): [User!]
+  searchFiles(filter: FileFilterInput): [File!]
 }
 
 """
@@ -125,6 +146,10 @@ type Mutation {
   setFilePrivate(fileID: ID!): File!
   shareFileWithUser(fileID: ID!, userID: ID!): FileSharing!
   removeFileAccess(fileID: ID!, userID: ID!): Boolean!
+  setFolderPublic(folderID: ID!): Folder!
+  setFolderPrivate(folderID: ID!): Folder!
+  shareFolderWithUser(folderID: ID!, userID: ID!): FolderSharing!
+  removeFolderAccess(folderID: ID!, userID: ID!): Boolean!
 }
 
 scalar Upload
@@ -161,15 +186,3 @@ input FileFilterInput {
   uploaderID: ID
 }
 
-extend type Query {
-  folder(id: ID!): Folder
-  root: Root
-  file(id: ID!): File
-  getUsersWithAccess(fileID: ID!): [User!]
-  searchFiles(filter: FileFilterInput): [File!]
-}
-
-extend type Folder {
-  files: [File!]
-  folders: [Folder!]
-}
