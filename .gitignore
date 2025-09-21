@@ -36,7 +36,7 @@ logs/
 /backend/uploads
 
 
-# Frontend - React / Node.js
+# Frontend - next / Node.js
 # ---------------------------------
 # Node modules - this is the most important one
 /frontend/node_modules/
@@ -52,6 +52,32 @@ logs/
 # Environment variables - NEVER commit these
 # This will ignore .env, .env.local, .env.development, etc.
 .env*
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
 
 # Docker

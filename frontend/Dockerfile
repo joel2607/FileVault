@@ -1,21 +1,42 @@
-# Use an official Node.js runtime as a parent image
-FROM node:20-alpine
+# Dockerfile for the frontend Next.js application
 
-# Set the working directory in the container
+# Stage 1: Build the application
+FROM node:20-alpine AS builder
+
+# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
-COPY package*.json ./
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
 
-# Install project dependencies
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application's source code
-# This is useful for building the image, though the docker-compose volume will override it
+# Copy the rest of the application source code
 COPY . .
 
-# The React development server runs on port 3000
+# Build the application
+RUN npm run build
+
+# Stage 2: Production environment
+FROM node:20-alpine AS runner
+
+# Set the working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
+
+# Install production dependencies
+RUN npm install --omit=dev
+
+# Copy the built application from the builder stage
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.mjs ./
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# The command to start the development server
+# Set the command to start the application
 CMD ["npm", "start"]
