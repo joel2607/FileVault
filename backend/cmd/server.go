@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -30,6 +31,7 @@ func init() {
 	viper.BindEnv("postgres.user", "POSTGRES_USER")
 	viper.BindEnv("postgres.password", "POSTGRES_PASSWORD")
 	viper.BindEnv("postgres.db", "POSTGRES_DB")
+	viper.BindEnv("redis.addr", "REDIS_ADDR")
 	viper.BindEnv("auth.jwt_expiration_hours", "JWT_EXPIRATION_HOURS")
 	viper.BindEnv("jwt_auth_secret", "JWT_AUTH_SECRET")
 }
@@ -41,12 +43,14 @@ func main() {
 	}
 
 	db := database.Init()
+	redisClient := database.InitRedis()
 	
 	authService := services.NewAuthService(db)
 	fileService := services.NewFileService(db)
 
 	router := chi.NewRouter()
 	router.Use(middleware.AuthMiddleware(authService))
+	router.Use(middleware.RedisRateLimiter(redisClient, 2, 1*time.Second))
 
 	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{DB: db, AuthService: authService, FileService: fileService}}))
 

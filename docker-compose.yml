@@ -18,6 +18,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis Service
+  redis:
+    image: redis:alpine
+    container_name: file_vault_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+
   # Go Backend Service
   backend:
     container_name: file_vault_backend
@@ -29,6 +44,8 @@ services:
       - "8080:8080" # Exposes the Go API
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     env_file:
       - .env
@@ -51,3 +68,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

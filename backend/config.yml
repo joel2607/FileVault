@@ -10,3 +10,6 @@ postgres:
 
 auth:
   jwt_expiration_hours: 24
+
+redis:
+  addr: "file_vault_redis:6379"
