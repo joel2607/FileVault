@@ -43,6 +43,12 @@ type Root struct {
 	Folders []*Folder `json:"folders,omitempty"`
 }
 
+type StorageStatistics struct {
+	UsedStorageKb   float64 `json:"usedStorageKB"`
+	SavedStorageKb  float64 `json:"savedStorageKB"`
+	PercentageSaved float64 `json:"percentageSaved"`
+}
+
 type UpdateFile struct {
 	ID             string  `json:"id"`
 	Name           *string `json:"name,omitempty"`

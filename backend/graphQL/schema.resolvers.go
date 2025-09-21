@@ -6,6 +6,7 @@ package graphQL
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -489,6 +490,16 @@ func (r *queryResolver) SearchFiles(ctx context.Context, filter *models.FileFilt
 		return nil, err
 	}
 	return r.ShareService.SearchFiles(ctx, filter, user)
+}
+
+// StorageStatistics is the resolver for the storageStatistics field.
+func (r *queryResolver) StorageStatistics(ctx context.Context) (*models.StorageStatistics, error) {
+	user, ok := ctx.Value("user").(*models.User)
+	if !ok {
+		return nil, fmt.Errorf("unauthorized")
+	}
+
+	return r.FileService.GetStorageStatistics(user)
 }
 
 // ID resolves the id field for the User type.

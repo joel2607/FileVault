@@ -101,6 +101,12 @@ type FolderSharing {
   permissionLevel: String!
 }
 
+type StorageStatistics {
+  usedStorageKB: Float!
+  savedStorageKB: Float!
+  percentageSaved: Float!
+}
+
 """
 Input for the registration mutation.
 """
@@ -128,6 +134,7 @@ type Query {
   file(id: ID!): File
   getUsersWithAccess(fileID: ID!): [User!]
   searchFiles(filter: FileFilterInput): [File!]
+  storageStatistics: StorageStatistics!
 }
 
 """

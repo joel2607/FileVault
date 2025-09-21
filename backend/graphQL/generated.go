@@ -145,11 +145,18 @@ type ComplexityRoot struct {
 		Me                 func(childComplexity int) int
 		Root               func(childComplexity int) int
 		SearchFiles        func(childComplexity int, filter *models.FileFilterInput) int
+		StorageStatistics  func(childComplexity int) int
 	}
 
 	Root struct {
 		Files   func(childComplexity int) int
 		Folders func(childComplexity int) int
+	}
+
+	StorageStatistics struct {
+		PercentageSaved func(childComplexity int) int
+		SavedStorageKb  func(childComplexity int) int
+		UsedStorageKb   func(childComplexity int) int
 	}
 
 	User struct {
@@ -244,6 +251,7 @@ type QueryResolver interface {
 	File(ctx context.Context, id string) (*models.File, error)
 	GetUsersWithAccess(ctx context.Context, fileID string) ([]*models.User, error)
 	SearchFiles(ctx context.Context, filter *models.FileFilterInput) ([]*models.File, error)
+	StorageStatistics(ctx context.Context) (*models.StorageStatistics, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *models.User) (string, error)
@@ -803,6 +811,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.SearchFiles(childComplexity, args["filter"].(*models.FileFilterInput)), true
+	case "Query.storageStatistics":
+		if e.complexity.Query.StorageStatistics == nil {
+			break
+		}
+
+		return e.complexity.Query.StorageStatistics(childComplexity), true
 
 	case "Root.files":
 		if e.complexity.Root.Files == nil {
@@ -816,6 +830,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Root.Folders(childComplexity), true
+
+	case "StorageStatistics.percentageSaved":
+		if e.complexity.StorageStatistics.PercentageSaved == nil {
+			break
+		}
+
+		return e.complexity.StorageStatistics.PercentageSaved(childComplexity), true
+	case "StorageStatistics.savedStorageKB":
+		if e.complexity.StorageStatistics.SavedStorageKb == nil {
+			break
+		}
+
+		return e.complexity.StorageStatistics.SavedStorageKb(childComplexity), true
+	case "StorageStatistics.usedStorageKB":
+		if e.complexity.StorageStatistics.UsedStorageKb == nil {
+			break
+		}
+
+		return e.complexity.StorageStatistics.UsedStorageKb(childComplexity), true
 
 	case "User.apiRateLimit":
 		if e.complexity.User.APIRateLimit == nil {
@@ -4312,6 +4345,43 @@ func (ec *executionContext) fieldContext_Query_searchFiles(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_storageStatistics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_storageStatistics,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().StorageStatistics(ctx)
+		},
+		nil,
+		ec.marshalNStorageStatistics2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_storageStatistics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "usedStorageKB":
+				return ec.fieldContext_StorageStatistics_usedStorageKB(ctx, field)
+			case "savedStorageKB":
+				return ec.fieldContext_StorageStatistics_savedStorageKB(ctx, field)
+			case "percentageSaved":
+				return ec.fieldContext_StorageStatistics_percentageSaved(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StorageStatistics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4527,6 +4597,93 @@ func (ec *executionContext) fieldContext_Root_folders(_ context.Context, field g
 				return ec.fieldContext_Folder_folders(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Folder", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StorageStatistics_usedStorageKB(ctx context.Context, field graphql.CollectedField, obj *models.StorageStatistics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StorageStatistics_usedStorageKB,
+		func(ctx context.Context) (any, error) {
+			return obj.UsedStorageKb, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StorageStatistics_usedStorageKB(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StorageStatistics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StorageStatistics_savedStorageKB(ctx context.Context, field graphql.CollectedField, obj *models.StorageStatistics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StorageStatistics_savedStorageKB,
+		func(ctx context.Context) (any, error) {
+			return obj.SavedStorageKb, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StorageStatistics_savedStorageKB(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StorageStatistics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StorageStatistics_percentageSaved(ctx context.Context, field graphql.CollectedField, obj *models.StorageStatistics) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StorageStatistics_percentageSaved,
+		func(ctx context.Context) (any, error) {
+			return obj.PercentageSaved, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StorageStatistics_percentageSaved(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StorageStatistics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8365,6 +8522,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "storageStatistics":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_storageStatistics(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -8411,6 +8590,55 @@ func (ec *executionContext) _Root(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Root_files(ctx, field, obj)
 		case "folders":
 			out.Values[i] = ec._Root_folders(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var storageStatisticsImplementors = []string{"StorageStatistics"}
+
+func (ec *executionContext) _StorageStatistics(ctx context.Context, sel ast.SelectionSet, obj *models.StorageStatistics) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, storageStatisticsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StorageStatistics")
+		case "usedStorageKB":
+			out.Values[i] = ec._StorageStatistics_usedStorageKB(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "savedStorageKB":
+			out.Values[i] = ec._StorageStatistics_savedStorageKB(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "percentageSaved":
+			out.Values[i] = ec._StorageStatistics_percentageSaved(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9186,6 +9414,22 @@ func (ec *executionContext) marshalNFileSharing2ᚖgithubᚗcomᚋBalkanIDᚑUni
 	return ec._FileSharing(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) marshalNFolder2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder(ctx context.Context, sel ast.SelectionSet, v models.Folder) graphql.Marshaler {
 	return ec._Folder(ctx, sel, &v)
 }
@@ -9254,6 +9498,20 @@ func (ec *executionContext) unmarshalNNewFolder2githubᚗcomᚋBalkanIDᚑUniver
 func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRegisterInput(ctx context.Context, v any) (models.RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNStorageStatistics2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics(ctx context.Context, sel ast.SelectionSet, v models.StorageStatistics) graphql.Marshaler {
+	return ec._StorageStatistics(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStorageStatistics2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics(ctx context.Context, sel ast.SelectionSet, v *models.StorageStatistics) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StorageStatistics(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
