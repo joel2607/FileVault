@@ -148,6 +148,7 @@ type Mutation {
   deleteFolder(id: ID!): Folder!
   updateFile(input: UpdateFile!): File!
   deleteFile(id: ID!): File!
+  generateDownloadUrl(fileID: ID!): String!
   setFilePublic(fileID: ID!): File!
   setFilePrivate(fileID: ID!): File!
   shareFileWithUser(fileID: ID!, userID: ID!): FileSharing!

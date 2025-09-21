@@ -10,9 +10,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/graphQL"
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/handlers"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services"
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services/storage"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 )
@@ -36,6 +39,8 @@ func init() {
 	viper.BindEnv("redis.addr", "REDIS_ADDR")
 	viper.BindEnv("auth.jwt_expiration_hours", "JWT_EXPIRATION_HOURS")
 	viper.BindEnv("jwt_auth_secret", "JWT_AUTH_SECRET")
+	viper.BindEnv("download_token_secret", "DOWNLOAD_TOKEN_SECRET")
+	viper.BindEnv("app.base_url", "APP_BASE_URL")
 }
 
 func main() {
@@ -45,28 +50,41 @@ func main() {
 	}
 
 	db := database.Init()
-	redisClient := database.InitRedis()
+	rdb := database.InitRedis()
 
+	// Service Initialization
 	authService := services.NewAuthService(db)
-	fileService := services.NewFileService(db, redisClient)
+	storageProvider := storage.NewLocalStorageProvider(viper.GetString("app.base_url"))
+	fileService := services.NewFileService(db, rdb, storageProvider)
 	shareService := services.NewShareService(db)
 
+	// Setup Chi Router
 	router := chi.NewRouter()
-	router.Use(middleware.AuthMiddleware(authService))
-	router.Use(middleware.RedisRateLimiter(redisClient, 2, 1*time.Second))
 
-	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{
+	// Middleware
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+	}).Handler)
+	router.Use(middleware.AuthMiddleware(authService))
+	router.Use(middleware.RedisRateLimiter(rdb, 2, 1*time.Second))
+
+	// Setup GraphQL Server
+	resolver := &graphQL.Resolver{
 		DB:           db,
-		RDB:          redisClient,
+		RDB:          rdb,
 		AuthService:  authService,
 		FileService:  fileService,
 		ShareService: shareService,
-	}}))
+	}
+	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: resolver}))
 
 	srv.AddTransport(&transport.Websocket{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				return true
+				return true // Allow all origins for WebSocket
 			},
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
@@ -74,9 +92,12 @@ func main() {
 		InitFunc: middleware.WebSocketInitFunc(authService),
 	})
 
+	// Define Routes
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
+	router.Get("/downloads/*", handlers.DownloadHandler)
 
+	// Start Server
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
