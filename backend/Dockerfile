@@ -19,6 +19,9 @@ COPY . .
 # Tidy the modules to create a perfect go.sum
 RUN go mod tidy
 
+# Generate the GraphQL boilerplate
+RUN go generate ./...
+
 # Build the binary to ensure everything is correct
 RUN CGO_ENABLED=0 go build -o ./tmp/server cmd/server.go
 

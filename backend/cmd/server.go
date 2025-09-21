@@ -69,7 +69,7 @@ func main() {
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 	}).Handler)
 	router.Use(middleware.AuthMiddleware(authService))
-	router.Use(middleware.RedisRateLimiter(rdb, 2, 1*time.Second))
+	router.Use(middleware.RateLimitMiddleware(rdb, 2, 1*time.Second))
 
 	// Setup GraphQL Server
 	resolver := &graphQL.Resolver{

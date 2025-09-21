@@ -32,7 +32,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		http.Error(w, "Forbidden: Invalid token", http.StatusForbidden)
+		http.Error(w, "Forbidden: Invalid token \n" + err.Error(), http.StatusForbidden)
 		return
 	}
 
