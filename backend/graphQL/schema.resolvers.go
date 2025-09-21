@@ -6,10 +6,12 @@ package graphQL
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 )
@@ -493,13 +495,54 @@ func (r *queryResolver) SearchFiles(ctx context.Context, filter *models.FileFilt
 }
 
 // StorageStatistics is the resolver for the storageStatistics field.
-func (r *queryResolver) StorageStatistics(ctx context.Context) (*models.StorageStatistics, error) {
-	user, ok := ctx.Value("user").(*models.User)
-	if !ok {
-		return nil, fmt.Errorf("unauthorized")
+func (r *subscriptionResolver) StorageStatistics(ctx context.Context, userID *string) (<-chan *models.StorageStatistics, error) {
+	currentUser, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	return r.FileService.GetStorageStatistics(user)
+	var targetUserID uint
+	if userID != nil {
+		if currentUser.Role != "ADMIN" {
+			return nil, fmt.Errorf("only admins can view other users' statistics")
+		}
+		id, _ := strconv.ParseUint(*userID, 10, 64)
+		targetUserID = uint(id)
+	} else {
+		targetUserID = currentUser.ID
+	}
+
+	ch := make(chan *models.StorageStatistics, 1)
+	channel := fmt.Sprintf("storage_updates_%d", targetUserID)
+	pubsub := r.RDB.Subscribe(database.Ctx, channel)
+
+	// Send initial data
+	initialStats, err := r.FileService.GetStorageStatistics(targetUserID)
+	if err == nil {
+		ch <- initialStats
+	}
+
+	go func() {
+		defer pubsub.Close()
+		defer close(ch)
+
+		for {
+			select {
+			case msg, ok := <-pubsub.Channel():
+				if !ok {
+					return
+				}
+				var stats models.StorageStatistics
+				if err := json.Unmarshal([]byte(msg.Payload), &stats); err == nil {
+					ch <- &stats
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	return ch, nil
 }
 
 // ID resolves the id field for the User type.
@@ -566,6 +609,9 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Subscription returns SubscriptionResolver implementation.
+func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
+
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
@@ -576,4 +622,5 @@ type folderResolver struct{ *Resolver }
 type folderSharingResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

@@ -49,6 +49,9 @@ type StorageStatistics struct {
 	PercentageSaved float64 `json:"percentageSaved"`
 }
 
+type Subscription struct {
+}
+
 type UpdateFile struct {
 	ID             string  `json:"id"`
 	Name           *string `json:"name,omitempty"`

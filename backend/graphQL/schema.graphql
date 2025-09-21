@@ -134,7 +134,6 @@ type Query {
   file(id: ID!): File
   getUsersWithAccess(fileID: ID!): [User!]
   searchFiles(filter: FileFilterInput): [File!]
-  storageStatistics: StorageStatistics!
 }
 
 """
@@ -157,6 +156,10 @@ type Mutation {
   setFolderPrivate(folderID: ID!): Folder!
   shareFolderWithUser(folderID: ID!, userID: ID!): FolderSharing!
   removeFolderAccess(folderID: ID!, userID: ID!): Boolean!
+}
+
+type Subscription {
+  storageStatistics(userID: ID): StorageStatistics!
 }
 
 scalar Upload

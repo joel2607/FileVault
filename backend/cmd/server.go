@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/graphQL"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services"
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 )
 
@@ -44,9 +46,9 @@ func main() {
 
 	db := database.Init()
 	redisClient := database.InitRedis()
-	
+
 	authService := services.NewAuthService(db)
-	fileService := services.NewFileService(db)
+	fileService := services.NewFileService(db, redisClient)
 	shareService := services.NewShareService(db)
 
 	router := chi.NewRouter()
@@ -54,11 +56,23 @@ func main() {
 	router.Use(middleware.RedisRateLimiter(redisClient, 2, 1*time.Second))
 
 	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{
-		DB: db, 
-		AuthService: authService, 
-		FileService: fileService, 
+		DB:           db,
+		RDB:          redisClient,
+		AuthService:  authService,
+		FileService:  fileService,
 		ShareService: shareService,
 	}}))
+
+	srv.AddTransport(&transport.Websocket{
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		},
+		InitFunc: middleware.WebSocketInitFunc(authService),
+	})
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)

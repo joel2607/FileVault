@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -13,34 +14,59 @@ import (
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 // FileService handles business logic related to file and folder management.
 // It interacts with the database to perform CRUD operations on files and folders.
 type FileService struct {
-	DB *gorm.DB
+	DB  *gorm.DB
+	RDB *redis.Client
 }
 
 // NewFileService creates and returns a new FileService instance.
-// It takes a GORM database connection as input.
+// It takes a GORM database connection and a Redis client as input.
 // Returns a pointer to the newly created FileService.
-func NewFileService(db *gorm.DB) *FileService {
-	return &FileService{DB: db}
+func NewFileService(db *gorm.DB, rdb *redis.Client) *FileService {
+	return &FileService{DB: db, RDB: rdb}
 }
 
-func (s *FileService) GetStorageStatistics(user *models.User) (*models.StorageStatistics, error) {
+func (s *FileService) GetStorageStatistics(userID uint) (*models.StorageStatistics, error) {
+	var user models.User
+	if err := s.DB.First(&user, userID).Error; err != nil {
+		return nil, err
+	}
+
 	var percentageSaved float64
 	if user.UsedStorageKB > 0 {
 		percentageSaved = (user.SavedStorageKB / user.UsedStorageKB) * 100
 	}
 
 	return &models.StorageStatistics{
-		UsedStorageKB:   user.UsedStorageKB,
-		SavedStorageKB:  user.SavedStorageKB,
+		UsedStorageKb:   user.UsedStorageKB,
+		SavedStorageKb:  user.SavedStorageKB,
 		PercentageSaved: percentageSaved,
 	}, nil
+}
+
+func (s *FileService) publishStorageUpdate(user *models.User) {
+	stats, err := s.GetStorageStatistics(user.ID)
+	if err != nil {
+		log.Printf("Error getting storage statistics for user %d: %v", user.ID, err)
+		return
+	}
+
+	payload, err := json.Marshal(stats)
+	if err != nil {
+		log.Printf("Error marshalling storage statistics for user %d: %v", user.ID, err)
+		return
+	}
+
+	channel := fmt.Sprintf("storage_updates_%d", user.ID)
+	s.RDB.Publish(database.Ctx, channel, payload)
 }
 
 // UploadFile handles the entire file upload process.
@@ -86,7 +112,7 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		if err := s.DB.Create(newFile).Error; err != nil {
 			return nil, err
 		}
-		existingContent.ReferenceCount++;
+		existingContent.ReferenceCount++
 		s.DB.Save(&existingContent)
 
 		// Update user's storage usage. They save space by not uploading duplicate data.
@@ -95,6 +121,7 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		user.UsedStorageKB += storageChangeKB
 		log.Printf("User used storage(saved): %f", user.UsedStorageKB)
 		s.DB.Save(user)
+		s.publishStorageUpdate(user)
 		return newFile, nil
 	}
 
@@ -138,18 +165,19 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		DeduplicationID: newContent.ID,
 	}
 	if parentFolderID != nil {
-			id, _ := strconv.ParseUint(*parentFolderID, 10, 64)
-			uid := uint(id)
-			newFile.FolderID = &uid
-		}
-		if err := s.DB.Create(newFile).Error; err != nil {
-			return nil, err
-		}
+		id, _ := strconv.ParseUint(*parentFolderID, 10, 64)
+		uid := uint(id)
+		newFile.FolderID = &uid
+	}
+	if err := s.DB.Create(newFile).Error; err != nil {
+		return nil, err
+	}
 
 	// Update user's storage usage. They dont save space as this is new data.
 	user.UsedStorageKB += float64(file.Size) / 1024
 	log.Printf("User used storage: %f", user.UsedStorageKB)
 	s.DB.Save(user)
+	s.publishStorageUpdate(user)
 
 	return newFile, nil
 }
@@ -227,8 +255,8 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 	}
 
 	fileSizeKB := float64(file.Size) / 1024
-	
-	// First delete file record to prevent deduplicated content delete fail. 
+
+	// First delete file record to prevent deduplicated content delete fail.
 	err := s.DB.Delete(&file).Error
 	if err != nil {
 		return nil, err
@@ -256,11 +284,10 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 		}
 	}
 
+	s.publishStorageUpdate(user)
 	return &file, nil
 
 }
-
-
 
 // UpdateFolder modifies an existing folder's properties, such as its name or parent folder.
 // It ensures that the user attempting the update is the owner of the folder.

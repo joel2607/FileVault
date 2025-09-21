@@ -46,6 +46,7 @@ type ResolverRoot interface {
 	FolderSharing() FolderSharingResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 	User() UserResolver
 }
 
@@ -145,7 +146,6 @@ type ComplexityRoot struct {
 		Me                 func(childComplexity int) int
 		Root               func(childComplexity int) int
 		SearchFiles        func(childComplexity int, filter *models.FileFilterInput) int
-		StorageStatistics  func(childComplexity int) int
 	}
 
 	Root struct {
@@ -157,6 +157,10 @@ type ComplexityRoot struct {
 		PercentageSaved func(childComplexity int) int
 		SavedStorageKb  func(childComplexity int) int
 		UsedStorageKb   func(childComplexity int) int
+	}
+
+	Subscription struct {
+		StorageStatistics func(childComplexity int, userID *string) int
 	}
 
 	User struct {
@@ -251,7 +255,9 @@ type QueryResolver interface {
 	File(ctx context.Context, id string) (*models.File, error)
 	GetUsersWithAccess(ctx context.Context, fileID string) ([]*models.User, error)
 	SearchFiles(ctx context.Context, filter *models.FileFilterInput) ([]*models.File, error)
-	StorageStatistics(ctx context.Context) (*models.StorageStatistics, error)
+}
+type SubscriptionResolver interface {
+	StorageStatistics(ctx context.Context, userID *string) (<-chan *models.StorageStatistics, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *models.User) (string, error)
@@ -811,12 +817,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.SearchFiles(childComplexity, args["filter"].(*models.FileFilterInput)), true
-	case "Query.storageStatistics":
-		if e.complexity.Query.StorageStatistics == nil {
-			break
-		}
-
-		return e.complexity.Query.StorageStatistics(childComplexity), true
 
 	case "Root.files":
 		if e.complexity.Root.Files == nil {
@@ -849,6 +849,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StorageStatistics.UsedStorageKb(childComplexity), true
+
+	case "Subscription.storageStatistics":
+		if e.complexity.Subscription.StorageStatistics == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_storageStatistics_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.StorageStatistics(childComplexity, args["userID"].(*string)), true
 
 	case "User.apiRateLimit":
 		if e.complexity.User.APIRateLimit == nil {
@@ -967,6 +979,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
 			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, opCtx.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next(ctx)
+
+			if data == nil {
+				return nil
+			}
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
@@ -1298,6 +1327,17 @@ func (ec *executionContext) field_Query_searchFiles_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["filter"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_storageStatistics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "userID", ec.unmarshalOID2ᚖstring)
+	if err != nil {
+		return nil, err
+	}
+	args["userID"] = arg0
 	return args, nil
 }
 
@@ -4345,43 +4385,6 @@ func (ec *executionContext) fieldContext_Query_searchFiles(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_storageStatistics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_storageStatistics,
-		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().StorageStatistics(ctx)
-		},
-		nil,
-		ec.marshalNStorageStatistics2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_storageStatistics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "usedStorageKB":
-				return ec.fieldContext_StorageStatistics_usedStorageKB(ctx, field)
-			case "savedStorageKB":
-				return ec.fieldContext_StorageStatistics_savedStorageKB(ctx, field)
-			case "percentageSaved":
-				return ec.fieldContext_StorageStatistics_percentageSaved(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type StorageStatistics", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4685,6 +4688,55 @@ func (ec *executionContext) fieldContext_StorageStatistics_percentageSaved(_ con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Float does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_storageStatistics(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Subscription_storageStatistics,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Subscription().StorageStatistics(ctx, fc.Args["userID"].(*string))
+		},
+		nil,
+		ec.marshalNStorageStatistics2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Subscription_storageStatistics(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "usedStorageKB":
+				return ec.fieldContext_StorageStatistics_usedStorageKB(ctx, field)
+			case "savedStorageKB":
+				return ec.fieldContext_StorageStatistics_savedStorageKB(ctx, field)
+			case "percentageSaved":
+				return ec.fieldContext_StorageStatistics_percentageSaved(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StorageStatistics", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_storageStatistics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -8522,28 +8574,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "storageStatistics":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_storageStatistics(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -8660,6 +8690,26 @@ func (ec *executionContext) _StorageStatistics(ctx context.Context, sel ast.Sele
 	}
 
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "storageStatistics":
+		return ec._Subscription_storageStatistics(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var userImplementors = []string{"User"}
