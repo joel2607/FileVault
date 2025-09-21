@@ -30,6 +30,19 @@ func NewFileService(db *gorm.DB) *FileService {
 	return &FileService{DB: db}
 }
 
+func (s *FileService) GetStorageStatistics(user *models.User) (*models.StorageStatistics, error) {
+	var percentageSaved float64
+	if user.UsedStorageKB > 0 {
+		percentageSaved = (user.SavedStorageKB / user.UsedStorageKB) * 100
+	}
+
+	return &models.StorageStatistics{
+		UsedStorageKB:   user.UsedStorageKB,
+		SavedStorageKB:  user.SavedStorageKB,
+		PercentageSaved: percentageSaved,
+	}, nil
+}
+
 // UploadFile handles the entire file upload process.
 // It performs content hashing for deduplication, saves the file to storage if it's new,
 // validates the MIME type, and creates the necessary metadata in the database.
@@ -73,7 +86,7 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		if err := s.DB.Create(newFile).Error; err != nil {
 			return nil, err
 		}
-		existingContent.ReferenceCount++
+		existingContent.ReferenceCount++;
 		s.DB.Save(&existingContent)
 
 		// Update user's storage usage. They save space by not uploading duplicate data.
@@ -125,13 +138,13 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 		DeduplicationID: newContent.ID,
 	}
 	if parentFolderID != nil {
-		id, _ := strconv.ParseUint(*parentFolderID, 10, 64)
-		uid := uint(id)
-		newFile.FolderID = &uid
-	}
-	if err := s.DB.Create(newFile).Error; err != nil {
-		return nil, err
-	}
+			id, _ := strconv.ParseUint(*parentFolderID, 10, 64)
+			uid := uint(id)
+			newFile.FolderID = &uid
+		}
+		if err := s.DB.Create(newFile).Error; err != nil {
+			return nil, err
+		}
 
 	// Update user's storage usage. They dont save space as this is new data.
 	user.UsedStorageKB += float64(file.Size) / 1024
