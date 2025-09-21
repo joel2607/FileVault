@@ -67,6 +67,11 @@ type ComplexityRoot struct {
 		UpdatedAt      func(childComplexity int) int
 	}
 
+	DownloadCountUpdate struct {
+		DownloadCount func(childComplexity int) int
+		FileID        func(childComplexity int) int
+	}
+
 	File struct {
 		CreatedAt           func(childComplexity int) int
 		DeduplicatedContent func(childComplexity int) int
@@ -161,6 +166,7 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
+		FileDownloadCount func(childComplexity int, fileID string) int
 		StorageStatistics func(childComplexity int, userID *string) int
 	}
 
@@ -260,6 +266,7 @@ type QueryResolver interface {
 }
 type SubscriptionResolver interface {
 	StorageStatistics(ctx context.Context, userID *string) (<-chan *models.StorageStatistics, error)
+	FileDownloadCount(ctx context.Context, fileID string) (<-chan *models.DownloadCountUpdate, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *models.User) (string, error)
@@ -335,6 +342,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.DeduplicatedContent.UpdatedAt(childComplexity), true
+
+	case "DownloadCountUpdate.downloadCount":
+		if e.complexity.DownloadCountUpdate.DownloadCount == nil {
+			break
+		}
+
+		return e.complexity.DownloadCountUpdate.DownloadCount(childComplexity), true
+	case "DownloadCountUpdate.fileID":
+		if e.complexity.DownloadCountUpdate.FileID == nil {
+			break
+		}
+
+		return e.complexity.DownloadCountUpdate.FileID(childComplexity), true
 
 	case "File.createdAt":
 		if e.complexity.File.CreatedAt == nil {
@@ -863,6 +883,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.StorageStatistics.UsedStorageKb(childComplexity), true
 
+	case "Subscription.fileDownloadCount":
+		if e.complexity.Subscription.FileDownloadCount == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_fileDownloadCount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.FileDownloadCount(childComplexity, args["fileID"].(string)), true
 	case "Subscription.storageStatistics":
 		if e.complexity.Subscription.StorageStatistics == nil {
 			break
@@ -1354,6 +1385,17 @@ func (ec *executionContext) field_Query_searchFiles_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Subscription_fileDownloadCount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "fileID", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["fileID"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Subscription_storageStatistics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1635,6 +1677,64 @@ func (ec *executionContext) fieldContext_DeduplicatedContent_referenceCount(_ co
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DownloadCountUpdate_fileID(ctx context.Context, field graphql.CollectedField, obj *models.DownloadCountUpdate) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DownloadCountUpdate_fileID,
+		func(ctx context.Context) (any, error) {
+			return obj.FileID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DownloadCountUpdate_fileID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DownloadCountUpdate",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DownloadCountUpdate_downloadCount(ctx context.Context, field graphql.CollectedField, obj *models.DownloadCountUpdate) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DownloadCountUpdate_downloadCount,
+		func(ctx context.Context) (any, error) {
+			return obj.DownloadCount, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DownloadCountUpdate_downloadCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DownloadCountUpdate",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
 		},
@@ -4806,6 +4906,53 @@ func (ec *executionContext) fieldContext_Subscription_storageStatistics(ctx cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Subscription_fileDownloadCount(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Subscription_fileDownloadCount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Subscription().FileDownloadCount(ctx, fc.Args["fileID"].(string))
+		},
+		nil,
+		ec.marshalNDownloadCountUpdate2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDownloadCountUpdate,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Subscription_fileDownloadCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "fileID":
+				return ec.fieldContext_DownloadCountUpdate_fileID(ctx, field)
+			case "downloadCount":
+				return ec.fieldContext_DownloadCountUpdate_downloadCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DownloadCountUpdate", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_fileDownloadCount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -7003,6 +7150,50 @@ func (ec *executionContext) _DeduplicatedContent(ctx context.Context, sel ast.Se
 	return out
 }
 
+var downloadCountUpdateImplementors = []string{"DownloadCountUpdate"}
+
+func (ec *executionContext) _DownloadCountUpdate(ctx context.Context, sel ast.SelectionSet, obj *models.DownloadCountUpdate) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, downloadCountUpdateImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DownloadCountUpdate")
+		case "fileID":
+			out.Values[i] = ec._DownloadCountUpdate_fileID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "downloadCount":
+			out.Values[i] = ec._DownloadCountUpdate_downloadCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var fileImplementors = []string{"File"}
 
 func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *models.File) graphql.Marshaler {
@@ -8779,6 +8970,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	switch fields[0].Name {
 	case "storageStatistics":
 		return ec._Subscription_storageStatistics(ctx, fields[0])
+	case "fileDownloadCount":
+		return ec._Subscription_fileDownloadCount(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -9462,6 +9655,20 @@ func (ec *executionContext) marshalNDeduplicatedContent2ᚖgithubᚗcomᚋBalkan
 		return graphql.Null
 	}
 	return ec._DeduplicatedContent(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDownloadCountUpdate2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDownloadCountUpdate(ctx context.Context, sel ast.SelectionSet, v models.DownloadCountUpdate) graphql.Marshaler {
+	return ec._DownloadCountUpdate(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDownloadCountUpdate2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDownloadCountUpdate(ctx context.Context, sel ast.SelectionSet, v *models.DownloadCountUpdate) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DownloadCountUpdate(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNFile2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v models.File) graphql.Marshaler {

@@ -8,6 +8,11 @@ type AuthResponse struct {
 	User  *User  `json:"user"`
 }
 
+type DownloadCountUpdate struct {
+	FileID        string `json:"fileID"`
+	DownloadCount int32  `json:"downloadCount"`
+}
+
 type FileFilterInput struct {
 	MimeTypes  []string `json:"mimeTypes,omitempty"`
 	MinSize    *int32   `json:"minSize,omitempty"`
