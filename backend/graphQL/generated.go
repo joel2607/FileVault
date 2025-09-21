@@ -124,6 +124,7 @@ type ComplexityRoot struct {
 		CreateFolder        func(childComplexity int, input models.NewFolder) int
 		DeleteFile          func(childComplexity int, id string) int
 		DeleteFolder        func(childComplexity int, id string) int
+		GenerateDownloadURL func(childComplexity int, fileID string) int
 		Login               func(childComplexity int, email string, password string) int
 		Register            func(childComplexity int, input models.RegisterInput) int
 		RemoveFileAccess    func(childComplexity int, fileID string, userID string) int
@@ -239,6 +240,7 @@ type MutationResolver interface {
 	DeleteFolder(ctx context.Context, id string) (*models.Folder, error)
 	UpdateFile(ctx context.Context, input models.UpdateFile) (*models.File, error)
 	DeleteFile(ctx context.Context, id string) (*models.File, error)
+	GenerateDownloadURL(ctx context.Context, fileID string) (string, error)
 	SetFilePublic(ctx context.Context, fileID string) (*models.File, error)
 	SetFilePrivate(ctx context.Context, fileID string) (*models.File, error)
 	ShareFileWithUser(ctx context.Context, fileID string, userID string) (*models.FileSharing, error)
@@ -617,6 +619,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DeleteFolder(childComplexity, args["id"].(string)), true
+	case "Mutation.generateDownloadUrl":
+		if e.complexity.Mutation.GenerateDownloadURL == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateDownloadUrl_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateDownloadURL(childComplexity, args["fileID"].(string)), true
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -1099,6 +1112,17 @@ func (ec *executionContext) field_Mutation_deleteFolder_args(ctx context.Context
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_generateDownloadUrl_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "fileID", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["fileID"] = arg0
 	return args, nil
 }
 
@@ -3549,6 +3573,47 @@ func (ec *executionContext) fieldContext_Mutation_deleteFile(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_generateDownloadUrl(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_generateDownloadUrl,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().GenerateDownloadURL(ctx, fc.Args["fileID"].(string))
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateDownloadUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateDownloadUrl_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -8355,6 +8420,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteFile":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteFile(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "generateDownloadUrl":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateDownloadUrl(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

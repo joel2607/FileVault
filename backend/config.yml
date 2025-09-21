@@ -13,3 +13,6 @@ auth:
 
 redis:
   addr: "file_vault_redis:6379"
+
+app:
+  base_url: "http://localhost:8080"
