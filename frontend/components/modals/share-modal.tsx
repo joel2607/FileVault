@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogTitle,
@@ -18,10 +18,23 @@ import {
   InputAdornment,
   IconButton,
   Chip,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Avatar,
+  Autocomplete,
+  CircularProgress,
 } from "@mui/material"
-import { ContentCopy, Public, Lock, Person } from "@mui/icons-material"
-import { useMutation } from "@apollo/client"
-import { SET_FILE_PUBLIC_MUTATION, SET_FILE_PRIVATE_MUTATION } from "@/lib/graphql/mutations"
+import { ContentCopy, Public, Lock, Person, Delete } from "@mui/icons-material"
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client"
+import {
+  SET_FILE_PUBLIC_MUTATION,
+  SET_FILE_PRIVATE_MUTATION,
+  ADD_FILE_ACCESS_MUTATION,
+  REVOKE_FILE_ACCESS_MUTATION,
+} from "@/lib/graphql/mutations"
+import { GET_FILE_ACCESS_QUERY, SEARCH_USERS_QUERY } from "@/lib/graphql/queries"
 import type { File } from "@/lib/types"
 
 interface ShareModalProps {
@@ -31,18 +44,50 @@ interface ShareModalProps {
   onFileUpdate: () => void
 }
 
+interface User {
+  id: string
+  username: string
+  email: string
+}
+
+interface FileAccess {
+  id: string
+  user: User
+  file: {
+    id: string
+    fileName: string
+  }
+}
+
 export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProps) {
   const [activeTab, setActiveTab] = useState(0)
-  const [userEmail, setUserEmail] = useState("")
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [error, setError] = useState("")
   const [copySuccess, setCopySuccess] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
 
+  // Queries and mutations
+  const { data: accessData, refetch: refetchAccess } = useQuery(GET_FILE_ACCESS_QUERY, {
+    variables: { fileID: file?.id },
+    skip: !file?.id || !open,
+  })
+
+  const [searchUsers, { data: usersData, loading: searchingUsers }] = useLazyQuery(SEARCH_USERS_QUERY)
   const [setFilePublic] = useMutation(SET_FILE_PUBLIC_MUTATION)
   const [setFilePrivate] = useMutation(SET_FILE_PRIVATE_MUTATION)
+  const [addFileAccess] = useMutation(ADD_FILE_ACCESS_MUTATION)
+  const [revokeFileAccess] = useMutation(REVOKE_FILE_ACCESS_MUTATION)
+
+  useEffect(() => {
+    if (searchTerm.length > 2) {
+      searchUsers({ variables: { email: searchTerm } })
+    }
+  }, [searchTerm, searchUsers])
 
   if (!file) return null
 
   const shareUrl = `${window.location.origin}/shared/${file.id}`
+  const fileAccess: FileAccess[] = accessData?.getFileAccess || []
 
   const handleVisibilityToggle = async (isPublic: boolean) => {
     try {
@@ -68,15 +113,45 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
     }
   }
 
-  const handleShareWithUser = () => {
-    // This would typically call the shareFileWithUser mutation
-    console.log("Share with user:", userEmail)
-    setUserEmail("")
+  const handleShareWithUser = async () => {
+    if (!selectedUser) return
+
+    try {
+      setError("")
+      await addFileAccess({
+        variables: {
+          fileID: file.id,
+          userID: selectedUser.id,
+        },
+      })
+
+      setSelectedUser(null)
+      setSearchTerm("")
+      refetchAccess()
+    } catch (error: any) {
+      setError(error.message)
+    }
+  }
+
+  const handleRevokeAccess = async (userId: string) => {
+    try {
+      setError("")
+      await revokeFileAccess({
+        variables: {
+          fileID: file.id,
+          userID: userId,
+        },
+      })
+      refetchAccess()
+    } catch (error: any) {
+      setError(error.message)
+    }
   }
 
   const handleClose = () => {
     setActiveTab(0)
-    setUserEmail("")
+    setSelectedUser(null)
+    setSearchTerm("")
     setError("")
     setCopySuccess(false)
     onClose()
@@ -109,22 +184,79 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
               Share this file with specific people by entering their email address.
             </Typography>
 
-            <TextField
-              fullWidth
-              label="Email address"
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-              margin="normal"
-              placeholder="Enter email to share with"
+            <Autocomplete
+              options={usersData?.searchUsers || []}
+              getOptionLabel={(option) => `${option.username} (${option.email})`}
+              value={selectedUser}
+              onChange={(_, newValue) => setSelectedUser(newValue)}
+              inputValue={searchTerm}
+              onInputChange={(_, newInputValue) => setSearchTerm(newInputValue)}
+              loading={searchingUsers}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search users by email"
+                  margin="normal"
+                  fullWidth
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {searchingUsers ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              renderOption={(props, option) => (
+                <Box component="li" {...props}>
+                  <Avatar sx={{ mr: 2, width: 32, height: 32 }}>{option.username.charAt(0).toUpperCase()}</Avatar>
+                  <Box>
+                    <Typography variant="body2">{option.username}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {option.email}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
             />
 
-            <Button variant="contained" onClick={handleShareWithUser} disabled={!userEmail.trim()} sx={{ mt: 2 }}>
+            <Button variant="contained" onClick={handleShareWithUser} disabled={!selectedUser} sx={{ mt: 2 }}>
               Share
             </Button>
 
             <Box sx={{ mt: 3 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Current Access
+                People with Access ({fileAccess.length})
+              </Typography>
+
+              {fileAccess.length > 0 ? (
+                <List dense>
+                  {fileAccess.map((access) => (
+                    <ListItem key={access.id}>
+                      <Avatar sx={{ mr: 2, width: 32, height: 32 }}>
+                        {access.user.username.charAt(0).toUpperCase()}
+                      </Avatar>
+                      <ListItemText primary={access.user.username} secondary={access.user.email} />
+                      <ListItemSecondaryAction>
+                        <IconButton edge="end" onClick={() => handleRevokeAccess(access.user.id)} color="error">
+                          <Delete />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No users have been granted access to this file.
+                </Typography>
+              )}
+            </Box>
+
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle2" gutterBottom>
+                Current Visibility
               </Typography>
               <Chip
                 icon={file.isPublic ? <Public /> : <Lock />}

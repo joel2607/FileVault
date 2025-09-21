@@ -21,16 +21,7 @@ import {
   Alert,
   Chip,
 } from "@mui/material"
-import {
-  Folder as FolderIcon,
-  MoreVert,
-  Edit,
-  Download,
-  Share,
-  Delete,
-  Public,
-  CreateNewFolder,
-} from "@mui/icons-material"
+import { Folder as FolderIcon, MoreVert, Edit, Delete, Public, CreateNewFolder } from "@mui/icons-material"
 import { useQuery, useMutation } from "@apollo/client"
 import { ROOT_QUERY, FOLDER_QUERY } from "@/lib/graphql/queries"
 import {
@@ -38,11 +29,12 @@ import {
   UPDATE_FOLDER_MUTATION,
   DELETE_FILE_MUTATION,
   DELETE_FOLDER_MUTATION,
-  GENERATE_DOWNLOAD_URL_MUTATION,
   CREATE_FOLDER_MUTATION,
 } from "@/lib/graphql/mutations"
 import type { File, Folder } from "@/lib/types"
 import { DashboardBreadcrumbs } from "./breadcrumbs"
+import { SearchBar } from "./search-bar"
+import { FileCard } from "./file-card"
 
 interface FileBrowserProps {
   onShareFile: (file: File) => void
@@ -59,6 +51,8 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   const [newName, setNewName] = useState("")
   const [newFolderName, setNewFolderName] = useState("")
   const [error, setError] = useState("")
+  const [searchResults, setSearchResults] = useState<File[] | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
 
   // Queries
   const {
@@ -83,13 +77,22 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   const [updateFolder] = useMutation(UPDATE_FOLDER_MUTATION)
   const [deleteFile] = useMutation(DELETE_FILE_MUTATION)
   const [deleteFolder] = useMutation(DELETE_FOLDER_MUTATION)
-  const [generateDownloadUrl] = useMutation(GENERATE_DOWNLOAD_URL_MUTATION)
   const [createFolder] = useMutation(CREATE_FOLDER_MUTATION)
 
   const currentData = currentFolderId ? folderData?.folder : rootData?.root
   const loading = currentFolderId ? folderLoading : rootLoading
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, item: File | Folder) => {
+  const handleSearchResults = (files: File[]) => {
+    setSearchResults(files)
+    setIsSearching(true)
+  }
+
+  const handleClearSearch = () => {
+    setSearchResults(null)
+    setIsSearching(false)
+  }
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, item: Folder) => {
     setAnchorEl(event.currentTarget)
     setSelectedItem(item)
   }
@@ -100,11 +103,18 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   }
 
   const handleFolderClick = (folder: Folder) => {
+    if (isSearching) {
+      handleClearSearch()
+    }
     setCurrentFolderId(folder.id)
     setCurrentPath([...currentPath, folder])
   }
 
   const handleNavigate = (folderId?: string) => {
+    if (isSearching) {
+      handleClearSearch()
+    }
+
     if (!folderId) {
       // Navigate to root
       setCurrentFolderId(undefined)
@@ -119,43 +129,25 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
     }
   }
 
-  const handleRename = () => {
+  const handleRenameFile = (file: File) => {
+    setSelectedItem(file)
+    setNewName(file.fileName)
+    setRenameDialogOpen(true)
+  }
+
+  const handleRenameFolder = () => {
     if (!selectedItem) return
-    setNewName("fileName" in selectedItem ? selectedItem.fileName : selectedItem.folderName)
+    setNewName("folderName" in selectedItem ? selectedItem.folderName : "")
     setRenameDialogOpen(true)
     handleMenuClose()
   }
 
-  const handleDownload = async () => {
-    if (!selectedItem || !("fileName" in selectedItem)) return
-
-    try {
-      const { data } = await generateDownloadUrl({
-        variables: { fileID: selectedItem.id },
-      })
-
-      if (data?.generateDownloadUrl) {
-        const link = document.createElement("a")
-        link.href = data.generateDownloadUrl
-        link.download = selectedItem.fileName
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }
-    } catch (error) {
-      console.error("Download failed:", error)
-    }
-
-    handleMenuClose()
+  const handleDeleteFile = (file: File) => {
+    setSelectedItem(file)
+    setDeleteDialogOpen(true)
   }
 
-  const handleShare = () => {
-    if (!selectedItem || !("fileName" in selectedItem)) return
-    onShareFile(selectedItem)
-    handleMenuClose()
-  }
-
-  const handleDelete = () => {
+  const handleDeleteFolder = () => {
     setDeleteDialogOpen(true)
     handleMenuClose()
   }
@@ -169,7 +161,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
           variables: {
             input: {
               id: selectedItem.id,
-              name: newName.trim(),
+              fileName: newName.trim(),
             },
           },
         })
@@ -178,7 +170,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
           variables: {
             input: {
               id: selectedItem.id,
-              name: newName.trim(),
+              folderName: newName.trim(),
             },
           },
         })
@@ -232,7 +224,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
       await createFolder({
         variables: {
           input: {
-            name: newFolderName.trim(),
+            folderName: newFolderName.trim(),
             parentFolderID: currentFolderId,
           },
         },
@@ -252,35 +244,29 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
     }
   }
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-  }
-
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith("image/")) return "🖼️"
-    if (mimeType.startsWith("video/")) return "🎥"
-    if (mimeType.startsWith("audio/")) return "🎵"
-    if (mimeType.includes("pdf")) return "📄"
-    if (mimeType.includes("document") || mimeType.includes("word")) return "📝"
-    if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "📊"
-    return "📄"
-  }
-
   if (loading) {
     return <Typography>Loading...</Typography>
   }
 
+  const displayFiles = isSearching ? searchResults : currentData?.files
+  const displayFolders = isSearching ? [] : currentData?.folders
+
   return (
     <Box>
+      <SearchBar onSearchResults={handleSearchResults} onClearSearch={handleClearSearch} />
+
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <DashboardBreadcrumbs currentPath={currentPath} onNavigate={handleNavigate} />
-        <Button variant="outlined" startIcon={<CreateNewFolder />} onClick={() => setCreateFolderDialogOpen(true)}>
-          New Folder
-        </Button>
+        {isSearching ? (
+          <Typography variant="h6">Search Results ({searchResults?.length || 0} files found)</Typography>
+        ) : (
+          <DashboardBreadcrumbs currentPath={currentPath} onNavigate={handleNavigate} />
+        )}
+
+        {!isSearching && (
+          <Button variant="outlined" startIcon={<CreateNewFolder />} onClick={() => setCreateFolderDialogOpen(true)}>
+            New Folder
+          </Button>
+        )}
       </Box>
 
       {error && (
@@ -290,8 +276,8 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
       )}
 
       <Grid container spacing={2}>
-        {/* Folders */}
-        {currentData?.folders?.map((folder: Folder) => (
+        {/* Folders - only show when not searching */}
+        {displayFolders?.map((folder: Folder) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={folder.id}>
             <Card
               sx={{
@@ -323,56 +309,29 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
           </Grid>
         ))}
 
-        {/* Files */}
-        {currentData?.files?.map((file: File) => (
+        {/* Files - using enhanced FileCard component */}
+        {displayFiles?.map((file: File) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
-            <Card sx={{ "&:hover": { elevation: 4 }, position: "relative" }}>
-              <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                  <Box sx={{ mr: 1, fontSize: 32 }}>{getFileIcon(file.mimeType)}</Box>
-                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                    <Typography variant="subtitle2" noWrap>
-                      {file.fileName}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {formatFileSize(file.size)}
-                    </Typography>
-                  </Box>
-                  <IconButton size="small" onClick={(e) => handleMenuClick(e, file)}>
-                    <MoreVert />
-                  </IconButton>
-                </Box>
-                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                  {file.isPublic && <Chip icon={<Public />} label="Public" size="small" color="success" />}
-                  {file.downloadCount > 0 && (
-                    <Chip label={`${file.downloadCount} downloads`} size="small" variant="outlined" />
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
+            <FileCard file={file} onRename={handleRenameFile} onShare={onShareFile} onDelete={handleDeleteFile} />
           </Grid>
         ))}
       </Grid>
 
-      {/* Context Menu */}
+      {isSearching && (!searchResults || searchResults.length === 0) && (
+        <Box sx={{ textAlign: "center", py: 4 }}>
+          <Typography variant="body1" color="text.secondary">
+            No files found matching your search criteria.
+          </Typography>
+        </Box>
+      )}
+
+      {/* Folder Context Menu */}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={handleRename}>
+        <MenuItem onClick={handleRenameFolder}>
           <Edit sx={{ mr: 1 }} />
           Rename
         </MenuItem>
-        {selectedItem && "fileName" in selectedItem && (
-          <>
-            <MenuItem onClick={handleDownload}>
-              <Download sx={{ mr: 1 }} />
-              Download
-            </MenuItem>
-            <MenuItem onClick={handleShare}>
-              <Share sx={{ mr: 1 }} />
-              Share
-            </MenuItem>
-          </>
-        )}
-        <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
+        <MenuItem onClick={handleDeleteFolder} sx={{ color: "error.main" }}>
           <Delete sx={{ mr: 1 }} />
           Delete
         </MenuItem>

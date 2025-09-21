@@ -19,8 +19,6 @@ import {
   Alert,
 } from "@mui/material"
 import { CloudUpload, Delete, AttachFile } from "@mui/icons-material"
-import { useMutation } from "@apollo/client"
-import { UPLOAD_FILES_MUTATION } from "@/lib/graphql/mutations"
 
 interface UploadModalProps {
   open: boolean
@@ -34,8 +32,6 @@ export function UploadModal({ open, onClose, currentFolderId, onUploadComplete }
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState("")
-
-  const [uploadFiles] = useMutation(UPLOAD_FILES_MUTATION)
 
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
@@ -72,25 +68,28 @@ export function UploadModal({ open, onClose, currentFolderId, onUploadComplete }
     setUploadProgress(0)
 
     try {
-      // Simulate progress for demo purposes
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return prev
-          }
-          return prev + 10
-        })
-      }, 200)
+      const formData = new FormData()
+      selectedFiles.forEach((file) => {
+        formData.append("files", file)
+      })
+      if (currentFolderId) {
+        formData.append("parentFolderID", currentFolderId)
+      }
 
-      await uploadFiles({
-        variables: {
-          files: selectedFiles,
-          parentFolderID: currentFolderId,
+      const token = localStorage.getItem("token")
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
+        body: formData,
       })
 
-      clearInterval(progressInterval)
+      if (!response.ok) {
+        throw new Error("Upload failed")
+      }
+
+      const result = await response.json()
       setUploadProgress(100)
 
       setTimeout(() => {
