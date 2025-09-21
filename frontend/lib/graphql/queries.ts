@@ -75,3 +75,30 @@ export const SEARCH_FILES_QUERY = gql`
     }
   }
 `
+
+export const GET_FILE_ACCESS_QUERY = gql`
+  query GetFileAccess($fileID: ID!) {
+    getFileAccess(fileID: $fileID) {
+      id
+      user {
+        id
+        username
+        email
+      }
+      file {
+        id
+        fileName
+      }
+    }
+  }
+`
+
+export const SEARCH_USERS_QUERY = gql`
+  query SearchUsers($email: String!) {
+    searchUsers(email: $email) {
+      id
+      username
+      email
+    }
+  }
+`

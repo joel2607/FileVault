@@ -120,3 +120,45 @@ export const SET_FILE_PRIVATE_MUTATION = gql`
     }
   }
 `
+
+export const ADD_FILE_ACCESS_MUTATION = gql`
+  mutation AddFileAccess($fileID: ID!, $userID: ID!) {
+    addFileAccess(fileID: $fileID, userID: $userID) {
+      id
+      user {
+        id
+        username
+        email
+      }
+      file {
+        id
+        fileName
+      }
+    }
+  }
+`
+
+export const REVOKE_FILE_ACCESS_MUTATION = gql`
+  mutation RevokeFileAccess($fileID: ID!, $userID: ID!) {
+    revokeFileAccess(fileID: $fileID, userID: $userID) {
+      id
+    }
+  }
+`
+
+export const GET_FILE_ACCESS_QUERY = gql`
+  query GetFileAccess($fileID: ID!) {
+    getFileAccess(fileID: $fileID) {
+      id
+      user {
+        id
+        username
+        email
+      }
+      file {
+        id
+        fileName
+      }
+    }
+  }
+`
