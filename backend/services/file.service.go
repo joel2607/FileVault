@@ -247,23 +247,6 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 
 }
 
-// GetFolder retrieves a specific folder by its ID for a given user.
-// It ensures that only the owner of the folder can access it.
-//
-// Inputs:
-// - ctx: The context for the request.
-// - id: The string ID of the folder to retrieve.
-// - user: The user requesting the folder.
-//
-// Outputs:
-// - A pointer to the retrieved models.Folder object.
-// - An error if the folder is not found or the user does not have permission.
-func (s *FileService) GetFolder(ctx context.Context, id string, user *models.User) (*models.Folder, error) {
-	var folder models.Folder
-	uid, _ := strconv.ParseUint(id, 10, 64)
-	err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error
-	return &folder, err
-}
 
 
 // UpdateFolder modifies an existing folder's properties, such as its name or parent folder.
@@ -346,28 +329,6 @@ func (s *FileService) DeleteFolder(ctx context.Context, id string, user *models.
 		return nil, err
 	}
 	return &folder, nil
-}
-
-// GetRoot retrieves the top-level files and folders for a given user.
-// This represents the user's root directory.
-//
-// Inputs:
-// - ctx: The context for the request.
-// - user: The user whose root directory is being requested.
-//
-// Outputs:
-// - A pointer to a models.Root object, containing slices of top-level files and folders.
-// - An error if the database query fails.
-func (s *FileService) GetRoot(ctx context.Context, user *models.User) (*models.Root, error) {
-	var files []*models.File
-	if err := s.DB.Where("user_id = ? AND folder_id IS NULL", user.ID).Find(&files).Error; err != nil {
-		return nil, err
-	}
-	var folders []*models.Folder
-	if err := s.DB.Where("user_id = ? AND parent_folder_id IS NULL", user.ID).Find(&folders).Error; err != nil {
-		return nil, err
-	}
-	return &models.Root{Files: files, Folders: folders}, nil
 }
 
 // isValidMIME validates the actual content type of a file against its declared MIME type.

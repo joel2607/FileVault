@@ -215,6 +215,50 @@ func (r *folderResolver) Folders(ctx context.Context, obj *models.Folder) ([]*mo
 	return folders, err
 }
 
+// ID resolves the id field for the FolderSharing type.
+// It converts the numeric ID of the sharing record into a string.
+func (r *folderSharingResolver) ID(ctx context.Context, obj *models.FolderSharing) (string, error) {
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
+}
+
+// CreatedAt resolves the createdAt field for the FolderSharing type.
+// It returns the creation timestamp as a string.
+func (r *folderSharingResolver) CreatedAt(ctx context.Context, obj *models.FolderSharing) (string, error) {
+	return obj.CreatedAt.String(), nil
+}
+
+// UpdatedAt resolves the updatedAt field for the FolderSharing type.
+// It returns the last update timestamp as a string.
+func (r *folderSharingResolver) UpdatedAt(ctx context.Context, obj *models.FolderSharing) (string, error) {
+	return obj.UpdatedAt.String(), nil
+}
+
+// FileID resolves the fileId field for the FolderSharing type.
+// It returns the ID of the file being shared as a string.
+func (r *folderSharingResolver) FolderID(ctx context.Context, obj *models.FolderSharing) (string, error) {
+	return strconv.FormatUint(uint64(obj.FolderID), 10), nil
+}
+
+// Folder resolves the folder field for the FolderSharing type.
+func (r *folderSharingResolver) Folder(ctx context.Context, obj *models.FolderSharing) (*models.Folder, error) {
+	var folder models.Folder
+	err := r.DB.First(&folder, obj.FolderID).Error
+	return &folder, err
+}
+
+// SharedWithUserID resolves the sharedWithUserId field for the FolderSharing type.
+// It returns the ID of the user with whom the folder is shared as a string.
+func (r *folderSharingResolver) SharedWithUserID(ctx context.Context, obj *models.FolderSharing) (string, error) {
+	return strconv.FormatUint(uint64(obj.SharedWithUserID), 10), nil
+}
+
+// SharedWithUser resolves the sharedWithUser field for the FolderSharing type.
+func (r *folderSharingResolver) SharedWithUser(ctx context.Context, obj *models.FolderSharing) (*models.User, error) {
+	var user models.User
+	err := r.DB.First(&user, obj.SharedWithUserID).Error
+	return &user, err
+}
+
 // Register is the resolver for the register mutation.
 // It handles new user registration by calling the AuthService.
 func (r *mutationResolver) Register(ctx context.Context, input models.RegisterInput) (*models.User, error) {
@@ -305,6 +349,90 @@ func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (*models.F
 	return r.FileService.DeleteFile(ctx, id, user)
 }
 
+// SetFilePublic is the resolver for the setFilePublic mutation.
+// It makes a file public and can only be performed by the file owner.
+func (r *mutationResolver) SetFilePublic(ctx context.Context, fileID string) (*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.SetFilePublic(ctx, fileID, user)
+}
+
+// SetFilePrivate is the resolver for the setFilePrivate mutation.
+// It makes a file private and can only be performed by the file owner.
+func (r *mutationResolver) SetFilePrivate(ctx context.Context, fileID string) (*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.SetFilePrivate(ctx, fileID, user)
+}
+
+// ShareFileWithUser is the resolver for the shareFileWithUser mutation.
+// It grants another user access to a private file.
+// This action can only be performed by the file owner and fails if the file is public.
+func (r *mutationResolver) ShareFileWithUser(ctx context.Context, fileID string, userID string) (*models.FileSharing, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.ShareFileWithUser(ctx, fileID, userID, user)
+}
+
+// RemoveFileAccess is the resolver for the removeFileAccess mutation.
+// It removes a user's access to a shared file.
+// This action can only be performed by the file owner.
+func (r *mutationResolver) RemoveFileAccess(ctx context.Context, fileID string, userID string) (bool, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return false, err
+	}
+	return r.ShareService.RemoveFileAccess(ctx, fileID, userID, user)
+}
+
+// SetFolderPublic is the resolver for the setFolderPublic mutation.
+// It makes a folder public and can only be performed by the folder owner.
+func (r *mutationResolver) SetFolderPublic(ctx context.Context, folderID string) (*models.Folder, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.SetFolderPublic(ctx, folderID, user)
+}
+
+// SetFolderPrivate is the resolver for the setFolderPrivate mutation.
+// It makes a folder private and can only be performed by the folder owner.
+func (r *mutationResolver) SetFolderPrivate(ctx context.Context, folderID string) (*models.Folder, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.SetFolderPrivate(ctx, folderID, user)
+}
+
+// ShareFolderWithUser is the resolver for the shareFolderWithUser mutation.
+// It grants another user access to a private folder.
+// This action can only be performed by the folder owner and fails if the folder is public.
+func (r *mutationResolver) ShareFolderWithUser(ctx context.Context, folderID string, userID string) (*models.FolderSharing, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.ShareFolderWithUser(ctx, folderID, userID, user)
+}
+
+// RemoveFolderAccess is the resolver for the removeFolderAccess mutation.
+// It removes a user's access to a shared folder.
+// This action can only be performed by the folder owner.
+func (r *mutationResolver) RemoveFolderAccess(ctx context.Context, folderID string, userID string) (bool, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return false, err
+	}
+	return r.ShareService.RemoveFolderAccess(ctx, folderID, userID, user)
+}
+
 // Me is the resolver for the me query.
 // It retrieves the currently authenticated user's information from the context.
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
@@ -318,7 +446,7 @@ func (r *queryResolver) Folder(ctx context.Context, id string) (*models.Folder, 
 	if err != nil {
 		return nil, err
 	}
-	return r.FileService.GetFolder(ctx, id, user)
+	return r.ShareService.GetFolder(ctx, id, user)
 }
 
 // Root is the resolver for the root query.
@@ -328,7 +456,39 @@ func (r *queryResolver) Root(ctx context.Context) (*models.Root, error) {
 	if err != nil {
 		return nil, err
 	}
-	return r.FileService.GetRoot(ctx, user)
+	return r.ShareService.GetRoot(ctx, user)
+}
+
+// File is the resolver for the file query.
+// It retrieves a specific file by its ID for the current user.
+func (r *queryResolver) File(ctx context.Context, id string) (*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.GetFile(ctx, id, user)
+}
+
+// GetUsersWithAccess is the resolver for the getUsersWithAccess query.
+// It returns a list of users who have access to a file.
+// This includes the file owner and any users the file has been shared with.
+// Only the file owner can perform this action.
+func (r *queryResolver) GetUsersWithAccess(ctx context.Context, fileID string) ([]*models.User, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.GetUsersWithAccess(ctx, fileID, user)
+}
+
+// SearchFiles is the resolver for the searchFiles query.
+// It searches for files based on a set of filters.
+func (r *queryResolver) SearchFiles(ctx context.Context, filter *models.FileFilterInput) ([]*models.File, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.ShareService.SearchFiles(ctx, filter, user)
 }
 
 // ID resolves the id field for the User type.
@@ -386,6 +546,9 @@ func (r *Resolver) FileSharing() FileSharingResolver { return &fileSharingResolv
 // Folder returns FolderResolver implementation.
 func (r *Resolver) Folder() FolderResolver { return &folderResolver{r} }
 
+// FolderSharing returns FolderSharingResolver implementation.
+func (r *Resolver) FolderSharing() FolderSharingResolver { return &folderSharingResolver{r} }
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -399,6 +562,7 @@ type deduplicatedContentResolver struct{ *Resolver }
 type fileResolver struct{ *Resolver }
 type fileSharingResolver struct{ *Resolver }
 type folderResolver struct{ *Resolver }
+type folderSharingResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

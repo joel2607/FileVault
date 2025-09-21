@@ -70,6 +70,13 @@ models:
         resolver: true
       sharedWithUser:
         resolver: true
+  FolderSharing:
+    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.FolderSharing"
+    fields:
+      folder:
+        resolver: true
+      sharedWithUser:
+        resolver: true
   UserRole:
     model:
       - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.UserRole"

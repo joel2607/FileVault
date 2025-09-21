@@ -44,11 +44,17 @@ func main() {
 	
 	authService := services.NewAuthService(db)
 	fileService := services.NewFileService(db)
+	shareService := services.NewShareService(db)
 
 	router := chi.NewRouter()
 	router.Use(middleware.AuthMiddleware(authService))
 
-	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{DB: db, AuthService: authService, FileService: fileService}}))
+	srv := handler.NewDefaultServer(graphQL.NewExecutableSchema(graphQL.Config{Resolvers: &graphQL.Resolver{
+		DB: db, 
+		AuthService: authService, 
+		FileService: fileService, 
+		ShareService: shareService,
+	}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", srv)
