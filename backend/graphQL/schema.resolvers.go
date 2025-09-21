@@ -554,6 +554,15 @@ func (r *subscriptionResolver) StorageStatistics(ctx context.Context, userID *st
 	return ch, nil
 }
 
+// FileDownloadCount is the resolver for the fileDownloadCount field.
+func (r *subscriptionResolver) FileDownloadCount(ctx context.Context, fileID string) (<-chan *models.DownloadCountUpdate, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.FileService.SubscribeToFileDownloads(ctx, fileID, user)
+}
+
 // ID resolves the id field for the User type.
 // It converts the numeric ID of the user object into a string.
 func (r *userResolver) ID(ctx context.Context, obj *models.User) (string, error) {

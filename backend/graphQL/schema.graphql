@@ -161,6 +161,12 @@ type Mutation {
 
 type Subscription {
   storageStatistics(userID: ID): StorageStatistics!
+  fileDownloadCount(fileID: ID!): DownloadCountUpdate!
+}
+
+type DownloadCountUpdate {
+  fileID: ID!
+  downloadCount: Int!
 }
 
 scalar Upload

@@ -101,6 +101,9 @@ func (s *FileService) GenerateDownloadURL(ctx context.Context, fileID string, us
 	if err := s.DB.Model(&models.File{}).Where("id = ?", file.ID).UpdateColumn("download_count", gorm.Expr("download_count + 1")).Error; err != nil {
 		log.Printf("Failed to increment download count for file %d: %v", file.ID, err)
 		// Do not fail the operation if this fails, just log it.
+	} else {
+		// Publish the update to Redis
+		s.PublishDownloadCountUpdate(file.ID, int32(file.DownloadCount+1))
 	}
 
 	var content models.DeduplicatedContent
@@ -110,6 +113,86 @@ func (s *FileService) GenerateDownloadURL(ctx context.Context, fileID string, us
 
 	// Delegate URL generation to the storage provider
 	return s.Storage.GetDownloadURL(content.SHA256Hash, file.FileName)
+}
+
+// PublishDownloadCountUpdate publishes a message to Redis when a file's download count changes.
+func (s *FileService) PublishDownloadCountUpdate(fileID uint, newCount int32) {
+	payload, err := json.Marshal(models.DownloadCountUpdate{
+		FileID:        strconv.FormatUint(uint64(fileID), 10),
+		DownloadCount: int32(newCount),
+	})
+	if err != nil {
+		log.Printf("Error marshalling download count update for file %d: %v", fileID, err)
+		return
+	}
+
+	channel := fmt.Sprintf("download_updates_%d", fileID)
+	if err := s.RDB.Publish(database.Ctx, channel, payload).Err(); err != nil {
+		log.Printf("Error publishing download count update for file %d: %v", fileID, err)
+	}
+}
+
+// SubscribeToFileDownloads handles the business logic for subscribing to file download updates.
+// It includes authorization checks and Redis pub/sub management.
+func (s *FileService) SubscribeToFileDownloads(ctx context.Context, fileID string, user *models.User) (<-chan *models.DownloadCountUpdate, error) {
+	id, err := strconv.ParseUint(fileID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file ID")
+	}
+	uid := uint(id)
+
+	var file models.File
+	if err := s.DB.First(&file, uid).Error; err != nil {
+		return nil, fmt.Errorf("file not found")
+	}
+
+	// Authorization check
+	isOwner := file.UserID == user.ID
+	isPublic := file.IsPublic
+	var isShared bool
+	var fileShare models.FileSharing
+	if err := s.DB.Where("file_id = ? AND shared_with_user_id = ?", file.ID, user.ID).First(&fileShare).Error; err == nil {
+		isShared = true
+	}
+	isAdmin := user.Role == "ADMIN"
+
+	if !isOwner && !isPublic && !isShared && !isAdmin {
+		return nil, fmt.Errorf("access denied")
+	}
+
+	// Create channel and subscribe
+	ch := make(chan *models.DownloadCountUpdate, 1)
+	channel := fmt.Sprintf("download_updates_%d", file.ID)
+	pubsub := s.RDB.Subscribe(ctx, channel)
+
+	// Send initial data
+	ch <- &models.DownloadCountUpdate{
+		FileID:        fileID,
+		DownloadCount: int32(file.DownloadCount),
+	}
+
+	// Goroutine to listen for updates
+	go func() {
+		defer pubsub.Close()
+		defer close(ch)
+
+		for {
+			select {
+			case msg, ok := <-pubsub.Channel():
+				if !ok {
+					return
+				}
+				var update models.DownloadCountUpdate
+				if err := json.Unmarshal([]byte(msg.Payload), &update); err == nil {
+					ch <- &update
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	return ch, nil
 }
 
 // UploadFile handles the entire file upload process.
