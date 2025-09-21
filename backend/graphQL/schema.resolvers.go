@@ -352,6 +352,15 @@ func (r *mutationResolver) DeleteFile(ctx context.Context, id string) (*models.F
 	return r.FileService.DeleteFile(ctx, id, user)
 }
 
+// GenerateDownloadURL is the resolver for the generateDownloadUrl field.
+func (r *mutationResolver) GenerateDownloadURL(ctx context.Context, fileID string) (string, error) {
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return "", err
+	}
+	return r.FileService.GenerateDownloadURL(ctx, fileID, user)
+}
+
 // SetFilePublic is the resolver for the setFilePublic mutation.
 // It makes a file public and can only be performed by the file owner.
 func (r *mutationResolver) SetFilePublic(ctx context.Context, fileID string) (*models.File, error) {

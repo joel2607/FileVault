@@ -16,22 +16,22 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services/storage"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
-// FileService handles business logic related to file and folder management.
-// It interacts with the database to perform CRUD operations on files and folders.
+// FileService provides methods for file management, including uploads,
+// deletions, and storage statistics.
 type FileService struct {
-	DB  *gorm.DB
-	RDB *redis.Client
+	DB      *gorm.DB
+	RDB     *redis.Client
+	Storage storage.FileStorageProvider
 }
 
-// NewFileService creates and returns a new FileService instance.
-// It takes a GORM database connection and a Redis client as input.
-// Returns a pointer to the newly created FileService.
-func NewFileService(db *gorm.DB, rdb *redis.Client) *FileService {
-	return &FileService{DB: db, RDB: rdb}
+// NewFileService creates a new instance of FileService.
+func NewFileService(db *gorm.DB, rdb *redis.Client, storage storage.FileStorageProvider) *FileService {
+	return &FileService{DB: db, RDB: rdb, Storage: storage}
 }
 
 func (s *FileService) GetStorageStatistics(userID uint) (*models.StorageStatistics, error) {
@@ -67,6 +67,49 @@ func (s *FileService) publishStorageUpdate(user *models.User) {
 
 	channel := fmt.Sprintf("storage_updates_%d", user.ID)
 	s.RDB.Publish(database.Ctx, channel, payload)
+}
+
+// GenerateDownloadURL handles the logic for creating a secure, temporary download link for a file.
+// It checks for user permissions, increments the file's download count, and then delegates
+// the actual URL creation to the configured storage provider.
+func (s *FileService) GenerateDownloadURL(ctx context.Context, fileID string, user *models.User) (string, error) {
+	id, err := strconv.ParseUint(fileID, 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("invalid file ID")
+	}
+	uid := uint(id)
+
+	var file models.File
+	if err := s.DB.First(&file, uid).Error; err != nil {
+		return "", fmt.Errorf("file not found")
+	}
+
+	// Authorization check: user must be the owner, the file must be public, or it must be shared with the user.
+	isOwner := file.UserID == user.ID
+	isPublic := file.IsPublic
+	var isShared bool
+	var fileShare models.FileSharing
+	if err := s.DB.Where("file_id = ? AND shared_with_user_id = ?", file.ID, user.ID).First(&fileShare).Error; err == nil {
+		isShared = true
+	}
+
+	if !isOwner && !isPublic && !isShared {
+		return "", fmt.Errorf("access denied: you do not have permission to download this file")
+	}
+
+	// Atomically increment the download count
+	if err := s.DB.Model(&models.File{}).Where("id = ?", file.ID).UpdateColumn("download_count", gorm.Expr("download_count + 1")).Error; err != nil {
+		log.Printf("Failed to increment download count for file %d: %v", file.ID, err)
+		// Do not fail the operation if this fails, just log it.
+	}
+
+	var content models.DeduplicatedContent
+	if err := s.DB.First(&content, file.DeduplicationID).Error; err != nil {
+		return "", fmt.Errorf("could not find file content")
+	}
+
+	// Delegate URL generation to the storage provider
+	return s.Storage.GetDownloadURL(content.SHA256Hash, file.FileName)
 }
 
 // UploadFile handles the entire file upload process.
