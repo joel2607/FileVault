@@ -259,6 +259,13 @@ func (s *FileService) SubscribeToStorageStatistics(ctx context.Context, userID *
 // - A pointer to the created models.File object if successful.
 // - An error if any part of the process fails.
 func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user *models.User, parentFolderID *string) (*models.File, error) {
+
+	// Check for whether the user has enough storage quota
+	if user.UsedStorageKB - user.SavedStorageKB + float64(file.Size)/1024 > user.StorageQuotaKB {
+		return nil, fmt.Errorf("storage quota exceeded")
+	}
+
+
 	log.Printf("Uploading file: %s of size %d bytes\n", file.Filename, file.Size)
 	// 1. Hashing
 	hash := sha256.New()
