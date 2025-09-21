@@ -1,8 +1,8 @@
 import { ApolloClient, InMemoryCache, from } from "@apollo/client"
 import { setContext } from "@apollo/client/link/context"
-import { createUploadLink } from "apollo-upload-client"
+import UploadHttpLink from "apollo-upload-client/UploadHttpLink.mjs"
 
-const httpLink = createUploadLink({
+const httpLink = new UploadHttpLink({
   uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "/query",
 })
 

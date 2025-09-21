@@ -57,7 +57,7 @@ logs/
 /node_modules
 
 # next.js
-/.next/
+frontend/.next/
 /out/
 
 # production
