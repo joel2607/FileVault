@@ -195,6 +195,55 @@ func (s *FileService) SubscribeToFileDownloads(ctx context.Context, fileID strin
 	return ch, nil
 }
 
+// SubscribeToStorageStatistics handles the business logic for subscribing to storage statistics updates.
+func (s *FileService) SubscribeToStorageStatistics(ctx context.Context, userID *string, currentUser *models.User) (<-chan *models.StorageStatistics, error) {
+	var targetUserID uint
+	if userID != nil {
+		if currentUser.Role != "ADMIN" {
+			return nil, fmt.Errorf("only admins can view other users' statistics")
+		}
+		id, err := strconv.ParseUint(*userID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid user ID")
+		}
+		targetUserID = uint(id)
+	} else {
+		targetUserID = currentUser.ID
+	}
+
+	ch := make(chan *models.StorageStatistics, 1)
+	channel := fmt.Sprintf("storage_updates_%d", targetUserID)
+	pubsub := s.RDB.Subscribe(ctx, channel)
+
+	// Send initial data
+	initialStats, err := s.GetStorageStatistics(targetUserID)
+	if err == nil {
+		ch <- initialStats
+	}
+
+	go func() {
+		defer pubsub.Close()
+		defer close(ch)
+
+		for {
+			select {
+			case msg, ok := <-pubsub.Channel():
+				if !ok {
+					return
+				}
+				var stats models.StorageStatistics
+				if err := json.Unmarshal([]byte(msg.Payload), &stats); err == nil {
+					ch <- &stats
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	return ch, nil
+}
+
 // UploadFile handles the entire file upload process.
 // It performs content hashing for deduplication, saves the file to storage if it's new,
 // validates the MIME type, and creates the necessary metadata in the database.

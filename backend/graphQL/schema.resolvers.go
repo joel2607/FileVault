@@ -6,12 +6,8 @@ package graphQL
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"strconv"
-
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 )
@@ -509,49 +505,7 @@ func (r *subscriptionResolver) StorageStatistics(ctx context.Context, userID *st
 	if err != nil {
 		return nil, err
 	}
-
-	var targetUserID uint
-	if userID != nil {
-		if currentUser.Role != "ADMIN" {
-			return nil, fmt.Errorf("only admins can view other users' statistics")
-		}
-		id, _ := strconv.ParseUint(*userID, 10, 64)
-		targetUserID = uint(id)
-	} else {
-		targetUserID = currentUser.ID
-	}
-
-	ch := make(chan *models.StorageStatistics, 1)
-	channel := fmt.Sprintf("storage_updates_%d", targetUserID)
-	pubsub := r.RDB.Subscribe(database.Ctx, channel)
-
-	// Send initial data
-	initialStats, err := r.FileService.GetStorageStatistics(targetUserID)
-	if err == nil {
-		ch <- initialStats
-	}
-
-	go func() {
-		defer pubsub.Close()
-		defer close(ch)
-
-		for {
-			select {
-			case msg, ok := <-pubsub.Channel():
-				if !ok {
-					return
-				}
-				var stats models.StorageStatistics
-				if err := json.Unmarshal([]byte(msg.Payload), &stats); err == nil {
-					ch <- &stats
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-
-	return ch, nil
+	return r.FileService.SubscribeToStorageStatistics(ctx, userID, currentUser)
 }
 
 // FileDownloadCount is the resolver for the fileDownloadCount field.
