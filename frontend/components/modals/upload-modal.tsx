@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { CloudUpload, Delete, AttachFile } from "@mui/icons-material";
 import { UPLOAD_FILES_MUTATION } from "@/lib/graphql/mutations";
-// import { apolloClient } from "@/lib/apollo-client";
+import { useMutation } from "@apollo/client";
 
 interface UploadModalProps {
   open: boolean;
@@ -38,6 +38,8 @@ export function UploadModal({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
+
+  const [uploadFiles] = useMutation(UPLOAD_FILES_MUTATION);
 
   const handleFileSelect = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,43 +78,23 @@ export function UploadModal({
     setError("");
     setUploadProgress(0);
 
-    const body = new FormData();
-
-    const operations = {
-      query: UPLOAD_FILES_MUTATION.loc?.source.body,
-      variables: {
-        files: selectedFiles.map((_, i) => null),
-        parentFolderID: currentFolderId || null,
-      },
-    };
-
-    body.append("operations", JSON.stringify(operations));
-
-    const map: { [key: string]: string[] } = {};
-    selectedFiles.forEach((_, i) => {
-      map[i] = [`variables.files.${i}`];
-    });
-
-    body.append("map", JSON.stringify(map));
-
-    selectedFiles.forEach((file, i) => {
-      body.append(String(i), file);
-    });
-
     try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body,
-        headers: {
-          authorization: `Bearer ${localStorage.getItem("token")}`,
+      await uploadFiles({
+        variables: {
+          files: selectedFiles,
+          parentFolderID: currentFolderId || null,
+        },
+        context: {
+          fetchOptions: {
+            onUploadProgress: (progressEvent: any) => {
+              const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              setUploadProgress(percentCompleted);
+            },
+          },
         },
       });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
 
       setUploadProgress(100);
       setTimeout(() => {
