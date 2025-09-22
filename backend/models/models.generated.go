@@ -21,6 +21,7 @@ type FileFilterInput struct {
 	EndDate    *string  `json:"endDate,omitempty"`
 	Tags       []string `json:"tags,omitempty"`
 	UploaderID *string  `json:"uploaderID,omitempty"`
+	IsPublic   *bool    `json:"isPublic,omitempty"`
 }
 
 // Defines the mutations available in the API.
