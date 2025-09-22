@@ -65,9 +65,9 @@ services:
       - "3000:3000" # Exposes the React dev server
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
-      - NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:8080/query
-      - NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT=ws://localhost:8080/query
-      - INTERNAL_GRAPHQL_ENDPOINT=http://backend:8080/query
+      - NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:8080/graphql
+      - NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT=ws://localhost:8080/graphql
+      - INTERNAL_GRAPHQL_ENDPOINT=http://backend:graphql
     env_file:
       - .env
     volumes:

@@ -15,7 +15,7 @@ redis:
   addr: "file_vault_redis:6379"
 
 app:
-  base_url: "http://localhost:8080"
+  base_url: "https://filevault.ajayjoel.space/"
 
 ratelimit:
   limit: 100

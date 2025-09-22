@@ -4,7 +4,7 @@
 # You will need curl and jq installed to run this script.
 
 # --- Configuration ---
-API_URL="http://localhost:8080/query"
+API_URL="http://localhost:8080/graphql"
 EMAIL="test@example.com"
 PASSWORD="password123"
 
