@@ -133,7 +133,7 @@ type Query {
   root: Root
   file(id: ID!): File
   getUsersWithAccess(fileID: ID!): [User!]
-  searchFiles(filter: FileFilterInput): [File!]
+  searchFiles(query: String, filter: FileFilterInput): [File!]
   searchUsers(query: String!): [User!]
 }
 
@@ -202,5 +202,6 @@ input FileFilterInput {
   endDate: String
   tags: [String!]
   uploaderID: ID
+  isPublic: Boolean
 }
 

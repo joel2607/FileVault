@@ -492,17 +492,25 @@ func (r *queryResolver) GetUsersWithAccess(ctx context.Context, fileID string) (
 
 // SearchFiles is the resolver for the searchFiles query.
 // It searches for files based on a set of filters.
-func (r *queryResolver) SearchFiles(ctx context.Context, filter *models.FileFilterInput) ([]*models.File, error) {
+func (r *queryResolver) SearchFiles(ctx context.Context, query *string, filter *models.FileFilterInput) ([]*models.File, error) {
 	user, err := middleware.GetCurrentUser(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return r.ShareService.SearchFiles(ctx, filter, user)
+	queryString := ""
+	if query != nil {
+		queryString = *query
+	}
+	return r.ShareService.SearchFiles(ctx, queryString, filter, user)
 }
 
 // SearchUsers is the resolver for the searchUsers field.
 func (r *queryResolver) SearchUsers(ctx context.Context, query string) ([]*models.User, error) {
-	return r.AuthService.SearchUsers(ctx, query)
+	user, err := middleware.GetCurrentUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.AuthService.SearchUsers(ctx, query, user)
 }
 
 // StorageStatistics is the resolver for the storageStatistics field.

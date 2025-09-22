@@ -62,9 +62,32 @@ export const FOLDER_QUERY = gql`
   }
 `
 
+export const SEARCH_USERS_QUERY = gql`
+  query SearchUsers($query: String!) {
+    searchUsers(query: $query) {
+      id
+      username
+      email
+    }
+  }
+`
+
+export const GET_FILE_ACCESS_QUERY = gql`
+  query GetFileAccess($fileID: ID!) {
+    getFileAccess(fileID: $fileID) {
+      id
+      user {
+        id
+        username
+        email
+      }
+    }
+  }
+`
+
 export const SEARCH_FILES_QUERY = gql`
-  query SearchFiles($filter: FileFilterInput) {
-    searchFiles(filter: $filter) {
+  query SearchFiles($query: String, $filter: FileFilterInput) {
+    searchFiles(query: $query, filter: $filter) {
       id
       fileName
       mimeType
@@ -72,26 +95,6 @@ export const SEARCH_FILES_QUERY = gql`
       isPublic
       downloadCount
       parentFolderId
-    }
-  }
-`
-
-export const GET_FILE_ACCESS_QUERY = gql`
-  query GetFileAccess($fileID: ID!) {
-    getUsersWithAccess(fileID: $fileID) {
-      id
-      username
-      email
-    }
-  }
-`
-
-export const SEARCH_USERS_QUERY = gql`
-  query SearchUsers($query: String!) {
-    searchUsers(query: $query) {
-      id
-      username
-      email
     }
   }
 `
