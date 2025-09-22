@@ -94,8 +94,8 @@ func main() {
 	})
 
 	// Define Routes
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	router.Handle("/query", srv)
+	// router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	router.Handle("/graphql", srv)
 	router.Get("/downloads/*", handlers.DownloadHandler)
 
 	// Start Server

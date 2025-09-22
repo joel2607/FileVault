@@ -13,7 +13,7 @@ var Ctx = context.Background()
 func InitRedis() *redis.Client {
 	redisAddr := viper.GetString("redis.addr")
 	if redisAddr == "" {
-		redisAddr = "localhost:6379"
+		redisAddr = "redis:6379"
 	}
 
 	rdb := redis.NewClient(&redis.Options{
