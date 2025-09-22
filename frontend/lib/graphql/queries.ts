@@ -78,17 +78,10 @@ export const SEARCH_FILES_QUERY = gql`
 
 export const GET_FILE_ACCESS_QUERY = gql`
   query GetFileAccess($fileID: ID!) {
-    getFileAccess(fileID: $fileID) {
+    getUsersWithAccess(fileID: $fileID) {
       id
-      user {
-        id
-        username
-        email
-      }
-      file {
-        id
-        fileName
-      }
+      username
+      email
     }
   }
 `
