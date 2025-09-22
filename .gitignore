@@ -84,3 +84,6 @@ next-env.d.ts
 # ---------------------------------
 # Ignore local override files
 docker-compose.override.yml
+
+
+.pem
