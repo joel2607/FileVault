@@ -33,15 +33,16 @@ import {
 } from "@/lib/graphql/mutations"
 import type { File, Folder } from "@/lib/types"
 import { DashboardBreadcrumbs } from "./breadcrumbs"
-import { SearchBar } from "./search-bar"
 import { FileCard } from "./file-card"
 import { MoveDialog } from "../modals/MoveDialog"
 
 interface FileBrowserProps {
   onShareFile: (file: File) => void
+  isSearching: boolean
+  searchResults: File[]
 }
 
-export function FileBrowser({ onShareFile }: FileBrowserProps) {
+export function FileBrowser({ onShareFile, isSearching, searchResults }: FileBrowserProps) {
   const [currentFolderId, setCurrentFolderId] = useState<string | undefined>()
   const [currentPath, setCurrentPath] = useState<Folder[]>([])
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -53,8 +54,6 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   const [newName, setNewName] = useState("")
   const [newFolderName, setNewFolderName] = useState("")
   const [error, setError] = useState("")
-  const [searchResults, setSearchResults] = useState<File[] | null>(null)
-  const [isSearching, setIsSearching] = useState(false)
 
   // Queries
   const {
@@ -92,16 +91,6 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   const currentData = currentFolderId ? folderData?.folder : rootData?.root
   const loading = currentFolderId ? folderLoading : rootLoading
 
-  const handleSearchResults = (files: File[]) => {
-    setSearchResults(files)
-    setIsSearching(true)
-  }
-
-  const handleClearSearch = () => {
-    setSearchResults(null)
-    setIsSearching(false)
-  }
-
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>, item: Folder) => {
     setAnchorEl(event.currentTarget)
     setSelectedItem(item)
@@ -113,18 +102,11 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   }
 
   const handleFolderClick = (folder: Folder) => {
-    if (isSearching) {
-      handleClearSearch()
-    }
     setCurrentFolderId(folder.id)
     setCurrentPath([...currentPath, folder])
   }
 
   const handleNavigate = (folderId?: string) => {
-    if (isSearching) {
-      handleClearSearch()
-    }
-
     if (!folderId) {
       // Navigate to root
       setCurrentFolderId(undefined)
@@ -293,8 +275,6 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
 
   return (
     <Box>
-      <SearchBar onSearchResults={handleSearchResults} onClearSearch={handleClearSearch} />
-
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         {isSearching ? (
           <Typography variant="h6">Search Results ({searchResults?.length || 0} files found)</Typography>

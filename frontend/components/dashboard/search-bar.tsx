@@ -1,12 +1,27 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Box, TextField, InputAdornment, IconButton, Menu, MenuItem, Chip, Typography, Divider } from "@mui/material"
-import { Search, FilterList, Clear } from "@mui/icons-material"
+import {
+  Box,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Collapse,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  Chip,
+  Button,
+  Typography,
+  Slider,
+} from "@mui/material"
+import { Search, Clear, FilterList } from "@mui/icons-material"
 import { useLazyQuery } from "@apollo/client"
 import { SEARCH_FILES_QUERY } from "@/lib/graphql/queries"
+import { useDebounce } from "@/hooks/use-debounce"
 import type { File } from "@/lib/types"
 
 interface SearchBarProps {
@@ -14,219 +29,205 @@ interface SearchBarProps {
   onClearSearch: () => void
 }
 
-interface SearchFilters {
-  mimeType?: string
-  isPublic?: boolean
-  minSize?: number
-  maxSize?: number
-}
+const MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "application/pdf",
+  "text/plain",
+  "video/mp4",
+  "audio/mpeg",
+]
 
 export function SearchBar({ onSearchResults, onClearSearch }: SearchBarProps) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [filters, setFilters] = useState<SearchFilters>({})
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const [activeFilters, setActiveFilters] = useState<string[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    mimeTypes: [] as string[],
+    sizeRange: [0, 100], // MB
+    dateRange: { start: "", end: "" },
+    isPublic: null as boolean | null,
+  })
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
-  const [searchFiles, { loading }] = useLazyQuery(SEARCH_FILES_QUERY)
-
-  const mimeTypeOptions = [
-    { value: "image/", label: "Images" },
-    { value: "video/", label: "Videos" },
-    { value: "audio/", label: "Audio" },
-    { value: "application/pdf", label: "PDFs" },
-    { value: "application/msword", label: "Documents" },
-    { value: "application/vnd.ms-excel", label: "Spreadsheets" },
-  ]
-
-  const sizeOptions = [
-    { value: { min: 0, max: 1024 * 1024 }, label: "< 1 MB" },
-    { value: { min: 1024 * 1024, max: 10 * 1024 * 1024 }, label: "1-10 MB" },
-    { value: { min: 10 * 1024 * 1024, max: 100 * 1024 * 1024 }, label: "10-100 MB" },
-    { value: { min: 100 * 1024 * 1024, max: undefined }, label: "> 100 MB" },
-  ]
+  const [searchFiles, { data, loading }] = useLazyQuery(SEARCH_FILES_QUERY)
 
   useEffect(() => {
-    const delayedSearch = setTimeout(() => {
-      if (searchTerm.trim() || Object.keys(filters).length > 0) {
-        handleSearch()
-      }
-    }, 500)
-
-    return () => clearTimeout(delayedSearch)
-  }, [searchTerm, filters])
-
-  const handleSearch = async () => {
-    try {
-      const searchFilter: any = {}
-
-      if (searchTerm.trim()) {
-        searchFilter.fileName = searchTerm.trim()
-      }
-
-      if (filters.mimeType) {
-        searchFilter.mimeType = filters.mimeType
-      }
-
-      if (filters.isPublic !== undefined) {
-        searchFilter.isPublic = filters.isPublic
-      }
-
-      if (filters.minSize !== undefined) {
-        searchFilter.minSize = filters.minSize
-      }
-
-      if (filters.maxSize !== undefined) {
-        searchFilter.maxSize = filters.maxSize
-      }
-
-      const { data } = await searchFiles({
-        variables: { filter: searchFilter },
-      })
-
-      if (data?.searchFiles) {
-        onSearchResults(data.searchFiles)
-      }
-    } catch (error) {
-      console.error("Search failed:", error)
+    if (debouncedSearchTerm.length >= 3 || JSON.stringify(filters) !== JSON.stringify({ mimeTypes: [], sizeRange: [0, 100], dateRange: { start: "", end: "" }, isPublic: null })) {
+      handleSearch()
+    } else if (debouncedSearchTerm.length === 0) {
+      onClearSearch()
     }
-  }
+  }, [debouncedSearchTerm, filters])
 
-  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleFilterClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleMimeTypeFilter = (mimeType: string, label: string) => {
-    const newFilters = { ...filters, mimeType }
-    setFilters(newFilters)
-    setActiveFilters((prev) => [...prev.filter((f) => !f.startsWith("Type:")), `Type: ${label}`])
-    handleFilterClose()
-  }
-
-  const handleVisibilityFilter = (isPublic: boolean) => {
-    const newFilters = { ...filters, isPublic }
-    setFilters(newFilters)
-    setActiveFilters((prev) => [
-      ...prev.filter((f) => !f.startsWith("Visibility:")),
-      `Visibility: ${isPublic ? "Public" : "Private"}`,
-    ])
-    handleFilterClose()
-  }
-
-  const handleSizeFilter = (sizeRange: { min: number; max?: number }, label: string) => {
-    const newFilters = { ...filters, minSize: sizeRange.min, maxSize: sizeRange.max }
-    setFilters(newFilters)
-    setActiveFilters((prev) => [...prev.filter((f) => !f.startsWith("Size:")), `Size: ${label}`])
-    handleFilterClose()
-  }
-
-  const removeFilter = (filterToRemove: string) => {
-    const newActiveFilters = activeFilters.filter((f) => f !== filterToRemove)
-    setActiveFilters(newActiveFilters)
-
-    const newFilters = { ...filters }
-    if (filterToRemove.startsWith("Type:")) {
-      delete newFilters.mimeType
-    } else if (filterToRemove.startsWith("Visibility:")) {
-      delete newFilters.isPublic
-    } else if (filterToRemove.startsWith("Size:")) {
-      delete newFilters.minSize
-      delete newFilters.maxSize
+  useEffect(() => {
+    if (data) {
+      onSearchResults(data.searchFiles)
     }
-    setFilters(newFilters)
+  }, [data, onSearchResults])
+
+  const handleSearch = () => {
+    const filterVariables: any = {
+      mimeTypes: filters.mimeTypes,
+      minSize: filters.sizeRange[0] * 1024 * 1024, // Convert MB to Bytes
+      maxSize: filters.sizeRange[1] * 1024 * 1024, // Convert MB to Bytes
+    }
+
+    if (filters.dateRange.start) {
+      filterVariables.startDate = new Date(filters.dateRange.start).toISOString()
+    }
+    if (filters.dateRange.end) {
+      filterVariables.endDate = new Date(filters.dateRange.end).toISOString()
+    }
+    if (filters.isPublic !== null) {
+      filterVariables.isPublic = filters.isPublic
+    }
+
+    searchFiles({
+      variables: {
+        query: debouncedSearchTerm,
+        filter: filterVariables,
+      },
+    })
   }
 
-  const clearAllFilters = () => {
+  const handleClear = () => {
     setSearchTerm("")
-    setFilters({})
-    setActiveFilters([])
     onClearSearch()
   }
 
-  const hasActiveSearch = searchTerm.trim() || activeFilters.length > 0
+  const handleFilterChange = (name: string, value: any) => {
+    setFilters((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const resetFilters = () => {
+    setFilters({
+      mimeTypes: [],
+      sizeRange: [0, 100],
+      dateRange: { start: "", end: "" },
+      isPublic: null,
+    })
+  }
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-        <TextField
-          fullWidth
-          placeholder="Search files..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-            endAdornment: hasActiveSearch && (
-              <InputAdornment position="end">
-                <IconButton onClick={clearAllFilters} size="small">
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Search for files by name, tag, or author..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              {searchTerm && (
+                <IconButton onClick={handleClear}>
                   <Clear />
                 </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          disabled={loading}
-        />
+              )}
+              <IconButton onClick={() => setShowFilters(!showFilters)}>
+                <FilterList />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
 
-        <IconButton onClick={handleFilterClick} color={activeFilters.length > 0 ? "primary" : "default"}>
-          <FilterList />
-        </IconButton>
-      </Box>
-
-      {/* Active Filters */}
-      {activeFilters.length > 0 && (
-        <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
-          <Typography variant="body2" color="text.secondary">
-            Filters:
-          </Typography>
-          {activeFilters.map((filter) => (
-            <Chip
-              key={filter}
-              label={filter}
-              onDelete={() => removeFilter(filter)}
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
-          ))}
+      <Collapse in={showFilters}>
+        <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1, mt: 1 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>File Types</InputLabel>
+                <Select
+                  multiple
+                  value={filters.mimeTypes}
+                  onChange={(e) => handleFilterChange("mimeTypes", e.target.value)}
+                  input={<OutlinedInput label="File Types" />}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {(selected as string[]).map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {MIME_TYPES.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography gutterBottom>
+                File Size (MB): {filters.sizeRange[0]} - {filters.sizeRange[1]}
+              </Typography>
+              <Slider
+                value={filters.sizeRange}
+                onChange={(_, newValue) => handleFilterChange("sizeRange", newValue)}
+                valueLabelDisplay="auto"
+                min={0}
+                max={1000}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Start Date"
+                type="date"
+                value={filters.dateRange.start}
+                onChange={(e) => handleFilterChange("dateRange", { ...filters.dateRange, start: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="End Date"
+                type="date"
+                value={filters.dateRange.end}
+                onChange={(e) => handleFilterChange("dateRange", { ...filters.dateRange, end: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Visibility</InputLabel>
+                <Select
+                  value={filters.isPublic === null ? "" : filters.isPublic ? "public" : "private"}
+                  onChange={(e) =>
+                    handleFilterChange(
+                      "isPublic",
+                      e.target.value === "" ? null : e.target.value === "public"
+                    )
+                  }
+                  label="Visibility"
+                >
+                  <MenuItem value="">
+                    <em>Any</em>
+                  </MenuItem>
+                  <MenuItem value="public">Public</MenuItem>
+                  <MenuItem value="private">Private</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+            <Button onClick={resetFilters} sx={{ mr: 1 }}>
+              Reset Filters
+            </Button>
+            <Button onClick={handleSearch} variant="contained">
+              Apply Filters
+            </Button>
+          </Box>
         </Box>
-      )}
-
-      {/* Filter Menu */}
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleFilterClose}>
-        <MenuItem disabled>
-          <Typography variant="subtitle2">File Type</Typography>
-        </MenuItem>
-        {mimeTypeOptions.map((option) => (
-          <MenuItem key={option.value} onClick={() => handleMimeTypeFilter(option.value, option.label)}>
-            {option.label}
-          </MenuItem>
-        ))}
-
-        <Divider />
-
-        <MenuItem disabled>
-          <Typography variant="subtitle2">Visibility</Typography>
-        </MenuItem>
-        <MenuItem onClick={() => handleVisibilityFilter(true)}>Public Files</MenuItem>
-        <MenuItem onClick={() => handleVisibilityFilter(false)}>Private Files</MenuItem>
-
-        <Divider />
-
-        <MenuItem disabled>
-          <Typography variant="subtitle2">File Size</Typography>
-        </MenuItem>
-        {sizeOptions.map((option) => (
-          <MenuItem key={option.label} onClick={() => handleSizeFilter(option.value, option.label)}>
-            {option.label}
-          </MenuItem>
-        ))}
-      </Menu>
+      </Collapse>
     </Box>
   )
 }
