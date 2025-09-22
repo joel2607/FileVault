@@ -4,6 +4,18 @@
 
 The application is deployed and accessible at: **[https://filevault.ajayjoel.space](https://filevault.ajayjoel.space)**
 
+You can log in using the following credentials, or register an account for yourself.
+
+Admin user:
+```
+email: admin@example.com
+password: admin
+```
+Regular user:
+```
+email: user@example.com
+password: user
+```
 ## Overview
 
 This project is a secure file vault system that supports efficient storage, powerful search, and controlled file sharing. It is a production-grade file vault application with both backend and frontend components, designed to demonstrate skills in API design, backend services in Go, relational data modeling with PostgreSQL, and modern frontend development with React.js and TypeScript.
