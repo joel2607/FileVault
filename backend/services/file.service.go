@@ -377,7 +377,7 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 func (s *FileService) CreateFolder(ctx context.Context, input models.NewFolder, user *models.User) (*models.Folder, error) {
 	folder := &models.Folder{
 		UserID:     user.ID,
-		FolderName: input.Name,
+		FolderName: input.FolderName,
 	}
 	if input.ParentFolderID != nil {
 		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
@@ -404,8 +404,8 @@ func (s *FileService) UpdateFile(ctx context.Context, input models.UpdateFile, u
 	if err := s.DB.First(&file, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
 		return nil, err
 	}
-	if input.Name != nil {
-		file.FileName = *input.Name
+	if input.FileName != nil {
+		file.FileName = *input.FileName
 	}
 	if input.ParentFolderID != nil {
 		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
@@ -487,8 +487,8 @@ func (s *FileService) UpdateFolder(ctx context.Context, input models.UpdateFolde
 	if err := s.DB.First(&folder, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
 		return nil, err
 	}
-	if input.Name != nil {
-		folder.FolderName = *input.Name
+	if input.FolderName != nil {
+		folder.FolderName = *input.FolderName
 	}
 	if input.ParentFolderID != nil {
 		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
