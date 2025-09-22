@@ -52,19 +52,12 @@ export function FileCard({ file, onRename, onShare, onDelete }: FileCardProps) {
       })
 
       if (data?.generateDownloadUrl) {
-        const response = await fetch(data.generateDownloadUrl)
-        const blob = await response.blob()
-
-        const url = window.URL.createObjectURL(blob)
         const link = document.createElement("a")
-        link.href = url
+        link.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}${data.generateDownloadUrl}`
         link.download = file.fileName
         document.body.appendChild(link)
         link.click()
-
-        // Cleanup
         document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
       }
     } catch (error) {
       console.error("Download failed:", error)
