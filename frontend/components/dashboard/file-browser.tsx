@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Box,
   Grid,
@@ -39,10 +39,9 @@ import { MoveDialog } from "../modals/MoveDialog"
 
 interface FileBrowserProps {
   onShareFile: (file: File) => void
-  refresh: number
 }
 
-export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
+export function FileBrowser({ onShareFile }: FileBrowserProps) {
   const [currentFolderId, setCurrentFolderId] = useState<string | undefined>()
   const [currentPath, setCurrentPath] = useState<Folder[]>([])
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -61,7 +60,6 @@ export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
   const {
     data: rootData,
     loading: rootLoading,
-    refetch: refetchRoot,
   } = useQuery(ROOT_QUERY, {
     skip: !!currentFolderId,
   })
@@ -69,26 +67,27 @@ export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
   const {
     data: folderData,
     loading: folderLoading,
-    refetch: refetchFolder,
   } = useQuery(FOLDER_QUERY, {
     variables: { id: currentFolderId! },
     skip: !currentFolderId,
   })
 
-  useEffect(() => {
-    if (currentFolderId) {
-      refetchFolder()
-    } else {
-      refetchRoot()
-    }
-  }, [refresh, currentFolderId, refetchFolder, refetchRoot])
-
   // Mutations
-  const [updateFile] = useMutation(UPDATE_FILE_MUTATION)
-  const [updateFolder] = useMutation(UPDATE_FOLDER_MUTATION)
-  const [deleteFile] = useMutation(DELETE_FILE_MUTATION)
-  const [deleteFolder] = useMutation(DELETE_FOLDER_MUTATION)
-  const [createFolder] = useMutation(CREATE_FOLDER_MUTATION)
+  const [updateFile] = useMutation(UPDATE_FILE_MUTATION, {
+    refetchQueries: [currentFolderId ? { query: FOLDER_QUERY, variables: { id: currentFolderId } } : { query: ROOT_QUERY }],
+  })
+  const [updateFolder] = useMutation(UPDATE_FOLDER_MUTATION, {
+    refetchQueries: [currentFolderId ? { query: FOLDER_QUERY, variables: { id: currentFolderId } } : { query: ROOT_QUERY }],
+  })
+  const [deleteFile] = useMutation(DELETE_FILE_MUTATION, {
+    refetchQueries: [currentFolderId ? { query: FOLDER_QUERY, variables: { id: currentFolderId } } : { query: ROOT_QUERY }],
+  })
+  const [deleteFolder] = useMutation(DELETE_FOLDER_MUTATION, {
+    refetchQueries: [currentFolderId ? { query: FOLDER_QUERY, variables: { id: currentFolderId } } : { query: ROOT_QUERY }],
+  })
+  const [createFolder] = useMutation(CREATE_FOLDER_MUTATION, {
+    refetchQueries: [currentFolderId ? { query: FOLDER_QUERY, variables: { id: currentFolderId } } : { query: ROOT_QUERY }],
+  })
 
   const currentData = currentFolderId ? folderData?.folder : rootData?.root
   const loading = currentFolderId ? folderLoading : rootLoading
@@ -208,13 +207,6 @@ export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
         })
       }
 
-      // Refetch current data
-      if (currentFolderId) {
-        refetchFolder()
-      } else {
-        refetchRoot()
-      }
-
       closeRenameDialog()
       setNewName("")
     } catch (error: any) {
@@ -234,13 +226,6 @@ export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
         await deleteFolder({
           variables: { id: selectedItem.id },
         })
-      }
-
-      // Refetch current data
-      if (currentFolderId) {
-        refetchFolder()
-      } else {
-        refetchRoot()
       }
 
       closeDeleteDialog()
@@ -273,13 +258,6 @@ export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
         })
       }
 
-      // Refetch current data
-      if (currentFolderId) {
-        refetchFolder()
-      } else {
-        refetchRoot()
-      }
-
       closeMoveDialog()
     } catch (error: any) {
       setError(error.message)
@@ -298,13 +276,6 @@ export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
           },
         },
       })
-
-      // Refetch current data
-      if (currentFolderId) {
-        refetchFolder()
-      } else {
-        refetchRoot()
-      }
 
       setCreateFolderDialogOpen(false)
       setNewFolderName("")

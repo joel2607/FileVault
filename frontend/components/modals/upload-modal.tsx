@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { CloudUpload, Delete, AttachFile } from "@mui/icons-material";
 import { UPLOAD_FILES_MUTATION } from "@/lib/graphql/mutations";
+import { ROOT_QUERY, FOLDER_QUERY } from "@/lib/graphql/queries";
 import { useMutation } from "@apollo/client";
 
 interface UploadModalProps {
@@ -39,7 +40,9 @@ export function UploadModal({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
 
-  const [uploadFiles] = useMutation(UPLOAD_FILES_MUTATION);
+  const [uploadFiles] = useMutation(UPLOAD_FILES_MUTATION, {
+    refetchQueries: [currentFolderId ? { query: FOLDER_QUERY, variables: { id: currentFolderId } } : { query: ROOT_QUERY }],
+  });
 
   const handleFileSelect = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
