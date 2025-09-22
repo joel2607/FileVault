@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Box,
   Grid,
@@ -39,9 +39,10 @@ import { MoveDialog } from "../modals/MoveDialog"
 
 interface FileBrowserProps {
   onShareFile: (file: File) => void
+  refresh: number
 }
 
-export function FileBrowser({ onShareFile }: FileBrowserProps) {
+export function FileBrowser({ onShareFile, refresh }: FileBrowserProps) {
   const [currentFolderId, setCurrentFolderId] = useState<string | undefined>()
   const [currentPath, setCurrentPath] = useState<Folder[]>([])
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -73,6 +74,14 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
     variables: { id: currentFolderId! },
     skip: !currentFolderId,
   })
+
+  useEffect(() => {
+    if (currentFolderId) {
+      refetchFolder()
+    } else {
+      refetchRoot()
+    }
+  }, [refresh, currentFolderId, refetchFolder, refetchRoot])
 
   // Mutations
   const [updateFile] = useMutation(UPDATE_FILE_MUTATION)
