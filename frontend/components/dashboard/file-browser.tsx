@@ -139,7 +139,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
     if (!selectedItem) return
     setNewName("folderName" in selectedItem ? selectedItem.folderName : "")
     setRenameDialogOpen(true)
-    handleMenuClose()
+    setAnchorEl(null)
   }
 
   const handleDeleteFile = (file: File) => {
@@ -148,8 +148,19 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   }
 
   const handleDeleteFolder = () => {
+    if (!selectedItem) return
     setDeleteDialogOpen(true)
-    handleMenuClose()
+    setAnchorEl(null)
+  }
+
+  const closeRenameDialog = () => {
+    setRenameDialogOpen(false)
+    setSelectedItem(null)
+  }
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+    setSelectedItem(null)
   }
 
   const confirmRename = async () => {
@@ -183,7 +194,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
         refetchRoot()
       }
 
-      setRenameDialogOpen(false)
+      closeRenameDialog()
       setNewName("")
     } catch (error: any) {
       setError(error.message)
@@ -211,7 +222,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
         refetchRoot()
       }
 
-      setDeleteDialogOpen(false)
+      closeDeleteDialog()
     } catch (error: any) {
       setError(error.message)
     }
@@ -338,7 +349,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
       </Menu>
 
       {/* Rename Dialog */}
-      <Dialog open={renameDialogOpen} onClose={() => setRenameDialogOpen(false)}>
+      <Dialog open={renameDialogOpen} onClose={closeRenameDialog}>
         <DialogTitle>Rename Item</DialogTitle>
         <DialogContent>
           <TextField
@@ -352,7 +363,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setRenameDialogOpen(false)}>Cancel</Button>
+          <Button onClick={closeRenameDialog}>Cancel</Button>
           <Button onClick={confirmRename} variant="contained">
             Rename
           </Button>
@@ -360,7 +371,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
@@ -370,7 +381,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={closeDeleteDialog}>Cancel</Button>
           <Button onClick={confirmDelete} variant="contained" color="error">
             Delete
           </Button>

@@ -66,6 +66,7 @@ services:
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
       - NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:8080/query
+      - NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT=ws://localhost:8080/query
       - INTERNAL_GRAPHQL_ENDPOINT=http://backend:8080/query
     env_file:
       - .env
