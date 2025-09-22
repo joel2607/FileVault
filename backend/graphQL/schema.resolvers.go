@@ -7,6 +7,7 @@ package graphQL
 import (
 	"context"
 	"strconv"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
