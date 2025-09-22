@@ -506,11 +506,7 @@ func (r *queryResolver) SearchFiles(ctx context.Context, query *string, filter *
 
 // SearchUsers is the resolver for the searchUsers field.
 func (r *queryResolver) SearchUsers(ctx context.Context, query string) ([]*models.User, error) {
-	user, err := middleware.GetCurrentUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return r.AuthService.SearchUsers(ctx, query, user)
+	return r.AuthService.SearchUsers(ctx, query)
 }
 
 // StorageStatistics is the resolver for the storageStatistics field.
