@@ -53,11 +53,8 @@ interface User {
 
 interface FileAccess {
   id: string
-  user: User
-  file: {
-    id: string
-    fileName: string
-  }
+  username: string
+  email: string
 }
 
 export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProps) {
@@ -87,9 +84,10 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
   }, [debouncedSearchTerm, searchUsers])
 
   if (!file) return null
+  console.log(accessData)
 
   const shareUrl = `${window.location.origin}/shared/${file.id}`
-  const fileAccess: FileAccess[] = accessData?.getFileAccess || []
+  const fileAccess: FileAccess[] = accessData?.getUsersWithAccess || []
 
   const handleVisibilityToggle = async (isPublic: boolean) => {
     try {
@@ -183,7 +181,7 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
         {activeTab === 0 && (
           <Box>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Share this file with specific people by entering their email address.
+              Share this file with specific people by entering their email address or username.
             </Typography>
 
             <Autocomplete
@@ -197,7 +195,7 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Search users by email"
+                  label="Search users by email or username"
                   margin="normal"
                   fullWidth
                   InputProps={{
@@ -238,11 +236,11 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
                   {fileAccess.map((access) => (
                     <ListItem key={access.id}>
                       <Avatar sx={{ mr: 2, width: 32, height: 32 }}>
-                        {access.user.username.charAt(0).toUpperCase()}
+                          {access.username.charAt(0).toUpperCase()}
                       </Avatar>
-                      <ListItemText primary={access.user.username} secondary={access.user.email} />
+                      <ListItemText primary={access.username} secondary={access.email} />
                       <ListItemSecondaryAction>
-                        <IconButton edge="end" onClick={() => handleRevokeAccess(access.user.id)} color="error">
+                        <IconButton edge="end" onClick={() => handleRevokeAccess(access.id)} color="error">
                           <Delete />
                         </IconButton>
                       </ListItemSecondaryAction>
