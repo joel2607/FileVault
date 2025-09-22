@@ -5,6 +5,8 @@ import { createClient } from "graphql-ws"
 import { getMainDefinition } from "@apollo/client/utilities"
 import { createUploadLink } from "apollo-upload-client";
 
+console.log("Apollo Client URI being used:", process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT);
+
 const uploadLink = createUploadLink({
   uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
 })
