@@ -21,7 +21,7 @@ import {
   Alert,
   Chip,
 } from "@mui/material"
-import { Folder as FolderIcon, MoreVert, Edit, Delete, Public, CreateNewFolder } from "@mui/icons-material"
+import { Folder as FolderIcon, MoreVert, Edit, Delete, Public, CreateNewFolder, MoveUp } from "@mui/icons-material"
 import { useQuery, useMutation } from "@apollo/client"
 import { ROOT_QUERY, FOLDER_QUERY } from "@/lib/graphql/queries"
 import {
@@ -35,6 +35,7 @@ import type { File, Folder } from "@/lib/types"
 import { DashboardBreadcrumbs } from "./breadcrumbs"
 import { SearchBar } from "./search-bar"
 import { FileCard } from "./file-card"
+import { MoveDialog } from "../modals/MoveDialog"
 
 interface FileBrowserProps {
   onShareFile: (file: File) => void
@@ -48,6 +49,7 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false)
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false)
   const [newName, setNewName] = useState("")
   const [newFolderName, setNewFolderName] = useState("")
   const [error, setError] = useState("")
@@ -153,6 +155,11 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
     setAnchorEl(null)
   }
 
+  const handleMove = (item: File | Folder) => {
+    setSelectedItem(item)
+    setMoveDialogOpen(true)
+  }
+
   const closeRenameDialog = () => {
     setRenameDialogOpen(false)
     setSelectedItem(null)
@@ -160,6 +167,11 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
 
   const closeDeleteDialog = () => {
     setDeleteDialogOpen(false)
+    setSelectedItem(null)
+  }
+
+  const closeMoveDialog = () => {
+    setMoveDialogOpen(false)
     setSelectedItem(null)
   }
 
@@ -223,6 +235,43 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
       }
 
       closeDeleteDialog()
+    } catch (error: any) {
+      setError(error.message)
+    }
+  }
+
+  const confirmMove = async (destinationFolderId: string | null) => {
+    if (!selectedItem) return
+
+    try {
+      if ("fileName" in selectedItem) {
+        await updateFile({
+          variables: {
+            input: {
+              id: selectedItem.id,
+              parentFolderID: destinationFolderId,
+            },
+          },
+        })
+      } else {
+        await updateFolder({
+          variables: {
+            input: {
+              id: selectedItem.id,
+              parentFolderID: destinationFolderId,
+            },
+          },
+        })
+      }
+
+      // Refetch current data
+      if (currentFolderId) {
+        refetchFolder()
+      } else {
+        refetchRoot()
+      }
+
+      closeMoveDialog()
     } catch (error: any) {
       setError(error.message)
     }
@@ -323,7 +372,13 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
         {/* Files - using enhanced FileCard component */}
         {displayFiles?.map((file: File) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
-            <FileCard file={file} onRename={handleRenameFile} onShare={onShareFile} onDelete={handleDeleteFile} />
+            <FileCard
+              file={file}
+              onRename={handleRenameFile}
+              onShare={onShareFile}
+              onDelete={handleDeleteFile}
+              onMove={handleMove}
+            />
           </Grid>
         ))}
       </Grid>
@@ -341,6 +396,10 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
         <MenuItem onClick={handleRenameFolder}>
           <Edit sx={{ mr: 1 }} />
           Rename
+        </MenuItem>
+        <MenuItem onClick={() => handleMove(selectedItem!)}>
+          <MoveUp sx={{ mr: 1 }} />
+          Move
         </MenuItem>
         <MenuItem onClick={handleDeleteFolder} sx={{ color: "error.main" }}>
           <Delete sx={{ mr: 1 }} />
@@ -409,6 +468,9 @@ export function FileBrowser({ onShareFile }: FileBrowserProps) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Move Dialog */}
+      <MoveDialog open={moveDialogOpen} onClose={closeMoveDialog} onMove={confirmMove} itemToMove={selectedItem} />
     </Box>
   )
 }

@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, Typography, IconButton, Box, Chip, Menu, MenuItem } from "@mui/material"
-import { MoreVert, Edit, Download, Share, Delete, Public } from "@mui/icons-material"
+import { MoreVert, Edit, Download, Share, Delete, Public, MoveUp } from "@mui/icons-material"
 import { useSubscription, useMutation } from "@apollo/client"
 import { FILE_DOWNLOAD_COUNT_SUBSCRIPTION } from "@/lib/graphql/subscriptions"
 import { GENERATE_DOWNLOAD_URL_MUTATION } from "@/lib/graphql/mutations"
@@ -15,9 +15,10 @@ interface FileCardProps {
   onRename: (file: File) => void
   onShare: (file: File) => void
   onDelete: (file: File) => void
+  onMove: (file: File) => void
 }
 
-export function FileCard({ file, onRename, onShare, onDelete }: FileCardProps) {
+export function FileCard({ file, onRename, onShare, onDelete, onMove }: FileCardProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [downloadCount, setDownloadCount] = useState(file.downloadCount)
   const [downloading, setDownloading] = useState(false)
@@ -53,7 +54,7 @@ export function FileCard({ file, onRename, onShare, onDelete }: FileCardProps) {
 
       if (data?.generateDownloadUrl) {
         const link = document.createElement("a")
-        link.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}${data.generateDownloadUrl}`
+        link.href = `${data.generateDownloadUrl}`
         link.download = file.fileName
         document.body.appendChild(link)
         link.click()
@@ -130,6 +131,15 @@ export function FileCard({ file, onRename, onShare, onDelete }: FileCardProps) {
         <MenuItem onClick={handleDownload} disabled={downloading}>
           <Download sx={{ mr: 1 }} />
           {downloading ? "Downloading..." : "Download"}
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onMove(file)
+            handleMenuClose()
+          }}
+        >
+          <MoveUp sx={{ mr: 1 }} />
+          Move
         </MenuItem>
         <MenuItem
           onClick={() => {
