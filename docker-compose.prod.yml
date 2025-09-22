@@ -91,8 +91,8 @@ services:
     volumes:
       - certbot_certs:/etc/letsencrypt
       - certbot_www:/var/www/certbot
-    # Keep the container running so we can exec into it for certificate commands
-    command: "sleep infinity"
+    # FIX: Overriding the entrypoint to keep the container alive reliably.
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 1d & wait $${!}; done;'"
 
 # Define named volumes for persistent data
 volumes:
