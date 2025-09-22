@@ -121,9 +121,9 @@ export const SET_FILE_PRIVATE_MUTATION = gql`
   }
 `
 
-export const ADD_FILE_ACCESS_MUTATION = gql`
-  mutation AddFileAccess($fileID: ID!, $userID: ID!) {
-    addFileAccess(fileID: $fileID, userID: $userID) {
+export const SHARE_FILE_WITH_USER_MUTATION = gql`
+  mutation ShareFileWithUser($fileID: ID!, $userID: ID!) {
+    shareFileWithUser(fileID: $fileID, userID: $userID) {
       id
       user {
         id
@@ -138,11 +138,9 @@ export const ADD_FILE_ACCESS_MUTATION = gql`
   }
 `
 
-export const REVOKE_FILE_ACCESS_MUTATION = gql`
-  mutation RevokeFileAccess($fileID: ID!, $userID: ID!) {
-    revokeFileAccess(fileID: $fileID, userID: $userID) {
-      id
-    }
+export const REMOVE_FILE_ACCESS_MUTATION = gql`
+  mutation RemoveFileAccess($fileID: ID!, $userID: ID!) {
+    removeFileAccess(fileID: $fileID, userID: $userID)
   }
 `
 
