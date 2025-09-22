@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "apollo-upload-client": "^19.0.0",
-    "graphql-upload": "^17.0.0"
-  },
-  "devDependencies": {
-    "@types/apollo-upload-client": "^18.0.0"
-  }
-}
