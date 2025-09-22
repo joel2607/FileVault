@@ -53,6 +53,11 @@ export function MoveDialog({ open, onClose, onMove, itemToMove }: MoveDialogProp
 
   const folders = currentFolderId ? data?.folder?.folders : data?.root?.folders
 
+  const filteredFolders =
+    itemToMove && "folderName" in itemToMove
+      ? folders?.filter((folder: Folder) => folder.id !== itemToMove.id)
+      : folders
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
@@ -70,7 +75,7 @@ export function MoveDialog({ open, onClose, onMove, itemToMove }: MoveDialogProp
           <Typography>Loading...</Typography>
         ) : (
           <List>
-            {folders?.map((folder: Folder) => (
+            {filteredFolders?.map((folder: Folder) => (
               <ListItem button key={folder.id} onClick={() => handleFolderClick(folder.id)}>
                 <ListItemIcon>
                   <FolderIcon />

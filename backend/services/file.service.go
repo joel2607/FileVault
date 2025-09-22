@@ -501,6 +501,9 @@ func (s *FileService) UpdateFolder(ctx context.Context, input models.UpdateFolde
 	if input.ParentFolderID != nil {
 		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
 		parsedID := uint(id)
+		if parsedID == folder.ID {
+			return nil, fmt.Errorf("cannot move a folder into itself")
+		}
 		folder.ParentFolderID = &parsedID
 	}
 	err = s.DB.Save(&folder).Error
