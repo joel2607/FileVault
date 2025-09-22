@@ -32,7 +32,7 @@ export default function HomePage() {
           <Typography variant="h4" component="h1" gutterBottom>
             My Files
           </Typography>
-          <FileBrowser key={refreshKey} onShareFile={handleShareFile} />
+          <FileBrowser refresh={refreshKey} onShareFile={handleShareFile} />
         </Box>
 
         <ShareModal
