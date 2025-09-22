@@ -100,23 +100,20 @@ export function UploadModal({
     });
 
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "/graphql",
-        {
-          method: "POST",
-          body,
-          headers: {
-            authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body,
+        headers: {
+          authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
       const result = await response.json();
 
       if (result.errors) {
         throw new Error(result.errors[0].message);
       }
-      
+
       setUploadProgress(100);
       setTimeout(() => {
         onUploadComplete();

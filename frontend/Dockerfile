@@ -6,6 +6,10 @@ FROM node:20-alpine AS builder
 # Set the working directory
 WORKDIR /app
 
+# Add build arguments
+ARG BACKEND_URL
+ENV BACKEND_URL=$BACKEND_URL
+
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
@@ -23,6 +27,10 @@ FROM node:20-alpine AS runner
 
 # Set the working directory
 WORKDIR /app
+
+# Add arguments
+ARG BACKEND_URL
+ENV BACKEND_URL=$BACKEND_URL
 
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
