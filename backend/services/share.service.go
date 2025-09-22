@@ -279,9 +279,9 @@ func (s *ShareService) SearchFiles(ctx context.Context, query string, filter *mo
 				db = db.Where("files.created_at <= ?", et)
 			}
 		}
-		if filter.IsPublic != nil {
-			db = db.Where("files.is_public = ?", *filter.IsPublic)
-		}
+		// if filter.IsPublic != nil {
+		// 	db = db.Where("files.is_public = ?", *filter.IsPublic)
+		// }
 	}
 
 	if err := db.Find(&files).Error; err != nil {
