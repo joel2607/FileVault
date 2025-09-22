@@ -125,7 +125,7 @@ export const SHARE_FILE_WITH_USER_MUTATION = gql`
   mutation ShareFileWithUser($fileID: ID!, $userID: ID!) {
     shareFileWithUser(fileID: $fileID, userID: $userID) {
       id
-      user {
+      sharedWithUser {
         id
         username
         email
@@ -141,22 +141,5 @@ export const SHARE_FILE_WITH_USER_MUTATION = gql`
 export const REMOVE_FILE_ACCESS_MUTATION = gql`
   mutation RemoveFileAccess($fileID: ID!, $userID: ID!) {
     removeFileAccess(fileID: $fileID, userID: $userID)
-  }
-`
-
-export const GET_FILE_ACCESS_QUERY = gql`
-  query GetFileAccess($fileID: ID!) {
-    getFileAccess(fileID: $fileID) {
-      id
-      user {
-        id
-        username
-        email
-      }
-      file {
-        id
-        fileName
-      }
-    }
   }
 `
