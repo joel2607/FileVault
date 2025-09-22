@@ -48,6 +48,9 @@ This will start the following services:
 *   **frontend**: React app running on `http://localhost:3000`
 *   **db**: PostgreSQL database running on `localhost:5432`
 
+## Testing the application
+
+Postman Workspace at: `https://web.postman.co/9471df3d-c48b-4b14-897c-e6cd77995772`
 
 
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/2xw7QaEj)
