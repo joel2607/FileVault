@@ -9,14 +9,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/query',
-        destination: `${process.env.BACKEND_URL}/query`,
-      },
-    ];
-  },
 };
 
 export default nextConfig
