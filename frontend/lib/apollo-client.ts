@@ -18,20 +18,27 @@ const authLink = setContext((_, { headers }) => {
   }
 })
 
-const wsLink =
-  typeof window !== "undefined"
-    ? new GraphQLWsLink(
-        createClient({
-          url: process.env.NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT || "ws://localhost:8080/query",
-          connectionParams: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }),
-      )
-    : null
+const createWsLink = () => {
+  if (typeof window === "undefined") {
+    return null
+  }
+  return new GraphQLWsLink(
+    createClient({
+      url: process.env.NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT || "ws://localhost:8080/query",
+      connectionParams: () => {
+        const token = localStorage.getItem("token")
+        return {
+          Authorization: token ? `Bearer ${token}` : "",
+        }
+      },
+    }),
+  )
+}
+
+const wsLink = createWsLink()
 
 const splitLink =
-  typeof window !== "undefined" && wsLink != null
+  wsLink != null
     ? split(
         ({ query }) => {
           const definition = getMainDefinition(query)
