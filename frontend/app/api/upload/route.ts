@@ -4,7 +4,7 @@ import { setContext } from "@apollo/client/link/context"
 import { UPLOAD_FILES_MUTATION } from "@/lib/graphql/mutations"
 
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
+  uri: process.env.INTERNAL_GRAPHQL_ENDPOINT || "http://backend:8080/query",
 })
 
 const authLink = setContext((_, { headers }) => {

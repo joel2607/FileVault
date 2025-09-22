@@ -13,8 +13,7 @@ const nextConfig = {
     return [
       {
         source: '/query',
-        // The destination is where your docker-compose exposes the backend port
-        destination: 'http://localhost:8080/query', 
+        destination: `${process.env.BACKEND_URL}/query`,
       },
     ];
   },
