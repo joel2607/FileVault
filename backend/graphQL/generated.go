@@ -151,7 +151,7 @@ type ComplexityRoot struct {
 		GetUsersWithAccess func(childComplexity int, fileID string) int
 		Me                 func(childComplexity int) int
 		Root               func(childComplexity int) int
-		SearchFiles        func(childComplexity int, filter *models.FileFilterInput) int
+		SearchFiles        func(childComplexity int, query *string, filter *models.FileFilterInput) int
 		SearchUsers        func(childComplexity int, query string) int
 	}
 
@@ -263,7 +263,7 @@ type QueryResolver interface {
 	Root(ctx context.Context) (*models.Root, error)
 	File(ctx context.Context, id string) (*models.File, error)
 	GetUsersWithAccess(ctx context.Context, fileID string) ([]*models.User, error)
-	SearchFiles(ctx context.Context, filter *models.FileFilterInput) ([]*models.File, error)
+	SearchFiles(ctx context.Context, query *string, filter *models.FileFilterInput) ([]*models.File, error)
 	SearchUsers(ctx context.Context, query string) ([]*models.User, error)
 }
 type SubscriptionResolver interface {
@@ -851,7 +851,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchFiles(childComplexity, args["filter"].(*models.FileFilterInput)), true
+		return e.complexity.Query.SearchFiles(childComplexity, args["query"].(*string), args["filter"].(*models.FileFilterInput)), true
 	case "Query.searchUsers":
 		if e.complexity.Query.SearchUsers == nil {
 			break
@@ -1390,11 +1390,16 @@ func (ec *executionContext) field_Query_getUsersWithAccess_args(ctx context.Cont
 func (ec *executionContext) field_Query_searchFiles_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
-	args["filter"] = arg0
+	args["query"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg1
 	return args, nil
 }
 
@@ -4509,7 +4514,7 @@ func (ec *executionContext) _Query_searchFiles(ctx context.Context, field graphq
 		ec.fieldContext_Query_searchFiles,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchFiles(ctx, fc.Args["filter"].(*models.FileFilterInput))
+			return ec.resolvers.Query().SearchFiles(ctx, fc.Args["query"].(*string), fc.Args["filter"].(*models.FileFilterInput))
 		},
 		nil,
 		ec.marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ,
@@ -6783,7 +6788,7 @@ func (ec *executionContext) unmarshalInputFileFilterInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"mimeTypes", "minSize", "maxSize", "startDate", "endDate", "tags", "uploaderID"}
+	fieldsInOrder := [...]string{"mimeTypes", "minSize", "maxSize", "startDate", "endDate", "tags", "uploaderID", "isPublic"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6839,6 +6844,13 @@ func (ec *executionContext) unmarshalInputFileFilterInput(ctx context.Context, o
 				return it, err
 			}
 			it.UploaderID = data
+		case "isPublic":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isPublic"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsPublic = data
 		}
 	}
 
