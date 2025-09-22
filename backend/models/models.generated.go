@@ -28,7 +28,7 @@ type Mutation struct {
 }
 
 type NewFolder struct {
-	Name           string  `json:"name"`
+	FolderName     string  `json:"folderName"`
 	ParentFolderID *string `json:"parentFolderID,omitempty"`
 }
 
@@ -59,12 +59,12 @@ type Subscription struct {
 
 type UpdateFile struct {
 	ID             string  `json:"id"`
-	Name           *string `json:"name,omitempty"`
+	FileName       *string `json:"fileName,omitempty"`
 	ParentFolderID *string `json:"parentFolderID,omitempty"`
 }
 
 type UpdateFolder struct {
 	ID             string  `json:"id"`
-	Name           *string `json:"name,omitempty"`
+	FolderName     *string `json:"folderName,omitempty"`
 	ParentFolderID *string `json:"parentFolderID,omitempty"`
 }

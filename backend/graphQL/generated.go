@@ -6765,20 +6765,20 @@ func (ec *executionContext) unmarshalInputNewFolder(ctx context.Context, obj any
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "parentFolderID"}
+	fieldsInOrder := [...]string{"folderName", "parentFolderID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		case "folderName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("folderName"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FolderName = data
 		case "parentFolderID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentFolderID"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6840,7 +6840,7 @@ func (ec *executionContext) unmarshalInputUpdateFile(ctx context.Context, obj an
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "parentFolderID"}
+	fieldsInOrder := [...]string{"id", "fileName", "parentFolderID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6854,13 +6854,13 @@ func (ec *executionContext) unmarshalInputUpdateFile(ctx context.Context, obj an
 				return it, err
 			}
 			it.ID = data
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		case "fileName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileName"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FileName = data
 		case "parentFolderID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentFolderID"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6881,7 +6881,7 @@ func (ec *executionContext) unmarshalInputUpdateFolder(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "parentFolderID"}
+	fieldsInOrder := [...]string{"id", "folderName", "parentFolderID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6895,13 +6895,13 @@ func (ec *executionContext) unmarshalInputUpdateFolder(ctx context.Context, obj 
 				return it, err
 			}
 			it.ID = data
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		case "folderName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("folderName"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FolderName = data
 		case "parentFolderID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentFolderID"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)

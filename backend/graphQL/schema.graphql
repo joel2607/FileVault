@@ -177,20 +177,20 @@ type Root {
 }
 
 input NewFolder {
-  name: String!
+  folderName: String!
   parentFolderID: ID
 }
 
 input UpdateFolder {
-    id: ID!
-    name: String
-    parentFolderID: ID
+  id: ID!
+  folderName: String
+  parentFolderID: ID
 }
 
 input UpdateFile {
-    id: ID!
-    name: String
-    parentFolderID: ID
+  id: ID!
+  fileName: String
+  parentFolderID: ID
 }
 
 input FileFilterInput {
