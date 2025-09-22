@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useCallback } from "react"
+import type React from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -16,91 +16,127 @@ import {
   ListItemText,
   IconButton,
   Alert,
-} from "@mui/material"
-import { CloudUpload, Delete, AttachFile } from "@mui/icons-material"
-import { useMutation } from "@apollo/client"
-import { UPLOAD_FILES_MUTATION } from "@/lib/graphql/mutations"
+} from "@mui/material";
+import { CloudUpload, Delete, AttachFile } from "@mui/icons-material";
+import { UPLOAD_FILES_MUTATION } from "@/lib/graphql/mutations";
+// import { apolloClient } from "@/lib/apollo-client";
 
 interface UploadModalProps {
-  open: boolean
-  onClose: () => void
-  currentFolderId?: string
-  onUploadComplete: () => void
+  open: boolean;
+  onClose: () => void;
+  currentFolderId?: string;
+  onUploadComplete: () => void;
 }
 
-export function UploadModal({ open, onClose, currentFolderId, onUploadComplete }: UploadModalProps) {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [error, setError] = useState("")
+export function UploadModal({
+  open,
+  onClose,
+  currentFolderId,
+  onUploadComplete,
+}: UploadModalProps) {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState("");
 
-  const [uploadFiles] = useMutation(UPLOAD_FILES_MUTATION)
-
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || [])
-    setSelectedFiles((prev) => [...prev, ...files])
-  }, [])
+  const handleFileSelect = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(event.target.files || []);
+      setSelectedFiles((prev) => [...prev, ...files]);
+    },
+    []
+  );
 
   const handleDrop = useCallback((event: React.DragEvent) => {
-    event.preventDefault()
-    const files = Array.from(event.dataTransfer.files)
-    setSelectedFiles((prev) => [...prev, ...files])
-  }, [])
+    event.preventDefault();
+    const files = Array.from(event.dataTransfer.files);
+    setSelectedFiles((prev) => [...prev, ...files]);
+  }, []);
 
   const handleDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault()
-  }, [])
+    event.preventDefault();
+  }, []);
 
   const removeFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-  }
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
 
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) return
+    if (selectedFiles.length === 0) return;
 
-    setUploading(true)
-    setError("")
-    setUploadProgress(0)
+    setUploading(true);
+    setError("");
+    setUploadProgress(0);
+
+    const body = new FormData();
+
+    const operations = {
+      query: UPLOAD_FILES_MUTATION.loc?.source.body,
+      variables: {
+        files: selectedFiles.map((_, i) => null),
+        parentFolderID: currentFolderId || null,
+      },
+    };
+
+    body.append("operations", JSON.stringify(operations));
+
+    const map: { [key: string]: string[] } = {};
+    selectedFiles.forEach((_, i) => {
+      map[i] = [`variables.files.${i}`];
+    });
+
+    body.append("map", JSON.stringify(map));
+
+    selectedFiles.forEach((file, i) => {
+      body.append(String(i), file);
+    });
 
     try {
-      await uploadFiles({
-        variables: {
-          files: selectedFiles,
-          parentFolderID: currentFolderId || null,
-        },
-        onUploadProgress: (progressEvent: any) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setUploadProgress(percentCompleted)
-        },
-      })
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "/graphql",
+        {
+          method: "POST",
+          body,
+          headers: {
+            authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
+      const result = await response.json();
+
+      if (result.errors) {
+        throw new Error(result.errors[0].message);
+      }
+      
+      setUploadProgress(100);
       setTimeout(() => {
-        onUploadComplete()
-        handleClose()
-      }, 500)
+        onUploadComplete();
+        handleClose();
+      }, 500);
     } catch (error: any) {
-      setError(error.message)
-      setUploading(false)
-      setUploadProgress(0)
+      setError(error.message);
+      setUploading(false);
+      setUploadProgress(0);
     }
-  }
+  };
 
   const handleClose = () => {
     if (!uploading) {
-      setSelectedFiles([])
-      setUploadProgress(0)
-      setError("")
-      onClose()
+      setSelectedFiles([]);
+      setUploadProgress(0);
+      setError("");
+      onClose();
     }
-  }
+  };
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
