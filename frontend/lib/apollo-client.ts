@@ -6,7 +6,7 @@ import { getMainDefinition } from "@apollo/client/utilities"
 import { createUploadLink } from "apollo-upload-client";
 
 const uploadLink = createUploadLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "http://localhost:8080/query",
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
 })
 
 const authLink = setContext((_, { headers }) => {
@@ -25,7 +25,7 @@ const createWsLink = () => {
   }
   return new GraphQLWsLink(
     createClient({
-      url: process.env.NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT || "ws://localhost:8080/query",
+      url: process.env.NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT!,
       connectionParams: () => {
         const token = localStorage.getItem("token")
         return {
