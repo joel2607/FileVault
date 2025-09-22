@@ -94,8 +94,8 @@ export const GET_FILE_ACCESS_QUERY = gql`
 `
 
 export const SEARCH_USERS_QUERY = gql`
-  query SearchUsers($email: String!) {
-    searchUsers(email: $email) {
+  query SearchUsers($query: String!) {
+    searchUsers(query: $query) {
       id
       username
       email

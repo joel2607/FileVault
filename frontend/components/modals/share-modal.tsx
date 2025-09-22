@@ -31,11 +31,12 @@ import { useMutation, useQuery, useLazyQuery } from "@apollo/client"
 import {
   SET_FILE_PUBLIC_MUTATION,
   SET_FILE_PRIVATE_MUTATION,
-  ADD_FILE_ACCESS_MUTATION,
-  REVOKE_FILE_ACCESS_MUTATION,
+  SHARE_FILE_WITH_USER_MUTATION,
+  REMOVE_FILE_ACCESS_MUTATION,
 } from "@/lib/graphql/mutations"
 import { GET_FILE_ACCESS_QUERY, SEARCH_USERS_QUERY } from "@/lib/graphql/queries"
 import type { File } from "@/lib/types"
+import { useDebounce } from "@/hooks/use-debounce"
 
 interface ShareModalProps {
   open: boolean
@@ -65,6 +66,7 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
   const [error, setError] = useState("")
   const [copySuccess, setCopySuccess] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // Queries and mutations
   const { data: accessData, refetch: refetchAccess } = useQuery(GET_FILE_ACCESS_QUERY, {
@@ -75,14 +77,14 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
   const [searchUsers, { data: usersData, loading: searchingUsers }] = useLazyQuery(SEARCH_USERS_QUERY)
   const [setFilePublic] = useMutation(SET_FILE_PUBLIC_MUTATION)
   const [setFilePrivate] = useMutation(SET_FILE_PRIVATE_MUTATION)
-  const [addFileAccess] = useMutation(ADD_FILE_ACCESS_MUTATION)
-  const [revokeFileAccess] = useMutation(REVOKE_FILE_ACCESS_MUTATION)
+  const [shareFileWithUser] = useMutation(SHARE_FILE_WITH_USER_MUTATION)
+  const [removeFileAccess] = useMutation(REMOVE_FILE_ACCESS_MUTATION)
 
   useEffect(() => {
-    if (searchTerm.length > 2) {
-      searchUsers({ variables: { email: searchTerm } })
+    if (debouncedSearchTerm.length > 2) {
+      searchUsers({ variables: { query: debouncedSearchTerm } })
     }
-  }, [searchTerm, searchUsers])
+  }, [debouncedSearchTerm, searchUsers])
 
   if (!file) return null
 
@@ -118,7 +120,7 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
 
     try {
       setError("")
-      await addFileAccess({
+      await shareFileWithUser({
         variables: {
           fileID: file.id,
           userID: selectedUser.id,
@@ -136,7 +138,7 @@ export function ShareModal({ open, onClose, file, onFileUpdate }: ShareModalProp
   const handleRevokeAccess = async (userId: string) => {
     try {
       setError("")
-      await revokeFileAccess({
+      await removeFileAccess({
         variables: {
           fileID: file.id,
           userID: userId,

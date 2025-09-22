@@ -134,6 +134,7 @@ type Query {
   file(id: ID!): File
   getUsersWithAccess(fileID: ID!): [User!]
   searchFiles(filter: FileFilterInput): [File!]
+  searchUsers(query: String!): [User!]
 }
 
 """

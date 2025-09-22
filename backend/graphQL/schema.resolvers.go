@@ -500,6 +500,11 @@ func (r *queryResolver) SearchFiles(ctx context.Context, filter *models.FileFilt
 	return r.ShareService.SearchFiles(ctx, filter, user)
 }
 
+// SearchUsers is the resolver for the searchUsers field.
+func (r *queryResolver) SearchUsers(ctx context.Context, query string) ([]*models.User, error) {
+	return r.AuthService.SearchUsers(ctx, query)
+}
+
 // StorageStatistics is the resolver for the storageStatistics field.
 func (r *subscriptionResolver) StorageStatistics(ctx context.Context, userID *string) (<-chan *models.StorageStatistics, error) {
 	currentUser, err := middleware.GetCurrentUser(ctx)
