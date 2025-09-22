@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -131,4 +132,12 @@ func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error)
 	}
 
 	return nil, errors.New("invalid token")
+}
+
+// SearchUsers performs a case-insensitive search for users with usernames or emails that contain the query string.
+func (s *AuthService) SearchUsers(ctx context.Context, query string) ([]*models.User, error) {
+	var users []*models.User
+	searchQuery := "%" + query + "%"
+	err := s.DB.Where("username ILIKE ? OR email ILIKE ?", searchQuery, searchQuery).Find(&users).Error
+	return users, err
 }

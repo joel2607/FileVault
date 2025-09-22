@@ -41,6 +41,7 @@ func init() {
 	viper.BindEnv("jwt_auth_secret", "JWT_AUTH_SECRET")
 	viper.BindEnv("download_token_secret", "DOWNLOAD_TOKEN_SECRET")
 	viper.BindEnv("app.base_url", "APP_BASE_URL")
+	viper.BindEnv("ratelimit.limit", "RATELIMIT_LIMIT")
 }
 
 func main() {
@@ -63,13 +64,13 @@ func main() {
 
 	// Middleware
 	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 	}).Handler)
 	router.Use(middleware.AuthMiddleware(authService))
-	router.Use(middleware.RateLimitMiddleware(rdb, 2, 1*time.Second))
+	router.Use(middleware.RateLimitMiddleware(rdb, viper.GetInt("ratelimit.limit"), 1*time.Second))
 
 	// Setup GraphQL Server
 	resolver := &graphQL.Resolver{

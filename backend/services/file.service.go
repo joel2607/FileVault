@@ -377,7 +377,7 @@ func (s *FileService) UploadFile(ctx context.Context, file graphql.Upload, user 
 func (s *FileService) CreateFolder(ctx context.Context, input models.NewFolder, user *models.User) (*models.Folder, error) {
 	folder := &models.Folder{
 		UserID:     user.ID,
-		FolderName: input.Name,
+		FolderName: input.FolderName,
 	}
 	if input.ParentFolderID != nil {
 		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
@@ -400,19 +400,23 @@ func (s *FileService) CreateFolder(ctx context.Context, input models.NewFolder, 
 // - A pointer to the updated models.File object.
 // - An error if the file is not found or the database operation fails.
 func (s *FileService) UpdateFile(ctx context.Context, input models.UpdateFile, user *models.User) (*models.File, error) {
+	uid, err := strconv.ParseUint(input.ID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid file ID")
+	}
 	var file models.File
-	if err := s.DB.First(&file, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
+	if err := s.DB.First(&file, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
 		return nil, err
 	}
-	if input.Name != nil {
-		file.FileName = *input.Name
+	if input.FileName != nil {
+		file.FileName = *input.FileName
 	}
 	if input.ParentFolderID != nil {
 		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
-		uid := uint(id)
-		file.FolderID = &uid
+		parsedID := uint(id)
+		file.FolderID = &parsedID
 	}
-	err := s.DB.Save(&file).Error
+	err = s.DB.Save(&file).Error
 	return &file, err
 }
 
@@ -483,19 +487,26 @@ func (s *FileService) DeleteFile(ctx context.Context, id string, user *models.Us
 // - A pointer to the updated models.Folder object.
 // - An error if the folder is not found or the database operation fails.
 func (s *FileService) UpdateFolder(ctx context.Context, input models.UpdateFolder, user *models.User) (*models.Folder, error) {
+	uid, err := strconv.ParseUint(input.ID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid folder ID")
+	}
 	var folder models.Folder
-	if err := s.DB.First(&folder, "id = ? AND user_id = ?", input.ID, user.ID).Error; err != nil {
+	if err := s.DB.First(&folder, "id = ? AND user_id = ?", uid, user.ID).Error; err != nil {
 		return nil, err
 	}
-	if input.Name != nil {
-		folder.FolderName = *input.Name
+	if input.FolderName != nil {
+		folder.FolderName = *input.FolderName
 	}
 	if input.ParentFolderID != nil {
 		id, _ := strconv.ParseUint(*input.ParentFolderID, 10, 64)
-		uid := uint(id)
-		folder.ParentFolderID = &uid
+		parsedID := uint(id)
+		if parsedID == folder.ID {
+			return nil, fmt.Errorf("cannot move a folder into itself")
+		}
+		folder.ParentFolderID = &parsedID
 	}
-	err := s.DB.Save(&folder).Error
+	err = s.DB.Save(&folder).Error
 	return &folder, err
 }
 

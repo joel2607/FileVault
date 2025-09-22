@@ -16,3 +16,6 @@ redis:
 
 app:
   base_url: "http://localhost:8080"
+
+ratelimit:
+  limit: 100

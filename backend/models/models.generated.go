@@ -21,6 +21,7 @@ type FileFilterInput struct {
 	EndDate    *string  `json:"endDate,omitempty"`
 	Tags       []string `json:"tags,omitempty"`
 	UploaderID *string  `json:"uploaderID,omitempty"`
+	IsPublic   *bool    `json:"isPublic,omitempty"`
 }
 
 // Defines the mutations available in the API.
@@ -28,7 +29,7 @@ type Mutation struct {
 }
 
 type NewFolder struct {
-	Name           string  `json:"name"`
+	FolderName     string  `json:"folderName"`
 	ParentFolderID *string `json:"parentFolderID,omitempty"`
 }
 
@@ -59,12 +60,12 @@ type Subscription struct {
 
 type UpdateFile struct {
 	ID             string  `json:"id"`
-	Name           *string `json:"name,omitempty"`
+	FileName       *string `json:"fileName,omitempty"`
 	ParentFolderID *string `json:"parentFolderID,omitempty"`
 }
 
 type UpdateFolder struct {
 	ID             string  `json:"id"`
-	Name           *string `json:"name,omitempty"`
+	FolderName     *string `json:"folderName,omitempty"`
 	ParentFolderID *string `json:"parentFolderID,omitempty"`
 }

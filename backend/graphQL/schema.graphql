@@ -133,7 +133,8 @@ type Query {
   root: Root
   file(id: ID!): File
   getUsersWithAccess(fileID: ID!): [User!]
-  searchFiles(filter: FileFilterInput): [File!]
+  searchFiles(query: String, filter: FileFilterInput): [File!]
+  searchUsers(query: String!): [User!]
 }
 
 """
@@ -177,20 +178,20 @@ type Root {
 }
 
 input NewFolder {
-  name: String!
+  folderName: String!
   parentFolderID: ID
 }
 
 input UpdateFolder {
-    id: ID!
-    name: String
-    parentFolderID: ID
+  id: ID!
+  folderName: String
+  parentFolderID: ID
 }
 
 input UpdateFile {
-    id: ID!
-    name: String
-    parentFolderID: ID
+  id: ID!
+  fileName: String
+  parentFolderID: ID
 }
 
 input FileFilterInput {
@@ -201,5 +202,6 @@ input FileFilterInput {
   endDate: String
   tags: [String!]
   uploaderID: ID
+  isPublic: Boolean
 }
 

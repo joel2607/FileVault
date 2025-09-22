@@ -212,8 +212,8 @@ func (s *ShareService) RemoveFileAccess(ctx context.Context, fileID string, user
 	return true, nil
 }
 
-// GetUsersWithAccess returns a list of users who have access to a file.
-// This includes the file owner and any users the file has been shared with.
+// GetUsersWithAccess returns a list of users who have been explicitly granted access to a file.
+// It excludes the file owner.
 // Only the file owner can perform this action.
 func (s *ShareService) GetUsersWithAccess(ctx context.Context, fileID string, user *models.User) ([]*models.User, error) {
 	var file models.File
@@ -227,68 +227,60 @@ func (s *ShareService) GetUsersWithAccess(ctx context.Context, fileID string, us
 	}
 
 	var users []*models.User
-	// Add the owner to the list
-	users = append(users, user)
-
 	var shares []models.FileSharing
-	if err := s.DB.Where("file_id = ?", uid).Find(&shares).Error; err != nil {
+	if err := s.DB.Preload("SharedWithUser").Where("file_id = ?", uid).Find(&shares).Error; err != nil {
 		return nil, err
 	}
 
 	for _, share := range shares {
-		var sharedUser models.User
-		if err := s.DB.First(&sharedUser, share.SharedWithUserID).Error; err == nil {
-			users = append(users, &sharedUser)
-		}
+		users = append(users, &share.SharedWithUser)
 	}
 
 	return users, nil
 }
 
-// SearchFiles searches for files based on a set of filters.
+// SearchFiles searches for files based on a query string and a set of filters.
+// The query string is matched against file names, tags, and the uploader's username.
 // Admins can search all files, while regular users can only search their own files and files shared with them.
-func (s *ShareService) SearchFiles(ctx context.Context, filter *models.FileFilterInput, user *models.User) ([]*models.File, error) {
+func (s *ShareService) SearchFiles(ctx context.Context, query string, filter *models.FileFilterInput, user *models.User) ([]*models.File, error) {
 	var files []*models.File
-	db := s.DB
+	db := s.DB.Joins("JOIN users ON users.id = files.user_id")
 
 	if user.Role != models.RoleAdmin {
 		// Regular user: can search own files and files shared with them
 		sharedFileIDs := s.DB.Model(&models.FileSharing{}).Select("file_id").Where("shared_with_user_id = ?", user.ID)
-		db = db.Where("user_id = ? OR id IN (?)", user.ID, sharedFileIDs)
+		db = db.Where("files.user_id = ? OR files.id IN (?)", user.ID, sharedFileIDs)
+	}
+
+	if query != "" {
+		searchQuery := "%" + query + "%"
+		db = db.Where("files.file_name ILIKE ? OR users.username ILIKE ? OR files.tags::text ILIKE ?", searchQuery, searchQuery, searchQuery)
 	}
 
 	if filter != nil {
 		if len(filter.MimeTypes) > 0 {
-			db = db.Where("mime_type IN (?)", filter.MimeTypes)
+			db = db.Where("files.mime_type IN (?)", filter.MimeTypes)
 		}
 		if filter.MinSize != nil {
-			db = db.Where("size >= ?", *filter.MinSize)
+			db = db.Where("files.size >= ?", *filter.MinSize)
 		}
 		if filter.MaxSize != nil {
-			db = db.Where("size <= ?", *filter.MaxSize)
+			db = db.Where("files.size <= ?", *filter.MaxSize)
 		}
 		if filter.StartDate != nil {
 			st, err := time.Parse(time.RFC3339, *filter.StartDate)
 			if err == nil {
-				db = db.Where("created_at >= ?", st)
+				db = db.Where("files.created_at >= ?", st)
 			}
 		}
 		if filter.EndDate != nil {
 			et, err := time.Parse(time.RFC3339, *filter.EndDate)
 			if err == nil {
-				db = db.Where("created_at <= ?", et)
+				db = db.Where("files.created_at <= ?", et)
 			}
 		}
-		if len(filter.Tags) > 0 {
-			for _, tag := range filter.Tags {
-				db = db.Where("tags::jsonb @> ?", fmt.Sprintf("\"%s\"", tag))
-			}
-		}
-		if filter.UploaderID != nil {
-			uid, err := strconv.ParseUint(*filter.UploaderID, 10, 64)
-			if err == nil {
-				db = db.Where("user_id = ?", uid)
-			}
+		if filter.IsPublic != nil {
+			db = db.Where("files.is_public = ?", *filter.IsPublic)
 		}
 	}
 

@@ -151,7 +151,8 @@ type ComplexityRoot struct {
 		GetUsersWithAccess func(childComplexity int, fileID string) int
 		Me                 func(childComplexity int) int
 		Root               func(childComplexity int) int
-		SearchFiles        func(childComplexity int, filter *models.FileFilterInput) int
+		SearchFiles        func(childComplexity int, query *string, filter *models.FileFilterInput) int
+		SearchUsers        func(childComplexity int, query string) int
 	}
 
 	Root struct {
@@ -262,7 +263,8 @@ type QueryResolver interface {
 	Root(ctx context.Context) (*models.Root, error)
 	File(ctx context.Context, id string) (*models.File, error)
 	GetUsersWithAccess(ctx context.Context, fileID string) ([]*models.User, error)
-	SearchFiles(ctx context.Context, filter *models.FileFilterInput) ([]*models.File, error)
+	SearchFiles(ctx context.Context, query *string, filter *models.FileFilterInput) ([]*models.File, error)
+	SearchUsers(ctx context.Context, query string) ([]*models.User, error)
 }
 type SubscriptionResolver interface {
 	StorageStatistics(ctx context.Context, userID *string) (<-chan *models.StorageStatistics, error)
@@ -849,7 +851,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchFiles(childComplexity, args["filter"].(*models.FileFilterInput)), true
+		return e.complexity.Query.SearchFiles(childComplexity, args["query"].(*string), args["filter"].(*models.FileFilterInput)), true
+	case "Query.searchUsers":
+		if e.complexity.Query.SearchUsers == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchUsers_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchUsers(childComplexity, args["query"].(string)), true
 
 	case "Root.files":
 		if e.complexity.Root.Files == nil {
@@ -1377,11 +1390,27 @@ func (ec *executionContext) field_Query_getUsersWithAccess_args(ctx context.Cont
 func (ec *executionContext) field_Query_searchFiles_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
-	args["filter"] = arg0
+	args["query"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_searchUsers_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["query"] = arg0
 	return args, nil
 }
 
@@ -4485,7 +4514,7 @@ func (ec *executionContext) _Query_searchFiles(ctx context.Context, field graphq
 		ec.fieldContext_Query_searchFiles,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchFiles(ctx, fc.Args["filter"].(*models.FileFilterInput))
+			return ec.resolvers.Query().SearchFiles(ctx, fc.Args["query"].(*string), fc.Args["filter"].(*models.FileFilterInput))
 		},
 		nil,
 		ec.marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ,
@@ -4544,6 +4573,69 @@ func (ec *executionContext) fieldContext_Query_searchFiles(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_searchFiles_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_searchUsers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_searchUsers,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().SearchUsers(ctx, fc.Args["query"].(string))
+		},
+		nil,
+		ec.marshalOUser2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_searchUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "username":
+				return ec.fieldContext_User_username(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "storageQuotaKb":
+				return ec.fieldContext_User_storageQuotaKb(ctx, field)
+			case "usedStorageKb":
+				return ec.fieldContext_User_usedStorageKb(ctx, field)
+			case "savedStorageKb":
+				return ec.fieldContext_User_savedStorageKb(ctx, field)
+			case "apiRateLimit":
+				return ec.fieldContext_User_apiRateLimit(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_searchUsers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6696,7 +6788,7 @@ func (ec *executionContext) unmarshalInputFileFilterInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"mimeTypes", "minSize", "maxSize", "startDate", "endDate", "tags", "uploaderID"}
+	fieldsInOrder := [...]string{"mimeTypes", "minSize", "maxSize", "startDate", "endDate", "tags", "uploaderID", "isPublic"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6752,6 +6844,13 @@ func (ec *executionContext) unmarshalInputFileFilterInput(ctx context.Context, o
 				return it, err
 			}
 			it.UploaderID = data
+		case "isPublic":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isPublic"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsPublic = data
 		}
 	}
 
@@ -6765,20 +6864,20 @@ func (ec *executionContext) unmarshalInputNewFolder(ctx context.Context, obj any
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "parentFolderID"}
+	fieldsInOrder := [...]string{"folderName", "parentFolderID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		case "folderName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("folderName"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FolderName = data
 		case "parentFolderID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentFolderID"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6840,7 +6939,7 @@ func (ec *executionContext) unmarshalInputUpdateFile(ctx context.Context, obj an
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "parentFolderID"}
+	fieldsInOrder := [...]string{"id", "fileName", "parentFolderID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6854,13 +6953,13 @@ func (ec *executionContext) unmarshalInputUpdateFile(ctx context.Context, obj an
 				return it, err
 			}
 			it.ID = data
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		case "fileName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileName"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FileName = data
 		case "parentFolderID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentFolderID"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6881,7 +6980,7 @@ func (ec *executionContext) unmarshalInputUpdateFolder(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "parentFolderID"}
+	fieldsInOrder := [...]string{"id", "folderName", "parentFolderID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6895,13 +6994,13 @@ func (ec *executionContext) unmarshalInputUpdateFolder(ctx context.Context, obj 
 				return it, err
 			}
 			it.ID = data
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		case "folderName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("folderName"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FolderName = data
 		case "parentFolderID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("parentFolderID"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
@@ -8828,6 +8927,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_searchFiles(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "searchUsers":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_searchUsers(ctx, field)
 				return res
 			}
 

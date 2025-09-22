@@ -7,6 +7,7 @@ import (
 	"time"
 	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
 	"github.com/go-redis/redis/v8"
+	"github.com/gorilla/websocket"
 )
 
 // RateLimitMiddleware provides a Redis-backed rate limiter.
@@ -16,6 +17,11 @@ import (
 func RateLimitMiddleware(rdb *redis.Client, defaultLimit int, defaultWindow time.Duration) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if websocket.IsWebSocketUpgrade(r) {
+                // If so, bypass the rate limiter
+                next.ServeHTTP(w, r)
+                return
+            }
 			// Try to get user from context
 			user, ok := r.Context().Value(UserCtxKey).(*models.User)
 			if !ok {
