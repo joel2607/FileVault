@@ -59,10 +59,8 @@ services:
       dockerfile: Dockerfile
       # The BACKEND_URL build arg is likely not needed if using runtime env vars
     restart: always
-    environment:
-      # These URLs must point to the public domain for the client-side browser
-      - NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://filevault.ajayjoel.space/graphql
-      - NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT=wss://filevault.ajayjoel.space/graphql
+    env_file:
+      - .env
     depends_on:
       - backend
     # NOTE: Ports and code volumes are removed for production.
