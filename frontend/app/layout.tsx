@@ -9,7 +9,7 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "CloudDrive - File Management",
+  title: "FileVault - File Management",
   description: "Modern file management application",
   generator: "v0.app",
 }

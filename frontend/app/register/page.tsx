@@ -53,7 +53,7 @@ export default function RegisterPage() {
         <CardContent sx={{ p: 4 }}>
           <Box textAlign="center" mb={3}>
             <Typography variant="h4" component="h1" gutterBottom>
-              CloudDrive
+              FileVault
             </Typography>
             <Typography variant="h6" color="text.secondary">
               Create your account
