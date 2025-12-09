@@ -1,8 +1,16 @@
-# /docker-compose.prod.yml
-# This file is configured for a production environment.
-
 services:
-  # PostgreSQL Database Service
+  # --- Cloudflare Tunnel (The Gatekeeper) ---
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: file_vault_tunnel
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN} 
+    depends_on:
+      - nginx
+
+  # --- Database & Cache (Unchanged) ---
   db:
     image: postgres:13-alpine
     container_name: file_vault_db
@@ -18,9 +26,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    # NOTE: Port 5433 is removed; not exposed to the host machine for security.
 
-  # Redis Service
   redis:
     image: redis:alpine
     container_name: file_vault_redis
@@ -32,9 +38,8 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
-    # NOTE: Port 6379 is removed; not exposed to the host machine.
 
-  # Go Backend Service
+  # --- App Services  ---
   backend:
     container_name: file_vault_backend
     build:
@@ -48,53 +53,29 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    # NOTE: Ports and code volumes are removed for production.
-    # The container runs the compiled Go binary.
 
-  # React Frontend Service
   frontend:
     container_name: file_vault_frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      # The BACKEND_URL build arg is likely not needed if using runtime env vars
     restart: always
     env_file:
       - .env
     depends_on:
       - backend
-    # NOTE: Ports and code volumes are removed for production.
-    # The container serves the optimized Next.js build.
 
-  # Nginx Reverse Proxy Service
+  # --- Nginx  ---
   nginx:
     image: nginx:alpine
     container_name: file_vault_nginx
     restart: always
-    ports:
-      - "80:80"   # For HTTP and LetsEncrypt challenge
-      - "443:443" # For HTTPS
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # Mount config read-only
-      - certbot_certs:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - frontend
       - backend
 
-  # Certbot Service for SSL Certificates
-  certbot:
-    image: certbot/certbot
-    container_name: file_vault_certbot
-    volumes:
-      - certbot_certs:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
-    # FIX: Overriding the entrypoint to keep the container alive reliably.
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 1d & wait $${!}; done;'"
-
-# Define named volumes for persistent data
 volumes:
   postgres_data:
   redis_data:
-  certbot_certs:
-  certbot_www:
