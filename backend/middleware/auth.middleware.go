@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services"
+	"github.com/joel2607/FileVault/models"
+	"github.com/joel2607/FileVault/services"
 )
 
 // ContextKey is a custom type to avoid key collisions in context.

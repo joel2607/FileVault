@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/middleware"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/joel2607/FileVault/middleware"
+	"github.com/joel2607/FileVault/models"
 )
 
 // ID resolves the id field for the DeduplicatedContent type.

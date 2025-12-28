@@ -3,7 +3,7 @@ package graphQL
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services"
+	"github.com/joel2607/FileVault/services"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )

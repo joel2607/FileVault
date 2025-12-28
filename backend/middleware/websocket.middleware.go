@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services"
+	"github.com/joel2607/FileVault/services"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 

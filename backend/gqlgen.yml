@@ -45,9 +45,9 @@ models:
   # My defined models.
   User:
     model:
-      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.User"
+      - "github.com/joel2607/FileVault/models.User"
   File:
-    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.File"
+    model: "github.com/joel2607/FileVault/models.File"
     fields:
       user:
         resolver: true
@@ -56,22 +56,22 @@ models:
       folder:
         resolver: true
   Folder:
-    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.Folder"
+    model: "github.com/joel2607/FileVault/models.Folder"
     fields:
       user:
         resolver: true
   DeduplicatedContent:
     model:
-      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.DeduplicatedContent"
+      - "github.com/joel2607/FileVault/models.DeduplicatedContent"
   FileSharing:
-    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.FileSharing"
+    model: "github.com/joel2607/FileVault/models.FileSharing"
     fields:
       file:
         resolver: true
       sharedWithUser:
         resolver: true
   FolderSharing:
-    model: "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.FolderSharing"
+    model: "github.com/joel2607/FileVault/models.FolderSharing"
     fields:
       folder:
         resolver: true
@@ -79,4 +79,4 @@ models:
         resolver: true
   UserRole:
     model:
-      - "github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models.UserRole"
+      - "github.com/joel2607/FileVault/models.UserRole"

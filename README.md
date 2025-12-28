@@ -1,4 +1,4 @@
-# BalkanID Full Stack Engineering Intern — Capstone Hiring Task
+# File Vault
 
 ## Live Demo
 
@@ -80,11 +80,11 @@ You need to have Docker and Docker Compose installed on your machine.
 
 1.  Clone the repo
     ```sh
-    git clone https://github.com/joel2607/vit-2026-capstone-internship-hiring-task-joel2607.git
+    git clone https://github.com/joel2607/FileVault.git
     ```
 2.  Navigate to the project directory
     ```sh
-    cd vit-2026-capstone-internship-hiring-task-joel2607
+    cd FileVault
     ```
 
 ### Environment Variables

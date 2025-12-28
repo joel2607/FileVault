@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/joel2607/FileVault/models"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -1129,7 +1129,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_createFolder_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewFolder2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐNewFolder)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewFolder2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐNewFolder)
 	if err != nil {
 		return nil, err
 	}
@@ -1189,7 +1189,7 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Mutation_register_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRegisterInput2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRegisterInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRegisterInput2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐRegisterInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1308,7 +1308,7 @@ func (ec *executionContext) field_Mutation_shareFolderWithUser_args(ctx context.
 func (ec *executionContext) field_Mutation_updateFile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateFile2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUpdateFile)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateFile2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUpdateFile)
 	if err != nil {
 		return nil, err
 	}
@@ -1319,7 +1319,7 @@ func (ec *executionContext) field_Mutation_updateFile_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_updateFolder_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateFolder2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUpdateFolder)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateFolder2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUpdateFolder)
 	if err != nil {
 		return nil, err
 	}
@@ -1395,7 +1395,7 @@ func (ec *executionContext) field_Query_searchFiles_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["query"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOFileFilterInput2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileFilterInput)
 	if err != nil {
 		return nil, err
 	}
@@ -1527,7 +1527,7 @@ func (ec *executionContext) _AuthResponse_user(ctx context.Context, field graphq
 			return obj.User, nil
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -1897,7 +1897,7 @@ func (ec *executionContext) _File_user(ctx context.Context, field graphql.Collec
 			return ec.resolvers.File().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -2064,7 +2064,7 @@ func (ec *executionContext) _File_deduplicatedContent(ctx context.Context, field
 			return ec.resolvers.File().DeduplicatedContent(ctx, obj)
 		},
 		nil,
-		ec.marshalNDeduplicatedContent2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDeduplicatedContent,
+		ec.marshalNDeduplicatedContent2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐDeduplicatedContent,
 		true,
 		true,
 	)
@@ -2221,7 +2221,7 @@ func (ec *executionContext) _File_folder(ctx context.Context, field graphql.Coll
 			return ec.resolvers.File().Folder(ctx, obj)
 		},
 		nil,
-		ec.marshalOFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalOFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		false,
 	)
@@ -2388,7 +2388,7 @@ func (ec *executionContext) _FileSharing_file(ctx context.Context, field graphql
 			return ec.resolvers.FileSharing().File(ctx, obj)
 		},
 		nil,
-		ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
+		ec.marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile,
 		true,
 		true,
 	)
@@ -2478,7 +2478,7 @@ func (ec *executionContext) _FileSharing_sharedWithUser(ctx context.Context, fie
 			return ec.resolvers.FileSharing().SharedWithUser(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -2674,7 +2674,7 @@ func (ec *executionContext) _Folder_user(ctx context.Context, field graphql.Coll
 			return ec.resolvers.Folder().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -2812,7 +2812,7 @@ func (ec *executionContext) _Folder_files(ctx context.Context, field graphql.Col
 			return ec.resolvers.Folder().Files(ctx, obj)
 		},
 		nil,
-		ec.marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ,
+		ec.marshalOFile2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileᚄ,
 		true,
 		false,
 	)
@@ -2873,7 +2873,7 @@ func (ec *executionContext) _Folder_folders(ctx context.Context, field graphql.C
 			return ec.resolvers.Folder().Folders(ctx, obj)
 		},
 		nil,
-		ec.marshalOFolder2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolderᚄ,
+		ec.marshalOFolder2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolderᚄ,
 		true,
 		false,
 	)
@@ -3040,7 +3040,7 @@ func (ec *executionContext) _FolderSharing_folder(ctx context.Context, field gra
 			return ec.resolvers.FolderSharing().Folder(ctx, obj)
 		},
 		nil,
-		ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		true,
 	)
@@ -3120,7 +3120,7 @@ func (ec *executionContext) _FolderSharing_sharedWithUser(ctx context.Context, f
 			return ec.resolvers.FolderSharing().SharedWithUser(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -3201,7 +3201,7 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 			return ec.resolvers.Mutation().Register(ctx, fc.Args["input"].(models.RegisterInput))
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -3264,7 +3264,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 			return ec.resolvers.Mutation().Login(ctx, fc.Args["email"].(string), fc.Args["password"].(string))
 		},
 		nil,
-		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐAuthResponse,
+		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐAuthResponse,
 		true,
 		true,
 	)
@@ -3311,7 +3311,7 @@ func (ec *executionContext) _Mutation_uploadFiles(ctx context.Context, field gra
 			return ec.resolvers.Mutation().UploadFiles(ctx, fc.Args["files"].([]*graphql.Upload), fc.Args["parentFolderID"].(*string))
 		},
 		nil,
-		ec.marshalNFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ,
+		ec.marshalNFile2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileᚄ,
 		true,
 		true,
 	)
@@ -3384,7 +3384,7 @@ func (ec *executionContext) _Mutation_createFolder(ctx context.Context, field gr
 			return ec.resolvers.Mutation().CreateFolder(ctx, fc.Args["input"].(models.NewFolder))
 		},
 		nil,
-		ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		true,
 	)
@@ -3447,7 +3447,7 @@ func (ec *executionContext) _Mutation_updateFolder(ctx context.Context, field gr
 			return ec.resolvers.Mutation().UpdateFolder(ctx, fc.Args["input"].(models.UpdateFolder))
 		},
 		nil,
-		ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		true,
 	)
@@ -3510,7 +3510,7 @@ func (ec *executionContext) _Mutation_deleteFolder(ctx context.Context, field gr
 			return ec.resolvers.Mutation().DeleteFolder(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		true,
 	)
@@ -3573,7 +3573,7 @@ func (ec *executionContext) _Mutation_updateFile(ctx context.Context, field grap
 			return ec.resolvers.Mutation().UpdateFile(ctx, fc.Args["input"].(models.UpdateFile))
 		},
 		nil,
-		ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
+		ec.marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile,
 		true,
 		true,
 	)
@@ -3646,7 +3646,7 @@ func (ec *executionContext) _Mutation_deleteFile(ctx context.Context, field grap
 			return ec.resolvers.Mutation().DeleteFile(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
+		ec.marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile,
 		true,
 		true,
 	)
@@ -3760,7 +3760,7 @@ func (ec *executionContext) _Mutation_setFilePublic(ctx context.Context, field g
 			return ec.resolvers.Mutation().SetFilePublic(ctx, fc.Args["fileID"].(string))
 		},
 		nil,
-		ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
+		ec.marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile,
 		true,
 		true,
 	)
@@ -3833,7 +3833,7 @@ func (ec *executionContext) _Mutation_setFilePrivate(ctx context.Context, field 
 			return ec.resolvers.Mutation().SetFilePrivate(ctx, fc.Args["fileID"].(string))
 		},
 		nil,
-		ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
+		ec.marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile,
 		true,
 		true,
 	)
@@ -3906,7 +3906,7 @@ func (ec *executionContext) _Mutation_shareFileWithUser(ctx context.Context, fie
 			return ec.resolvers.Mutation().ShareFileWithUser(ctx, fc.Args["fileID"].(string), fc.Args["userID"].(string))
 		},
 		nil,
-		ec.marshalNFileSharing2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileSharing,
+		ec.marshalNFileSharing2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileSharing,
 		true,
 		true,
 	)
@@ -4006,7 +4006,7 @@ func (ec *executionContext) _Mutation_setFolderPublic(ctx context.Context, field
 			return ec.resolvers.Mutation().SetFolderPublic(ctx, fc.Args["folderID"].(string))
 		},
 		nil,
-		ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		true,
 	)
@@ -4069,7 +4069,7 @@ func (ec *executionContext) _Mutation_setFolderPrivate(ctx context.Context, fiel
 			return ec.resolvers.Mutation().SetFolderPrivate(ctx, fc.Args["folderID"].(string))
 		},
 		nil,
-		ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		true,
 	)
@@ -4132,7 +4132,7 @@ func (ec *executionContext) _Mutation_shareFolderWithUser(ctx context.Context, f
 			return ec.resolvers.Mutation().ShareFolderWithUser(ctx, fc.Args["folderID"].(string), fc.Args["userID"].(string))
 		},
 		nil,
-		ec.marshalNFolderSharing2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolderSharing,
+		ec.marshalNFolderSharing2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolderSharing,
 		true,
 		true,
 	)
@@ -4231,7 +4231,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 			return ec.resolvers.Query().Me(ctx)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser,
 		true,
 		true,
 	)
@@ -4283,7 +4283,7 @@ func (ec *executionContext) _Query_folder(ctx context.Context, field graphql.Col
 			return ec.resolvers.Query().Folder(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalOFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder,
+		ec.marshalOFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder,
 		true,
 		false,
 	)
@@ -4345,7 +4345,7 @@ func (ec *executionContext) _Query_root(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().Root(ctx)
 		},
 		nil,
-		ec.marshalORoot2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRoot,
+		ec.marshalORoot2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐRoot,
 		true,
 		false,
 	)
@@ -4381,7 +4381,7 @@ func (ec *executionContext) _Query_file(ctx context.Context, field graphql.Colle
 			return ec.resolvers.Query().File(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalOFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile,
+		ec.marshalOFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile,
 		true,
 		false,
 	)
@@ -4454,7 +4454,7 @@ func (ec *executionContext) _Query_getUsersWithAccess(ctx context.Context, field
 			return ec.resolvers.Query().GetUsersWithAccess(ctx, fc.Args["fileID"].(string))
 		},
 		nil,
-		ec.marshalOUser2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserᚄ,
+		ec.marshalOUser2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUserᚄ,
 		true,
 		false,
 	)
@@ -4517,7 +4517,7 @@ func (ec *executionContext) _Query_searchFiles(ctx context.Context, field graphq
 			return ec.resolvers.Query().SearchFiles(ctx, fc.Args["query"].(*string), fc.Args["filter"].(*models.FileFilterInput))
 		},
 		nil,
-		ec.marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ,
+		ec.marshalOFile2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileᚄ,
 		true,
 		false,
 	)
@@ -4590,7 +4590,7 @@ func (ec *executionContext) _Query_searchUsers(ctx context.Context, field graphq
 			return ec.resolvers.Query().SearchUsers(ctx, fc.Args["query"].(string))
 		},
 		nil,
-		ec.marshalOUser2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserᚄ,
+		ec.marshalOUser2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUserᚄ,
 		true,
 		false,
 	)
@@ -4760,7 +4760,7 @@ func (ec *executionContext) _Root_files(ctx context.Context, field graphql.Colle
 			return obj.Files, nil
 		},
 		nil,
-		ec.marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ,
+		ec.marshalOFile2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileᚄ,
 		true,
 		false,
 	)
@@ -4821,7 +4821,7 @@ func (ec *executionContext) _Root_folders(ctx context.Context, field graphql.Col
 			return obj.Folders, nil
 		},
 		nil,
-		ec.marshalOFolder2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolderᚄ,
+		ec.marshalOFolder2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolderᚄ,
 		true,
 		false,
 	)
@@ -4960,7 +4960,7 @@ func (ec *executionContext) _Subscription_storageStatistics(ctx context.Context,
 			return ec.resolvers.Subscription().StorageStatistics(ctx, fc.Args["userID"].(*string))
 		},
 		nil,
-		ec.marshalNStorageStatistics2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics,
+		ec.marshalNStorageStatistics2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐStorageStatistics,
 		true,
 		true,
 	)
@@ -5009,7 +5009,7 @@ func (ec *executionContext) _Subscription_fileDownloadCount(ctx context.Context,
 			return ec.resolvers.Subscription().FileDownloadCount(ctx, fc.Args["fileID"].(string))
 		},
 		nil,
-		ec.marshalNDownloadCountUpdate2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDownloadCountUpdate,
+		ec.marshalNDownloadCountUpdate2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐDownloadCountUpdate,
 		true,
 		true,
 	)
@@ -5316,7 +5316,7 @@ func (ec *executionContext) _User_role(ctx context.Context, field graphql.Collec
 			return obj.Role, nil
 		},
 		nil,
-		ec.marshalNUserRole2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserRole,
+		ec.marshalNUserRole2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUserRole,
 		true,
 		true,
 	)
@@ -9731,11 +9731,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAuthResponse2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐAuthResponse(ctx context.Context, sel ast.SelectionSet, v models.AuthResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthResponse2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐAuthResponse(ctx context.Context, sel ast.SelectionSet, v models.AuthResponse) graphql.Marshaler {
 	return ec._AuthResponse(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAuthResponse2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐAuthResponse(ctx context.Context, sel ast.SelectionSet, v *models.AuthResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthResponse2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐAuthResponse(ctx context.Context, sel ast.SelectionSet, v *models.AuthResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9761,11 +9761,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNDeduplicatedContent2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDeduplicatedContent(ctx context.Context, sel ast.SelectionSet, v models.DeduplicatedContent) graphql.Marshaler {
+func (ec *executionContext) marshalNDeduplicatedContent2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐDeduplicatedContent(ctx context.Context, sel ast.SelectionSet, v models.DeduplicatedContent) graphql.Marshaler {
 	return ec._DeduplicatedContent(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNDeduplicatedContent2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDeduplicatedContent(ctx context.Context, sel ast.SelectionSet, v *models.DeduplicatedContent) graphql.Marshaler {
+func (ec *executionContext) marshalNDeduplicatedContent2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐDeduplicatedContent(ctx context.Context, sel ast.SelectionSet, v *models.DeduplicatedContent) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9775,11 +9775,11 @@ func (ec *executionContext) marshalNDeduplicatedContent2ᚖgithubᚗcomᚋBalkan
 	return ec._DeduplicatedContent(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNDownloadCountUpdate2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDownloadCountUpdate(ctx context.Context, sel ast.SelectionSet, v models.DownloadCountUpdate) graphql.Marshaler {
+func (ec *executionContext) marshalNDownloadCountUpdate2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐDownloadCountUpdate(ctx context.Context, sel ast.SelectionSet, v models.DownloadCountUpdate) graphql.Marshaler {
 	return ec._DownloadCountUpdate(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNDownloadCountUpdate2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐDownloadCountUpdate(ctx context.Context, sel ast.SelectionSet, v *models.DownloadCountUpdate) graphql.Marshaler {
+func (ec *executionContext) marshalNDownloadCountUpdate2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐDownloadCountUpdate(ctx context.Context, sel ast.SelectionSet, v *models.DownloadCountUpdate) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9789,11 +9789,11 @@ func (ec *executionContext) marshalNDownloadCountUpdate2ᚖgithubᚗcomᚋBalkan
 	return ec._DownloadCountUpdate(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNFile2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v models.File) graphql.Marshaler {
+func (ec *executionContext) marshalNFile2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v models.File) graphql.Marshaler {
 	return ec._File(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.File) graphql.Marshaler {
+func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.File) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -9817,7 +9817,7 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUnivers
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile(ctx, sel, v[i])
+			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -9837,7 +9837,7 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUnivers
 	return ret
 }
 
-func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v *models.File) graphql.Marshaler {
+func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v *models.File) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9847,11 +9847,11 @@ func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversity
 	return ec._File(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNFileSharing2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileSharing(ctx context.Context, sel ast.SelectionSet, v models.FileSharing) graphql.Marshaler {
+func (ec *executionContext) marshalNFileSharing2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileSharing(ctx context.Context, sel ast.SelectionSet, v models.FileSharing) graphql.Marshaler {
 	return ec._FileSharing(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFileSharing2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileSharing(ctx context.Context, sel ast.SelectionSet, v *models.FileSharing) graphql.Marshaler {
+func (ec *executionContext) marshalNFileSharing2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileSharing(ctx context.Context, sel ast.SelectionSet, v *models.FileSharing) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9877,11 +9877,11 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalNFolder2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder(ctx context.Context, sel ast.SelectionSet, v models.Folder) graphql.Marshaler {
+func (ec *executionContext) marshalNFolder2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder(ctx context.Context, sel ast.SelectionSet, v models.Folder) graphql.Marshaler {
 	return ec._Folder(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder(ctx context.Context, sel ast.SelectionSet, v *models.Folder) graphql.Marshaler {
+func (ec *executionContext) marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder(ctx context.Context, sel ast.SelectionSet, v *models.Folder) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9891,11 +9891,11 @@ func (ec *executionContext) marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversi
 	return ec._Folder(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNFolderSharing2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolderSharing(ctx context.Context, sel ast.SelectionSet, v models.FolderSharing) graphql.Marshaler {
+func (ec *executionContext) marshalNFolderSharing2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolderSharing(ctx context.Context, sel ast.SelectionSet, v models.FolderSharing) graphql.Marshaler {
 	return ec._FolderSharing(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFolderSharing2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolderSharing(ctx context.Context, sel ast.SelectionSet, v *models.FolderSharing) graphql.Marshaler {
+func (ec *executionContext) marshalNFolderSharing2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolderSharing(ctx context.Context, sel ast.SelectionSet, v *models.FolderSharing) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9937,21 +9937,21 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewFolder2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐNewFolder(ctx context.Context, v any) (models.NewFolder, error) {
+func (ec *executionContext) unmarshalNNewFolder2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐNewFolder(ctx context.Context, v any) (models.NewFolder, error) {
 	res, err := ec.unmarshalInputNewFolder(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRegisterInput(ctx context.Context, v any) (models.RegisterInput, error) {
+func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐRegisterInput(ctx context.Context, v any) (models.RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNStorageStatistics2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics(ctx context.Context, sel ast.SelectionSet, v models.StorageStatistics) graphql.Marshaler {
+func (ec *executionContext) marshalNStorageStatistics2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐStorageStatistics(ctx context.Context, sel ast.SelectionSet, v models.StorageStatistics) graphql.Marshaler {
 	return ec._StorageStatistics(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNStorageStatistics2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐStorageStatistics(ctx context.Context, sel ast.SelectionSet, v *models.StorageStatistics) graphql.Marshaler {
+func (ec *executionContext) marshalNStorageStatistics2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐStorageStatistics(ctx context.Context, sel ast.SelectionSet, v *models.StorageStatistics) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -9977,12 +9977,12 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateFile2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUpdateFile(ctx context.Context, v any) (models.UpdateFile, error) {
+func (ec *executionContext) unmarshalNUpdateFile2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUpdateFile(ctx context.Context, v any) (models.UpdateFile, error) {
 	res, err := ec.unmarshalInputUpdateFile(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateFolder2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUpdateFolder(ctx context.Context, v any) (models.UpdateFolder, error) {
+func (ec *executionContext) unmarshalNUpdateFolder2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUpdateFolder(ctx context.Context, v any) (models.UpdateFolder, error) {
 	res, err := ec.unmarshalInputUpdateFolder(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -10039,11 +10039,11 @@ func (ec *executionContext) marshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10053,13 +10053,13 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversity
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserRole(ctx context.Context, v any) (models.UserRole, error) {
+func (ec *executionContext) unmarshalNUserRole2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUserRole(ctx context.Context, v any) (models.UserRole, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := models.UserRole(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserRole2githubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserRole(ctx context.Context, sel ast.SelectionSet, v models.UserRole) graphql.Marshaler {
+func (ec *executionContext) marshalNUserRole2githubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUserRole(ctx context.Context, sel ast.SelectionSet, v models.UserRole) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
@@ -10353,7 +10353,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.File) graphql.Marshaler {
+func (ec *executionContext) marshalOFile2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.File) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10380,7 +10380,7 @@ func (ec *executionContext) marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUnivers
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile(ctx, sel, v[i])
+			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10400,14 +10400,14 @@ func (ec *executionContext) marshalOFile2ᚕᚖgithubᚗcomᚋBalkanIDᚑUnivers
 	return ret
 }
 
-func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v *models.File) graphql.Marshaler {
+func (ec *executionContext) marshalOFile2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFile(ctx context.Context, sel ast.SelectionSet, v *models.File) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._File(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFileFilterInput(ctx context.Context, v any) (*models.FileFilterInput, error) {
+func (ec *executionContext) unmarshalOFileFilterInput2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFileFilterInput(ctx context.Context, v any) (*models.FileFilterInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -10415,7 +10415,7 @@ func (ec *executionContext) unmarshalOFileFilterInput2ᚖgithubᚗcomᚋBalkanID
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOFolder2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolderᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Folder) graphql.Marshaler {
+func (ec *executionContext) marshalOFolder2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolderᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Folder) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10442,7 +10442,7 @@ func (ec *executionContext) marshalOFolder2ᚕᚖgithubᚗcomᚋBalkanIDᚑUnive
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder(ctx, sel, v[i])
+			ret[i] = ec.marshalNFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10462,7 +10462,7 @@ func (ec *executionContext) marshalOFolder2ᚕᚖgithubᚗcomᚋBalkanIDᚑUnive
 	return ret
 }
 
-func (ec *executionContext) marshalOFolder2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐFolder(ctx context.Context, sel ast.SelectionSet, v *models.Folder) graphql.Marshaler {
+func (ec *executionContext) marshalOFolder2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐFolder(ctx context.Context, sel ast.SelectionSet, v *models.Folder) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10505,7 +10505,7 @@ func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalORoot2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐRoot(ctx context.Context, sel ast.SelectionSet, v *models.Root) graphql.Marshaler {
+func (ec *executionContext) marshalORoot2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐRoot(ctx context.Context, sel ast.SelectionSet, v *models.Root) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10578,7 +10578,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -10605,7 +10605,7 @@ func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋBalkanIDᚑUnivers
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋBalkanIDᚑUniversityᚋvitᚑ2026ᚑcapstoneᚑinternshipᚑhiringᚑtaskᚑjoel2607ᚋmodelsᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋjoel2607ᚋFileVaultᚋmodelsᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

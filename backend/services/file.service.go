@@ -14,9 +14,9 @@ import (
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/database"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/services/storage"
+	"github.com/joel2607/FileVault/database"
+	"github.com/joel2607/FileVault/models"
+	"github.com/joel2607/FileVault/services/storage"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )

@@ -1,4 +1,4 @@
-module github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607
+module github.com/joel2607/FileVault
 
 go 1.24.0
 

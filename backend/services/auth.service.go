@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/joel2607/FileVault/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"

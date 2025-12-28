@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"github.com/BalkanID-University/vit-2026-capstone-internship-hiring-task-joel2607/models"
+	"github.com/joel2607/FileVault/models"
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/websocket"
 )
