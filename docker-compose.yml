@@ -1,5 +1,16 @@
 services:
-  # PostgreSQL Database Service
+  # --- Cloudflare Tunnel (The Gatekeeper) ---
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: file_vault_tunnel
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN} 
+    depends_on:
+      - nginx
+
+  # --- Database & Cache (Unchanged) ---
   db:
     image: postgres:13-alpine
     container_name: file_vault_db
@@ -8,40 +19,33 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 1s
+      interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis Service
   redis:
     image: redis:alpine
     container_name: file_vault_redis
     restart: always
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
+      interval: 10s
       timeout: 3s
       retries: 5
 
-  # Go Backend Service
+  # --- App Services  ---
   backend:
     container_name: file_vault_backend
     build:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "8080:8080" # Exposes the Go API
     depends_on:
       db:
         condition: service_healthy
@@ -49,30 +53,27 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    volumes:
-      - ./backend:/app # Mounts your local backend code for live-reloading
 
-  # React Frontend Service
   frontend:
     container_name: file_vault_frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        - BACKEND_URL=${BACKEND_URL}
     restart: always
-    ports:
-      - "3000:3000" # Exposes the React dev server
-    environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
-      - NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:8080/graphql
-      - NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT=ws://localhost:8080/graphql
-      - INTERNAL_GRAPHQL_ENDPOINT=http://backend:graphql
     env_file:
       - .env
-    volumes:
-      - ./frontend/src:/app/src # Mounts only the src directory for changes
     depends_on:
+      - backend
+
+  # --- Nginx  ---
+  nginx:
+    image: nginx:alpine
+    container_name: file_vault_nginx
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
       - backend
 
 volumes:
